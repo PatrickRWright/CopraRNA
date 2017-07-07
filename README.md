@@ -1,2 +1,2 @@
 # CopraRNA
-target prediction for prokaryotic trans-acting small RNAs
+Phylogenetic target prediction for prokaryotic trans-acting small RNAs.
