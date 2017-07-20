@@ -1,0 +1,8 @@
+## please contact us if you know your 
+## organism is part of the RefSeq database 
+## and has an ID in the RefSeq format but 
+## is not present in this list, or is
+## missing IDs 
+
+RefSeq-IDs	organism-name
+
