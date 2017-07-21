@@ -48,7 +48,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 ### Bio Software
 
-# IntaRNA 2.0.3                                                        // conda install intarna
+# IntaRNA 2.0.4                                                        // conda install intarna
 # EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 # embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
