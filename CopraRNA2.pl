@@ -163,7 +163,7 @@ GetOptions ( ## edit 2.0.4
 # - prepare functional enrichment in a way that doesn't make everything fail if it doesn't work anymore
 # - option for the root function on the weights (currently cop1 hat root 2.5 and cop2 no rooting at all)
 # - do manual testing
-# - clean up run directory (add an option for a more or less thorough clean)
+# - clean up run directory (add an option for a more or less thorough clean --noclean)
 # - add 'cds' option when martin has included normalization
 # - replace clustalw in regions plots - also make density plot discrete...
 # - update print_archive_README.pl
