@@ -223,7 +223,7 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; ## edit 2.0.5.1 // removed -distconv this is now fixed within the script
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    system $PATH_COPRA_SUBSCRIPTS . "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab";
+    system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab";
 
     # edit 2.0.2
     system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
