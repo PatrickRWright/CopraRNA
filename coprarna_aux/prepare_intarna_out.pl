@@ -88,7 +88,6 @@ foreach my $id (@rfids) {
 my $switch = 0;
 my @ncrnaarray = (); 
 
-# TODO this can be done more tidyly with bioperl
 # preparing individual sRNA files for IntaRNA whole genome predictions
 open(MYDATA, $ncrnas) or die("\nError: cannot open file $ncrnas in prepare_intarna_out.pl\n\n"); ## edit 2.0.5.1 // added script name
     my @ncrnalines = <MYDATA>;

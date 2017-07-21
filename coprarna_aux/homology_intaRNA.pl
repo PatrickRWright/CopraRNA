@@ -48,24 +48,41 @@ chomp $maxbpdist;
 
 open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); ## edit 2.0.2 
 
-my $tripletorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
+my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
+# RefSeqID -> space separated RefSeqIDs // 'NC_005140' -> 'NC_005139 NC_005140 NC_005128'
 my %refseqaffiliations = ();
 
-open(MYDATA, $tripletorefseqnewfile) or die("\nError: cannot open file $tripletorefseqnewfile in homology_intaRNA.pl\n\n");
-    my @triptorefseqnew = <MYDATA>;
+# read kegg2refseqnew.csv
+open(MYDATA, $keggtorefseqnewfile) or die("\nError: cannot open file $keggtorefseqnewfile in homology_intaRNA.pl\n\n");
+    my @keggtorefseqnew = <MYDATA>;
 close MYDATA;
 
-foreach(@triptorefseqnew) {
+# get the refseq affiliations
+foreach(@keggtorefseqnew) {
+    # split off quadruplecode (pseudokegg id)
     my @split = split("\t", $_);
-    my @split2 = split(" ", $split[1]);
-    foreach(@split2) {
-        chomp $split[1];#these are refseqids
-        $refseqaffiliations{$_} = $split[1];
+    my $all_refseqs = $split[1];
+    chomp $all_refseqs;
+    # split up refseq ids
+    my @split_refseqs = split(/\s/, $all_refseqs);
+    foreach(@split_refseqs) {
+        $refseqaffiliations{$_} = $all_refseqs;
     }
 }
 
 # add "ncRNA_" to fasta headers
 system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa"; ## edit 2.0.5.1 // replaced put_ncRNA_fasta_together.pl with this statement
+
+# assign correct refseq IDs for each sequence
+for (my $i=4;$i<scalar(@ARGV);$i++) {
+    # split up the refseq list for one organism
+    my @split = split(/\s/, $refseqaffiliations{$ARGV[$i]});
+    # get the first id entry
+    my $first_refseq_id = $split[0];
+    # override in ncrna.fa
+    system "sed -i 's/$ARGV[$i]/$first_refseq_id/g' ncrna.fa";
+}
+
 # override $ncrnas variable
 $ncrnas = "ncrna.fa";
 
@@ -223,7 +240,7 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; ## edit 2.0.5.1 // removed -distconv this is now fixed within the script
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab";
+    system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab"; ## edit 2.0.5.1 // changed to conda domclust
 
     # edit 2.0.2
     system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";

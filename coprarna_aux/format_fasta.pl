@@ -12,8 +12,6 @@ my $fasta = $ARGV[0];
 
 my $seqio = Bio::SeqIO->new(-file => $fasta, -format => "fasta");
 
-my %fasta_hash = ();
-
 while (my $seq = $seqio->next_seq) {
     my $curr_seq = $seq->seq();
     my $curr_id = $seq->id();
