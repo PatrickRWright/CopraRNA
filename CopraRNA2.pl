@@ -150,7 +150,7 @@ GetOptions ( ## edit 2.0.4
     'ntup:i'		=> \$upstream,
     'ntdown:i'		=> \$downstream,
     'cores:i'		=> \$core_count,
-    'region:s'		=> \$region, # one of "5utr", "3utr", // "cds" currently disabled
+    'region:s'		=> \$region, # one of "5utr", "3utr", "cds"
     'rcsize:f'		=> \$RelClusterSize,
     'winsize:i'		=> \$winsize,    ## edit 2.0.5.1 
     'maxbpdist:i'	=> \$maxbpdist,  ## edit 2.0.5.1
@@ -164,7 +164,7 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 # - prepare functional enrichment in a way that doesn't make everything fail if it doesn't work anymore
-# - option for the root function on the weights (currently cop1 hat root 2.5 and cop2 no rooting at all)
+# - check DomClust 1.2.8a
 # - do manual testing
 # - clean up run directory (add an option for a more or less thorough clean --noclean)
 # - add 'cds' option when martin has included normalization
@@ -194,7 +194,7 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --region                  region to scan in whole genome target prediction (def:5utr)\n",
 "                           '5utr' for start codon\n",
 "                           '3utr' for stop codon\n",
-#"                           'cds' for entire transcript\n", # currently disabled
+"                           'cds' for entire transcript\n",
 " --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
@@ -236,7 +236,7 @@ if ($core_count <= 1) {
 }
 
 # check region parameter ## edit 2.0.4
-die ("\nError: -region parameter must be one of 5utr or 3utr. You set '$region'.\n\n") unless ($region eq "5utr" or $region eq "3utr");
+die ("\nError: -region parameter must be one of 5utr, 3utr or cds. You set '$region'.\n\n") unless ($region eq "5utr" or $region eq "3utr" or $region eq "cds");
 
 # check for gaps
 system "grep '-' $sRNAs_fasta > find_gaps.txt"; ## edit 2.0.2

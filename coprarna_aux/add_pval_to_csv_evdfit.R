@@ -80,6 +80,10 @@ pgev <- function (q, xi = 1, mu = 0, sigma = 1)
 
 # end insert new functions
 
+# read options ## edit 2.0.5.1
+options <- read.table("CopraRNA_option_file.txt", sep=":")
+region <- as.character(options$V2[4])
+
 files_opt <- list.files(pattern="_opt.intarna.csv")
 files_subopt <- list.files(pattern="_subopt.intarna.csv")
 
@@ -101,10 +105,18 @@ for (i in 1:length(files_opt)) {
     # opt
     data_opt <- read.table(curr_opt_file, sep=";", header=TRUE)
     energy_opt <- data_opt$E ## edit 2.0.5.1 // changed to E because headers in IntaRNA 2 are different
+    # if the predicton is running on the full length transcript then use normalized energy
+    if (region == "cds") {
+        energy_opt <- data_opt$E_norm ## edit 2.0.5.1 // added E_norm for cds option
+    }
     energy_opt <- energy_opt*(-1)
     # subopt
     data_subopt <- read.table(curr_subopt_file, sep=";", header=TRUE)
     energy_subopt <- data_subopt$E ## edit 2.0.5.1 changed to E because headers in IntaRNA 2 are different
+    # if the predicton is running on the full length transcript then use normalized energy
+    if (region == "cds") {
+       energy_subopt <- data_subopt$E_norm ## edit 2.0.5.1 // added E_norm for cds option
+    }
     energy_subopt <- energy_subopt*(-1)
     # fit evd and get parameters
     gevenergies <- gev(energy_opt) # fit
@@ -121,8 +133,8 @@ for (i in 1:length(files_opt)) {
     data_opt <- data_opt[order(data_opt$opt_pvals),]
     data_subopt <- data_subopt[order(data_subopt$subopt_pvals),]
     # change p-value column name 
-    colnames(data_opt)[35]<-"p-value"    ## edit 2.0.5.1 // changed to 35 because there are now more columns
-    colnames(data_subopt)[35]<-"p-value" ## edit 2.0.5.1 // changed to 35 because there are now more columns
+    colnames(data_opt)[36]<-"p-value"    ## edit 2.0.5.1 // changed to 36 because there are now more columns
+    colnames(data_subopt)[36]<-"p-value" ## edit 2.0.5.1 // changed to 36 because there are now more columns
     # write output
     # this overwrites the input files
     write.table(data_opt, file=curr_opt_file, sep=";", quote=F, row.names=F)

@@ -134,8 +134,8 @@ foreach (@files) {
         @ncrnaarray = ();
         my $intarnaout = $_ . ".intarna.csv"; ## edit 2.0.5.1 // added .csv
             $pm->start and next;            
-            system("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2' --outMode=C --out $intarnaout") unless (-e $intarnaout); ## edit 2.0.4 added -s 1 for consensus prediction // ## edit 2.0.5 changed to IntaRNA2 // ## edit 2.0.5.1 changed to IntaRNA 2.0 csv output
-            print("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2' --outMode=C --out $intarnaout\n") if ($verbose);
+            system("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout") unless (-e $intarnaout); ## edit 2.0.4 added -s 1 for consensus prediction // ## edit 2.0.5 changed to IntaRNA2 // ## edit 2.0.5.1 changed to IntaRNA 2.0 csv output
+            print("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout\n") if ($verbose);
             $pm->finish;
      }                                                                                   
 }
@@ -162,45 +162,6 @@ foreach (@files) {
 my %ncrnalengthhash = (); 
 my @lines = (); 
 my @datalines = (); 
-
-# normalize energy score for region=cds
-
-# TODO check if this has been added to IntaRNA
-# and then use normalized scores later on
-
-#if ($mrnapart eq "cds") {
-#    foreach(@files) {
-#        if($_ =~ m/\_N[ZC]_.+?\.fa/) { ## edit 2.0.3.2 // removed '_'
-#            open(THEDATA, $_) or die("Error: cannot open file $_\n");
-#                @lines = <THEDATA>;
-#            close THEDATA;
-#            $lines[0] = substr($lines[0], 1);
-#            chomp $lines[0];
-#            chomp $lines[1];
-#            $ncrnalengthhash{$lines[0]} = length($lines[1]);
-#        }
-#    }
-#    foreach(@files) {
-#        if($_ =~ m/intarna\.sorted\.csv$/) {
-#            open(THEDATA, $_) or die("Error: cannot open file $_\n");
-#                @datalines = <THEDATA>;
-#            close THEDATA;
-#
-#        open (WRITETO, ">$_");
-#        print WRITETO ($datalines[0]);
-#        for(my $i=1; $i<scalar(@datalines); $i++) {
-#            my @splitlines = split(/;/, $datalines[$i]);
-#            my $normenergy = ($splitlines[16]/log($ncrnalengthhash{$splitlines[8]}*$splitlines[1]));
-#            pop @splitlines;
-#            foreach(@splitlines) {
-#                print WRITETO ($_ . ";");
-#            }
-#            print WRITETO ($normenergy . "\n");
-#        }
-#        close WRITETO;
-#        }
-#    }
-#}
 
 ## disentangle *.fa.intarna.sorted.csv
 
@@ -234,8 +195,8 @@ if ($cop2) {
     chomp $pvcut; ## edit 2.0.5.1
 
     ## truncate the tags.clustered file according to the specified pvalue cutoff
-    ## 35 is the field with the p-value and 0 ist the line
-    system "awk -F';' '{ if (\$35 <= $pvcut) print \$0 }' opt_tags.clustered > opt_tags.clustered_trunc_no_head";
+    ## 36 is the field with the p-value and 0 is the line
+    system "awk -F';' '{ if (\$36 <= $pvcut) print \$0 }' opt_tags.clustered > opt_tags.clustered_trunc_no_head";
     system "head -n 1 opt_tags.clustered > temp_head";
     system "cat temp_head opt_tags.clustered_trunc_no_head > opt_tags.clustered_trunc";
     system "rm opt_tags.clustered_trunc_no_head temp_head";

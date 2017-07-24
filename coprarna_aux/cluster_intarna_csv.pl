@@ -9,7 +9,7 @@ use List::MoreUtils qw(uniq); # liblist-moreutils-perl
 ## *_opt.intarna.csv files and cluster.tab
 ## to create a clustering of IntaRNA predictions 
 
-print "d1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;hybridDB;E;ED1;ED2;Pu1;Pu2;E_init;E_loops;E_dangleL;E_dangleR;E_endL;E_endR;seedStart1;seedEnd1;seedStart2;seedEnd2;seedE;seedED1;seedED2;seedPu1;seedPu2;p-value;clusternumber\n";
+print "d1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;hybridDB;E;ED1;ED2;Pu1;Pu2;E_init;E_loops;E_dangleL;E_dangleR;E_endL;E_endR;seedStart1;seedEnd1;seedStart2;seedEnd2;seedE;seedED1;seedED2;seedPu1;seedPu2;E_norm;p-value;clusternumber\n";
 
 my @final_csv_files = <*_opt.intarna.csv>;  ## edit 2.0.5.1 // changed file suffix
 
@@ -47,20 +47,20 @@ for (my $i=1;$i<scalar(@cluster_tab_lines);$i++) {
     my @split_line = split(/\t/, $curr_line);
     
     for (my $j=1;$j<scalar(@split_line);$j++) { 
-        my $energy = 0; # need this to save the homolog with the lowest energy 
-                        # if one org. contains more than one homolog
+        my $pvalue = 100; # need this to save the homolog with the lowest pvalue 
+                          # if one org. contains more than one homolog
         my $print_line = "";
         my $curr_cell = $split_line[$j];
         my @split_cell = split(/\s/,$curr_cell);
-        foreach(@split_cell) {
+        foreach(@split_cell) { # if there is only one entry this loops only once
            $_ =~ s/\(\d+\)//g; # remove digit in brackets at the end 
            $_ =~ s/\w+://g; # remove pseudo KEGG id and colon
            if (exists $ltag_line_hash{$_}) {
                my @split_line = split(/;/, $ltag_line_hash{$_});
-               # $split_line[14] is the current energy value           ## edit 2.0.5.1 // changed to 14 because of new IntaRNA 2 output
-               if ($split_line[14] < $energy) {
+               # $split_line[35] is the current p-value           ## edit 2.0.5.1 // changed to check on pvalue instead of energy because of cds option
+               if ($split_line[35] < $pvalue) {
                    $print_line = $ltag_line_hash{$_};
-                   $energy = $split_line[14];
+                   $pvalue = $split_line[35];
                } 
            } 
         }
