@@ -93,6 +93,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            now using Cwd 'abs_path' to make script path locations dynamic
 #            added warning for run directories that contain many files
 #            added websrv option to only output websrv files if explicitly called for
+#            added root option // applies this root function to weights both for CopraRNA1 and CopraRNA2 pvalue combination
 #
 # v2.0.5   : changed to using IntaRNA2.0 ui
 #            local mirror for .gbk changed to .gb because file ending in local mirror changed
@@ -134,6 +135,7 @@ my $verbose = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
 my $top_count = 100; # amount of top predictions // ## edit 2.0.5.1
+my $root = 2.5; # root function to apply to the weights // ## edit 2.0.5.1
 
 # get absolute path
 my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
@@ -157,6 +159,7 @@ GetOptions ( ## edit 2.0.4
     'websrv'		=> \$websrv, # switch for providing webserver output
     'pvcut:f'		=> \$pvalcutoff, # p-value cutoff for CopraRNA 2
     'topcount:i'	=> \$top_count, # amount of top predictions to return and use for functional enrichment ## edit 2.0.5.1
+    'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
 );
 
 # TODO:
@@ -203,6 +206,7 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
 " --pvcut                   specifies the p-values to remove before joined p-value computation (def:0.15)\n",
+" --root                    specifies root function to apply to the weights (def:2.5)\n",
 " --topcount                specifies the amount of top predictions to return/use for functional enrichment (def:100)\n\n", ## edit 2.0.5.1
 
 "Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -rcsize 0.5 -winsize 150 -maxbpdist 100 -cop2 -verbose -pvcut 0.15 -topcount 100 -cores 4\n\n",
@@ -280,6 +284,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
     print WRITETOOPTIONS "p-value cutoff:" . $pvalcutoff . "\n";
     print WRITETOOPTIONS "top count:" . $top_count . "\n";
+    print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "version:CopraRNA 2.0.5.1\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options

@@ -1,6 +1,10 @@
-## edit 2.0.4.1 // changed combination to the hartung method without root weights
+## edit 2.0.5.1 // root is now a parameter
+options <- read.table("CopraRNA_option_file.txt", sep=":")
+root <- as.numeric(as.character(options$V2[14]))
+
+## edit 2.0.4.1 // changed combination to the hartung method 
 weights <- weights[order(weights$V1),]
-##weights$V2 <- (weights$V2)^(1/2.5)
+weights$V2 <- (weights$V2)^(1/root)
 weights <- weights$V2
 
 curr_clust_indices <- which(data$clusternumber==cl_num)

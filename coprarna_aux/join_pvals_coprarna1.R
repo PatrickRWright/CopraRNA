@@ -5,6 +5,9 @@ inputFile <- args[1] ## edit 2.0.5.1
 
 ####################### retrieve cov matrix from max clusters
 
+options <- read.table("CopraRNA_option_file.txt", sep=":")
+root <- as.numeric(as.character(options$V2[14]))
+
 fasta <- read.table("ncrna.fa")
 orgcnt <- length(grep("^>", fasta$V1))
 
@@ -12,7 +15,7 @@ therna <- "ncrna_"
 
 # read weights
 weightdata <- read.table("zscore.weight", sep=";", header=FALSE)
-weight <- ((as.numeric(weightdata$V2))**(1/(2.5))) # root 2.5
+weight <- ((as.numeric(weightdata$V2))**(1/(root))) ## edit 2.0.5.1 // parametrized root function
 weightdata <- cbind(weightdata,weight)
 weightdata <- weightdata[order(weightdata$V1),]
 rownames(weightdata)<-NULL
