@@ -364,14 +364,14 @@ if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5
 
     foreach (@split_c1) {
         if ($_) {
-            system "grep -A1 '$_' $orgofintTargets >> CopraRNA1_top_targets.fa";
+            system "grep -iA1 '$_' $orgofintTargets >> CopraRNA1_top_targets.fa";
         }
     }
 
     if ($cop2) {
         foreach (@split_c2) {
             if ($_) {
-                system "grep -A1 '$_' $orgofintTargets >> CopraRNA2_top_targets.fa";
+                system "grep -iA1 '$_' $orgofintTargets >> CopraRNA2_top_targets.fa";
             }
         }
     }
