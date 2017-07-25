@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 IntaRNA_result = sys.argv[1]
 #print IntaRNA_result
@@ -13,7 +15,7 @@ for i in range(1,len(IntaRNA_lines)): # range omits the right boundary
     # split
     curr_line = IntaRNA_lines[i]
     split = curr_line.split(";")
-    entrezID = split[9]
+    entrezID = split[37] ## edit 2.0.5.1 // changed to 37 because of new IntaRNA output
     backgroundList.append(entrezID)
 
 backgroundList = map(str,backgroundList)
@@ -41,7 +43,6 @@ from suds.client import Client
 from datetime import datetime
 
 errors = 0
-
 #setup_logging()
 
 #logging.getLogger('suds.client').setLevel(logging.DEBUG)

@@ -1,5 +1,9 @@
+#!/usr/bin/env python
+
 import sys
 CopraRNA_result = sys.argv[1]
+# amount of top predictions to enrich with
+enrichment_count = int(sys.argv[2]) ## edit 2.0.5.1
 #print CopraRNA_result
 
 with open(CopraRNA_result) as file:
@@ -23,7 +27,7 @@ backgroundList = map(str,backgroundList)
 
 print "background:" + str(len(backgroundList))
 
-inputList = backgroundList[0:100]
+inputList = backgroundList[0:enrichment_count] ## edit 2.0.5.1 // dynamic list length
 print "input:" + str(len(inputList))
 
 inputIds = ",".join(inputList)

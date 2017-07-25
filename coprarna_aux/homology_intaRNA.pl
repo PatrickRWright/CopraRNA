@@ -30,13 +30,17 @@ my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; 
 chomp $verbose;
 
 # get amount of top predictions to return
-my $top_count = `grep 'top count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.5.1
-chomp $top_count;
-$top_count++; # need this to include the header
+my $topcount = `grep 'top count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.5.1
+chomp $topcount;
+$topcount++; # need this to include the header
 
 # check for websrv output printing
 my $websrv = `grep 'websrv:' CopraRNA_option_file.txt | sed 's/websrv://g'`; ## edit 2.0.5.1
 chomp $websrv;
+
+# check for enrichment on/off and count
+my $enrich = `grep 'enrich:' CopraRNA_option_file.txt | sed 's/enrich://g'`; ## edit 2.0.5.1
+chomp $enrich;
 
 # get window size option
 my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; ## edit 2.0.5.1
@@ -316,8 +320,8 @@ system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl C
 system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_anno_addhomologs_padj.csv 1 > CopraRNA2_anno_addhomologs_padj_amountsamp.csv" if ($cop2); ## edit 2.0.5.1
 
 # truncate final output // ## edit 2.0.5.1
-system "head -n $top_count CopraRNA1_anno_addhomologs_padj_amountsamp.csv > CopraRNA1_final.csv";
-system "head -n $top_count CopraRNA2_anno_addhomologs_padj_amountsamp.csv > CopraRNA2_final.csv" if ($cop2);
+system "head -n $topcount CopraRNA1_anno_addhomologs_padj_amountsamp.csv > CopraRNA1_final.csv";
+system "head -n $topcount CopraRNA2_anno_addhomologs_padj_amountsamp.csv > CopraRNA2_final.csv" if ($cop2);
 
 ##### create regions plots
 ## system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "script_R_plots_6.R --args CopraRNA1_final_all.csv 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing
@@ -393,60 +397,38 @@ if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5
 
 system $PATH_COPRA_SUBSCRIPTS . "print_archive_README.pl > README.txt";
 
-die(); #### remove this later
+if ($enrich) {
 
-##### create DAVID enrichment table
+    ##### create DAVID enrichment table
+    ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
+    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA1_anno_addhomologs_padj_amountsamp.csv $enrich > DAVID_enrichment_temp.txt"; ## edit 2.0.5.1 // added $enrich as input
+    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/\\s//g' > DAVID_enrichment_grepped_temp.txt"; ## edit 2.0.3.1
+    system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; ## edit 2.0.3.1
 
-## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
-system "/usr/bin/python2.7 " . $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv > DAVID_enrichment_temp.txt"; ## edit 2.0.3.1
-system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/\\s//g' > DAVID_enrichment_grepped_temp.txt"; ## edit 2.0.3.1
-system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; ## edit 2.0.3.1
+    open(MYDATA, "termClusterReport.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+        my @enrichment_lines = <MYDATA>;
+    close MYDATA;
 
-open(MYDATA, "termClusterReport.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-    my @enrichment_lines = <MYDATA>;
-close MYDATA;
+    unless($enrichment_lines[0]) {
+        system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+    }
 
-unless($enrichment_lines[0]) {
-    system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+    ##### end DAVID enrichment
+
+    ## add enrichment visualization ## edit 1.2.5
+
+    system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; ## edit 1.2.5 ## edit 1.2.7 (edited html file)
+    system "/usr/local/R/2.15.1-lx/bin/R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R"; ## edit 1.2.5 ## edit 1.2.7 (edited R code)
+    system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; ##edit 1.2.5
+    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; ## edit 1.2.5
+    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; ## edit 1.2.6
+    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 1.2.5
+    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 1.2.6
+    system "rm index-thumb.html"; ## edit 1.2.5
+    system "rm index-pdf.html"; ## edit 1.2.6
+
+    ## end add enrichment vis
 }
-
-##### end DAVID enrichment
-
-#############################
-
-## add enrichment visualization ## edit 1.2.5
-
-system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; ## edit 1.2.5 ## edit 1.2.7 (edited html file)
-system "/usr/local/R/2.15.1-lx/bin/R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R"; ## edit 1.2.5 ## edit 1.2.7 (edited R code)
-system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; ##edit 1.2.5
-system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; ## edit 1.2.5
-system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; ## edit 1.2.6
-system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 1.2.5
-system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 1.2.6
-system "rm index-thumb.html"; ## edit 1.2.5
-system "rm index-pdf.html"; ## edit 1.2.6
-
-## end add enrichment vis
-
-system "rm enrichment.txt"; # edit 1.2.5
-system "rm gene_CDS_exception.txt"; ## edit 1.2.2
-system "rm CopraRNA_pvalues.txt";
-system "rm final_uniq.csv";
-system "rm dndout";
-# fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
-my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
-if ($temp_fasta_check) {
-    system 'find -regex ".*fa[0-9]+$" | xargs rm';
-}
-system "rm padj.csv";
-system "rm formatdb.log" if (-e "formatdb.log");
-system "rm all.fas.gene" if (-e "all.fas.gene");
-system "rm all.fas.hom" if (-e "all.fas.hom");
-system "rm all.fas.tit" if (-e "all.fas.tit");
-system "rm all.fas.phr" if (-e "all.fas.phr");
-system "rm all.fas.pin" if (-e "all.fas.pin");
-system "rm all.fas.psq" if (-e "all.fas.psq");
-system "rm error.log" if (-e "error.log");
 
 close ERRORLOG;
 

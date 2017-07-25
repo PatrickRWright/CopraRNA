@@ -70,16 +70,16 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # R statistics 3.2.2                                                   // conda install r-base==3.2.2
 # seqinr 3.1_3                                                         // conda install r-seqinr 
 
-### python 2.6.6
+### python 2.7.13                                                      // conda install python==2.7.13
 
 ## packages:
-# sys                                                                  // available from conda python (3.5.2) conda install python
-# logging                                                              // available from conda python (3.5.2)
-# traceback                                                            // available from conda python (3.5.2) 
-# suds.metrics                                                         // conda install suds-jurko (0.6)
-# suds                                                                 // conda install suds-jurko
-# suds.client                                                          // conda install suds-jurko
-# datetime                                                             // available from conda python (3.5.2)
+# sys                                                                  // available from conda python (2.7.13)
+# logging                                                              // available from conda python (2.7.13)
+# traceback                                                            // available from conda python (2.7.13) 
+# suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
+# suds         (suds-jurko 0.6)                                        // conda install suds-jurko
+# suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
+# datetime                                                             // available from conda python (2.7.13)
 
 #####################################################
 
@@ -89,13 +89,14 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
 #            adjusted update_kegg2refseq for new format of prokaryotes.txt
 #            added verbose terminal printing option
+#            added topcount option
 #            added pvalue cutoff option for CopraRNA 2
 #            now using Cwd 'abs_path' to make script path locations dynamic
 #            added warning for run directories that contain many files
 #            added websrv option to only output websrv files if explicitly called for
 #            added root option // applies this root function to weights both for CopraRNA1 and CopraRNA2 pvalue combination
 #            now calculating normalized IntaRNA energy scores internally in IntaRNA // adjusted CopraRNA accordingly
-#            added switch for functional enrichment
+#            added enrichment parameter 
 #
 # v2.0.5   : changed to using IntaRNA2.0 ui
 #            local mirror for .gbk changed to .gb because file ending in local mirror changed
@@ -136,9 +137,10 @@ my $cop2 = 0;
 my $verbose = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
-my $top_count = 100; # amount of top predictions // ## edit 2.0.5.1
+my $topcount = 100; # amount of top predictions // ## edit 2.0.5.1
 my $root = 2.5; # root function to apply to the weights // ## edit 2.0.5.1
-my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on
+my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on 
+                ##              // this option also allows to specify how many top predictions to use for the enrichment
 
 # get absolute path
 my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
@@ -161,15 +163,18 @@ GetOptions ( ## edit 2.0.4
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
     'pvcut:f'		=> \$pvalcutoff, # p-value cutoff for CopraRNA 2
-    'topcount:i'	=> \$top_count, # amount of top predictions to return and use for functional enrichment ## edit 2.0.5.1
-    'enrich'		=> \$enrich, # functional enrichment needs to be specifically turned on 
+    'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
+    'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
 );
 
 # TODO:
 # - prepare functional enrichment in a way that doesn't make everything fail if it doesn't work anymore
-# - check DomClust 1.2.8a
+# - fix functional enrichment plotting (extract_functional_enriched.R need to be changed to have CopraRNA_result_all.csv as input)
+# - differentiate functional enrichment CopraRNA1 and 2 (compute it for both only if enough lines are present // esspecially for cop2 maybe do whole gen background)
+# - switch nocop1
 # - do manual testing
+# - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella) supply compressed files // make an option to check that archive
 # - clean up run directory (add an option for a more or less thorough clean --noclean)
 # - replace clustalw in regions plots - also make density plot discrete...
 # - update print_archive_README.pl
@@ -208,12 +213,12 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --cop2                    switch for CopraRNA2 prediction (def:off)\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
-" --enrich                  switch to turn on DAVID-WS functional enrichment calculation (def:off)\n",  ## edit 2.0.5.1
+" --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
 " --pvcut                   specifies the p-values to remove before joined p-value computation (def:0.15)\n",
 " --root                    specifies root function to apply to the weights (def:2.5)\n",
-" --topcount                specifies the amount of top predictions to return/use for functional enrichment (def:100)\n\n", ## edit 2.0.5.1
+" --topcount                specifies the amount of top predictions to return (def:100)\n\n", ## edit 2.0.5.1
 
-"Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -rcsize 0.5 -winsize 150 -maxbpdist 100 -cop2 -verbose -pvcut 0.15 -topcount 100 -cores 4\n\n",
+"Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -rcsize 0.5 -winsize 150 -maxbpdist 100 -cop2 -enrich 100 -pvcut 0.15 -topcount 100 -cores 4\n\n",
 "License: MIT\n\n",
 "References: \n",
 "1. Wright PR et al., Comparative genomics boosts target prediction for bacterial small RNAs\n   Proc Natl Acad Sci USA, 2013, 110(37), E3487–E3496\n",
@@ -287,7 +292,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "verbose:" . $verbose . "\n";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
     print WRITETOOPTIONS "p-value cutoff:" . $pvalcutoff . "\n";
-    print WRITETOOPTIONS "top count:" . $top_count . "\n";
+    print WRITETOOPTIONS "top count:" . $topcount . "\n";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "version:CopraRNA 2.0.5.1\n";  ## edit 2.0.4.2
@@ -311,33 +316,34 @@ my $RefSeqIds = `grep '>' $sRNAs_fasta | sed 's/>//g' | tr '\n' ' '`;
 print $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds\n" if ($verbose);
 system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
 
-# check err.log // should be empty // err.log contains information on not correctly downloaded RefSeq files, gene no CDS issue, wrong 16S counts, empty ncrna_hIntaRNA.csv 
-# and the exception in add_pval_to_csv_evdfit.R
-# -s  File has nonzero size (returns size in bytes).
-if (-s "err.log") { die("\nError: CopraRNA failed.\n\n"); } ## edit 2.0.2
-
-die(); ### remove this later
-
 # get organism of interest
 my $ncrnaRIDs = `grep ">" ncrna.fa | sed 's/>ncRNA_//g' | tr '\n' ' '`;
 my @splitRID = split(/\s/, $ncrnaRIDs);
 my $organismOfInterest = $splitRID[0];
 chomp $organismOfInterest;
-# final csv for organism of interest
-my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . ".final.csv";
+# final optimal IntaRNA result for organism of interest
+my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . "_opt.intarna.csv"; ## edit 2.0.5.1
 
-# add IntaRNA single organisms enrichments
-system "cp $MainFinalCSV intarna_websrv_table.csv";
-system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
-system "/usr/bin/python2.7 " . $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
-system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/\\s//g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.3.1
-system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
+if ($enrich) { ## edit 2.0.5.1
+    # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
+    system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
+    system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
+    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
+    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/\\s//g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.3.1
+#    system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
+}
 
 # output warnings
-system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your prediction and restarting (see restart button on the bottom of the page).\";} }' zscore.weight | tr '\n' ' ' > weights.warning"; ## edit 2.0.2
+system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning"; ## edit 2.0.2
 
+# check err.log // should be empty // err.log contains information on 
+# 1. not correctly downloaded RefSeq files 
+# 2. gene no CDS issue 
+# 3. wrong 16S counts
+# 4. empty CopraRNA1_anno_addhomologs_padj_amountsamp.csv
+# 5. the exception in add_pval_to_csv_evdfit.R
 # -s  File has nonzero size (returns size in bytes).
-if (-s "err.log") { die("\nError: CopraRNA failed.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
+if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
 
 # clean up
 #system "rm *.gb";
