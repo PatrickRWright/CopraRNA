@@ -46,7 +46,7 @@ for (my $i=1;$i<scalar(@cluster_tab_lines);$i++) {
     # split line from cluster.tab -> one entry per organism
     my @split_line = split(/\t/, $curr_line);
     
-    for (my $j=1;$j<scalar(@split_line);$j++) { 
+    for (my $j=1;$j<scalar(@split_line);$j++) { # skip first column 
         my $pvalue = 100; # need this to save the homolog with the lowest pvalue 
                           # if one org. contains more than one homolog
         my $print_line = "";

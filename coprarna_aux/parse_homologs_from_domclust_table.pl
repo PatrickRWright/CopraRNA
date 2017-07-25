@@ -13,22 +13,21 @@ my @clustertablines = ();
 my $line;
 my %homologtaghash = ();
 
-open(MYDATA, $clustertab) or die("Error: cannot open file $clustertab'\n");
+open(MYDATA, $clustertab) or die("\nError: cannot open file $clustertab at parse_homologs_from_domclust_table.pl\n\n");
 
 @clustertablines = <MYDATA>;
 
 close MYDATA;
 
-
 foreach(@clustertablines) {
     if (not $_ =~ m/^#|^running/) { # skip
         my @splitlinearray = split(/\t/, $_); # split each line by tabs
-        for (my $i=1;$i<scalar(@splitlinearray);$i++) {
+        for (my $i=1;$i<scalar(@splitlinearray);$i++) { # skip first column
             my @homologtaglist = ();
             my @splitthesplitted = split(/\s/, $splitlinearray[$i]); # split the tab splitted values by whitespaces
             foreach (@splitthesplitted) {
                 #print "$_\n";
-                if ($_ =~ m/\w{3}:(.*)/) { # filter the locus tags
+                if ($_ =~ m/\w{4}:(.*)/) { # filter the locus tags
                     chomp $1;
                     my $temp  = $1;
                     if ($temp =~ m/(.*?)\(\d+\)/) { # remove number at the back e.g. only keep locus tag
@@ -48,9 +47,7 @@ foreach(@clustertablines) {
 my @finallistlines = ();
 
 open(MYDATA, $finallist) or die("Error: cannot open file $finallist'\n");
-
-@finallistlines = <MYDATA>;
-
+    @finallistlines = <MYDATA>;
 close MYDATA;
 
 chomp $finallistlines[0];

@@ -53,7 +53,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
 # clustalw 2.1                                                         // TODO remove this dependency in regions plot scrip jens
-# DomClust 1.0                                                         // conda install domclust==1.0
+# DomClust 1.2.8a                                                      // conda install domclust==1.2.8a
 # MAFFT 7.310                                                          // conda install mafft
 
 ### Perl (5.22.0) Module(s):                                           // perl via conda install perl
@@ -85,7 +85,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
-# v2.0.5.1 : major restructuring due to changed IntaRNA version 
+# v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
 #            adjusted update_kegg2refseq for new format of prokaryotes.txt
 #            added verbose terminal printing option
@@ -94,6 +94,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added warning for run directories that contain many files
 #            added websrv option to only output websrv files if explicitly called for
 #            added root option // applies this root function to weights both for CopraRNA1 and CopraRNA2 pvalue combination
+#            now calculating normalized IntaRNA energy scores internally in IntaRNA // adjusted CopraRNA accordingly
+#            added switch for functional enrichment
 #
 # v2.0.5   : changed to using IntaRNA2.0 ui
 #            local mirror for .gbk changed to .gb because file ending in local mirror changed
@@ -136,6 +138,7 @@ my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
 my $top_count = 100; # amount of top predictions // ## edit 2.0.5.1
 my $root = 2.5; # root function to apply to the weights // ## edit 2.0.5.1
+my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on
 
 # get absolute path
 my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
@@ -159,6 +162,7 @@ GetOptions ( ## edit 2.0.4
     'websrv'		=> \$websrv, # switch for providing webserver output
     'pvcut:f'		=> \$pvalcutoff, # p-value cutoff for CopraRNA 2
     'topcount:i'	=> \$top_count, # amount of top predictions to return and use for functional enrichment ## edit 2.0.5.1
+    'enrich'		=> \$enrich, # functional enrichment needs to be specifically turned on 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
 );
 
@@ -167,7 +171,6 @@ GetOptions ( ## edit 2.0.4
 # - check DomClust 1.2.8a
 # - do manual testing
 # - clean up run directory (add an option for a more or less thorough clean --noclean)
-# - add 'cds' option when martin has included normalization
 # - replace clustalw in regions plots - also make density plot discrete...
 # - update print_archive_README.pl
 
@@ -205,6 +208,7 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --cop2                    switch for CopraRNA2 prediction (def:off)\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
+" --enrich                  switch to turn on DAVID-WS functional enrichment calculation (def:off)\n",  ## edit 2.0.5.1
 " --pvcut                   specifies the p-values to remove before joined p-value computation (def:0.15)\n",
 " --root                    specifies root function to apply to the weights (def:2.5)\n",
 " --topcount                specifies the amount of top predictions to return/use for functional enrichment (def:100)\n\n", ## edit 2.0.5.1
@@ -285,6 +289,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "p-value cutoff:" . $pvalcutoff . "\n";
     print WRITETOOPTIONS "top count:" . $top_count . "\n";
     print WRITETOOPTIONS "root:" . $root . "\n";
+    print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "version:CopraRNA 2.0.5.1\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
