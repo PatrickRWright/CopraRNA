@@ -52,8 +52,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 # embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
-# clustalw 2.1                                                         // TODO remove this dependency in regions plot scrip jens
-# DomClust 1.2.8a                                                      // conda install domclust==1.2.8a
+# clustalw 2.1                                                         // TODO remove this dependency in regions plot script jens
+# DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
 
 ### Perl (5.22.0) Module(s):                                           // perl via conda install perl
@@ -97,6 +97,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added root option // applies this root function to weights both for CopraRNA1 and CopraRNA2 pvalue combination
 #            now calculating normalized IntaRNA energy scores internally in IntaRNA // adjusted CopraRNA accordingly
 #            added enrichment parameter 
+#            added noclean parameter
 #
 # v2.0.5   : changed to using IntaRNA2.0 ui
 #            local mirror for .gbk changed to .gb because file ending in local mirror changed
@@ -135,6 +136,7 @@ my $winsize = 150; # IntaRNA window size
 my $maxbpdist = 100; # IntaRNA maximum base pair distance 
 my $cop2 = 0;
 my $verbose = 0; ## edit 2.0.5.1
+my $noclean = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
 my $topcount = 100; # amount of top predictions // ## edit 2.0.5.1
@@ -162,6 +164,7 @@ GetOptions ( ## edit 2.0.4
     'cop2'		=> \$cop2, # switch for coprarna2, if set then coprarna1 and 2 are run // else only coprarna1
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
+    'noclean'		=> \$noclean, # switch to prevent cleaning of files
     'pvcut:f'		=> \$pvalcutoff, # p-value cutoff for CopraRNA 2
     'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
@@ -169,11 +172,11 @@ GetOptions ( ## edit 2.0.4
 );
 
 # TODO:
-# - think about enrichment for CopraRNA2 output
+# - think about enrichment for CopraRNA2 output // also chartreport... second aux enrichment
 # - switch nocop1
 # - do manual testing
-# - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella) supply compressed files // make an option to check that archive
-# - clean up run directory (add an option for a more or less thorough clean --noclean)
+# - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella, Staphylococcus areus, Rhizobia (Agrobacterium and meliloti), Vibrio 
+#   supply compressed files // make an option to check that archive
 # - replace clustalw in regions plots - also make density plot discrete...
 # - update print_archive_README.pl // can probably be customized also for noclean // only print those explanations if noclean is on
 
@@ -211,6 +214,7 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --cop2                    switch for CopraRNA2 prediction (def:off)\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
+" --noclean                 switch to prevent removal of temporary files (def:off)\n",  ## edit 2.0.5.1
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
 " --pvcut                   specifies the p-values to remove before joined p-value computation (def:0.15)\n",
 " --root                    specifies root function to apply to the weights (def:2.5)\n",
@@ -293,6 +297,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "top count:" . $topcount . "\n";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
+    print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "version:CopraRNA 2.0.5.1\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
@@ -343,8 +348,40 @@ system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted.
 # -s  File has nonzero size (returns size in bytes).
 if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
 
+# move full result files 
+system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv";
+system "mv CopraRNA2_anno_addhomologs_padj_amountsamp.csv CopraRNA2_final_all.csv" if ($cop2);
+
 # clean up
-#system "rm *.gb";
-#system "rm -f err.log"; ## edit 2.0.2
-# end clean up
+unless ($noclean) {
+
+    system "rm *.gb 16s_sequences.aln compatible.*";
+    system "rm err.log *IntaRNA1_ui* *anno* padj.csv";
+    system "rm *top_targets* *pvalues* ncRNA_* rhodevelopment.txt";
+    system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
+    system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
+    system "rm -r weight_permutations";
+    system "rm *DAVID* input_sRNA.fa IntaRNA* intarna* merged_refseq_ids.txt";    
+
+    # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
+    my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
+    if ($temp_fasta_check) {
+        system 'find -regex ".*fa[0-9]+$" | xargs rm';
+    }
+
+    # blast files
+    system "rm all.fas" if (-e "all.fas");
+    system "rm all.fas.blast" if (-e "all.fas.blast");
+    system "rm all.fas.hom" if (-e "all.fas.hom");
+    system "rm all.fas.pin" if (-e "all.fas.pin");
+    system "rm all.fas.phr" if (-e "all.fas.phr");
+    system "rm all.fas.tit" if (-e "all.fas.tit");
+    system "rm all.fas.psq" if (-e "all.fas.psq");
+    system "rm all.fas.gene" if (-e "all.fas.gene");
+    system "rm error.log" if (-e "error.log");
+    system "rm formatdb.log" if (-e "formatdb.log");
+    system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
+
+}
+
 
