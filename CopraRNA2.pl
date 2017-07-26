@@ -46,6 +46,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### dependencies: (specified versions are tested and functional)
 
+# bzip2 (for the core genome archive)                                  // conda install bzip2
+
 ### Bio Software
 
 # IntaRNA 2.0.4                                                        // conda install intarna
@@ -175,8 +177,6 @@ GetOptions ( ## edit 2.0.4
 # - think about enrichment for CopraRNA2 output // also chartreport... second aux enrichment
 # - switch nocop1
 # - do manual testing
-# - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella, Staphylococcus areus, Rhizobia (Agrobacterium and meliloti), Vibrio 
-#   supply compressed files // make an option to check that archive
 # - replace clustalw in regions plots - also make density plot discrete...
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
