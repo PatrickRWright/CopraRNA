@@ -258,7 +258,7 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
 
 # 16s sequence parsing 
 print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa";
+system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
 
 # check 16s
 open(MYDATA, "16s_sequences.fa") or die("\nError: cannot open file 16s_sequences.fa in homology_intaRNA.pl\n\n");
@@ -397,20 +397,20 @@ if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5
 
 system $PATH_COPRA_SUBSCRIPTS . "print_archive_README.pl > README.txt";
 
-if ($enrich) {
+if ($enrich) { ## edit 2.0.5.1
 
     ##### create DAVID enrichment table
     ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
-    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA1_anno_addhomologs_padj_amountsamp.csv $enrich > DAVID_enrichment_temp.txt"; ## edit 2.0.5.1 // added $enrich as input
-    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/\\s//g' > DAVID_enrichment_grepped_temp.txt"; ## edit 2.0.3.1
-    system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; ## edit 2.0.3.1
+    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA1_anno_addhomologs_padj_amountsamp.csv $enrich > DAVID_enrichment_temp_cop1.txt"; ## edit 2.0.5.1 // added $enrich as input
+    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp_cop1.txt | sed 's/\\s//g' > DAVID_enrichment_grepped_temp_cop1.txt"; ## edit 2.0.3.1
+    system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp_cop1.txt > termClusterReport_cop1.txt"; ## edit 2.0.3.1
 
-    open(MYDATA, "termClusterReport.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+    open(MYDATA, "termClusterReport_cop1.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport_cop1.txt";
         my @enrichment_lines = <MYDATA>;
     close MYDATA;
 
     unless($enrichment_lines[0]) {
-        system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+        system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport_cop1.txt";
     }
 
     ##### end DAVID enrichment
@@ -418,12 +418,12 @@ if ($enrich) {
     ## add enrichment visualization ## edit 1.2.5
 
     system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; ## edit 1.2.5 ## edit 1.2.7 (edited html file)
-    system "/usr/local/R/2.15.1-lx/bin/R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R"; ## edit 1.2.5 ## edit 1.2.7 (edited R code)
-    system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; ##edit 1.2.5
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R --args CopraRNA1_anno_addhomologs_padj_amountsamp.csv termClusterReport_cop1.txt enrichment_cop1.txt"; ## edit 1.2.5 ## edit 1.2.7 (edited R code) ## edit 2.0.5.1 added args
+    system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment_cop1.txt"; ##edit 1.2.5
     system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; ## edit 1.2.5
     system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; ## edit 1.2.6
-    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 1.2.5
-    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 1.2.6
+    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big_cop1.png"; ## edit 1.2.5
+    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big_cop1.pdf"; ## edit 1.2.6
     system "rm index-thumb.html"; ## edit 1.2.5
     system "rm index-pdf.html"; ## edit 1.2.6
 

@@ -3,13 +3,16 @@
 use strict;
 use warnings;
 
+# this script produces the auxilliary enrichment 
+# for the organism of interest
+
 # read in main termClusterReport
-open(DATA,"termClusterReport.txt") or die ("cannot open termClusterReport.txt\n");
+open(DATA,"termClusterReport_cop1.txt") or die ("\nError: cannot open termClusterReport_cop1.txt at find_single_specific_targets_in_termCluster.pl\n\n");
     my @mainClustering = <DATA>;
 close DATA;
 
 # read in single organism termClusterReport
-open(DATA,"IntaRNA_chartReport_grepped.txt") or die ("cannot open IntaRNA_chartReport_grepped.txt\n"); ## edit 2.0.3.1
+open(DATA,"IntaRNA_chartReport_grepped.txt") or die ("\nError: cannot open IntaRNA_chartReport_grepped.txt at find_single_specific_targets_in_termCluster.pl\n\n");
     my @singleOrgClustering = <DATA>;
 close DATA;
 
@@ -69,9 +72,9 @@ foreach my $key (keys %mainClusteringHash) {
                 chomp $IntaRNA_ncbi_line;
                 my @split = split(/;/,$IntaRNA_ncbi_line);
                 my $ltag = $split[0];
-                my $geneName = $split[8];
-                my $tarStart = $split[1];
-                my $tarStop = $split[2];
+                my $geneName = $split[36]; ## edit 2.0.5.1 
+                my $tarStart = $split[8]; ## edit 2.0.5.1
+                my $tarStop = $split[9]; ## edit 2.0.5.1
                 my $added_info = "(" . $ltag . "|" . $geneName . "|" . $tarStart . "|" . $tarStop . ");";
                 $printLine = $printLine . $added_info;
             }
@@ -81,6 +84,5 @@ foreach my $key (keys %mainClusteringHash) {
         print $printLine unless (length($printLine) == 0);
     }
 }
-
 
 

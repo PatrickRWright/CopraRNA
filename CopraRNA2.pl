@@ -169,15 +169,13 @@ GetOptions ( ## edit 2.0.4
 );
 
 # TODO:
-# - prepare functional enrichment in a way that doesn't make everything fail if it doesn't work anymore
-# - fix functional enrichment plotting (extract_functional_enriched.R need to be changed to have CopraRNA_result_all.csv as input)
-# - differentiate functional enrichment CopraRNA1 and 2 (compute it for both only if enough lines are present // esspecially for cop2 maybe do whole gen background)
+# - think about enrichment for CopraRNA2 output
 # - switch nocop1
 # - do manual testing
 # - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella) supply compressed files // make an option to check that archive
 # - clean up run directory (add an option for a more or less thorough clean --noclean)
 # - replace clustalw in regions plots - also make density plot discrete...
-# - update print_archive_README.pl
+# - update print_archive_README.pl // can probably be customized also for noclean // only print those explanations if noclean is on
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
@@ -330,7 +328,7 @@ if ($enrich) { ## edit 2.0.5.1
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
     system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
     system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/\\s//g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.3.1
-#    system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
+    system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
 }
 
 # output warnings

@@ -1,19 +1,21 @@
 ## edit 1.2.7 new script
-x<-read.delim("termClusterReport.txt", header=FALSE)
+## script by Jens Georg
+
+args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
+inputFile_CopraRNA <- args[1] ## edit 2.0.5.1
+inputFile_DAVID <- args[2] ## edit 2.0.5.1
+output_file <- args[3] ## edit 2.0.5.1
+
+x<-read.delim(inputFile_DAVID, header=FALSE) ## edit 2.0.5.1
 
 y<-grep("Enrichment Score", x[,2])
 kk<-c()
-
-
-
 
 for(i in 1:length(y)){
 k<-as.character(x[y[i],2])
 k<-sub("Enrichment Score: ","",k)
 kk<-c(kk,k)
 }
-
-
 
 kk<-as.numeric(kk)
 ks<-which(kk >= 1)
@@ -110,7 +112,7 @@ for(i in 1:nrow(res)){
 #res<-rbind(terms,res)
 	
 #----------------	
-x<-read.csv("CopraRNA_result_all.csv", header=TRUE,sep=",")
+x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",") ## edit 2.0.5.1
 
 l<-(strsplit(as.character(x[1:300,3]), "\\|"))
 
@@ -234,10 +236,10 @@ res4<-rbind(meta2,meta, colnames(res3), res3)
 res4[3,1]<-"Entrez GeneID"
 res4[3,2]<-"CopraRNA_pValue"
 
-write.table(res4, file="enrichment.txt", sep="\t",col.names = FALSE,row.names = FALSE, quote=FALSE)
+write.table(res4, file=output_file, sep="\t",col.names = FALSE,row.names = FALSE, quote=FALSE)
 
 
-#./copraRNA.pl ./enrichment.txt
+#./copraRNA.pl ./enrichment_cop1.txt
 
 #./phantomjs ./rasterize ./index_v1_1\ copy.html out.pdf
 	

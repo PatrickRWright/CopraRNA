@@ -1,5 +1,6 @@
 # call
 # R --slave -f ../script_R_plots_6.R --args CopraRNA1_final.csv 
+# script by Jens Georg
 
 args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.2
 inputFile <- args[1] ## edit 2.0.2
