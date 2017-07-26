@@ -355,13 +355,14 @@ system "mv CopraRNA2_anno_addhomologs_padj_amountsamp.csv CopraRNA2_final_all.cs
 unless ($noclean) {
 
     system "rm enrichment_cop1.txt *DAVID* IntaRNA* intarna*" if ($enrich);
+    system "rm *IntaRNA1_ui* *top_targets*" if ($websrv);
     system "rm *.gb 16s_sequences.aln *pvsample*";
     system "rm compatible.fneighbor compatible.distmat.mapped compatible.distmat";
-    system "rm err.log *IntaRNA1_ui* *anno* padj.csv";
-    system "rm *top_targets* *pvalues* ncRNA_* rhodevelopment.txt";
+    system "rm err.log *anno* padj.csv";
+    system "rm *pvalues* ncRNA_* rhodevelopment.txt";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
-    system "rm -r weight_permutations";
+    system "rm -r weight_permutations" if ($cop2);
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
