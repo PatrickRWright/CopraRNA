@@ -30,6 +30,7 @@ foreach (@mainClustering) {
     }
     my @tabSplit = split(/\t/, $_);
     if (exists $tabSplit[1] and exists $tabSplit[5]) { # skip "Enrichment Score:" and empty lines
+        # only for enrichment scores >= 1
         $mainClusteringHash{$tabSplit[1]} = $tabSplit[5] unless ($tabSplit[1] eq "Term" or $currEnrichmentScore < 1); ## edit 2.0.2
     }
 }
