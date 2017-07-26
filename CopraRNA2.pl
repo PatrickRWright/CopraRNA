@@ -178,7 +178,6 @@ GetOptions ( ## edit 2.0.4
 # - make a micro archive of model organisms (E. coli, PCC6803, Bacillus subtilis, Salmonella, Staphylococcus areus, Rhizobia (Agrobacterium and meliloti), Vibrio 
 #   supply compressed files // make an option to check that archive
 # - replace clustalw in regions plots - also make density plot discrete...
-# - update print_archive_README.pl // can probably be customized also for noclean // only print those explanations if noclean is on
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
@@ -355,7 +354,8 @@ system "mv CopraRNA2_anno_addhomologs_padj_amountsamp.csv CopraRNA2_final_all.cs
 # clean up
 unless ($noclean) {
 
-    system "rm *.gb 16s_sequences.aln compatible.*";
+    system "rm *.gb 16s_sequences.aln *pvsample* enrichment_cop1.txt";
+    system "rm compatible.fneighbor compatible.distmat.mapped compatible.distmat";
     system "rm err.log *IntaRNA1_ui* *anno* padj.csv";
     system "rm *top_targets* *pvalues* ncRNA_* rhodevelopment.txt";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";

@@ -26,61 +26,93 @@ rna\@informatik.uni-freiburg.de
 
 -- Archive file explanations
 
+CopraRNA1_final.csv:
+This is the final result table of your CopraRNA1 run.
+It contains the the amount of predictions specified by the
+topcount parameter (def: 100). If less than this amount
+of predictions is returned then the the file contains
+all possible predictions.
+ 
+CopraRNA2_final.csv: (only when -cop2 was set)
+This is the final result table of your CopraRNA2 run.
+t contains the the amount of predictions specified by the
+topcount parameter (def: 100). If less than this amount
+of predictions is returned then the the file contains
+all possible predictions.
+
+CopraRNA1_final_all.csv:
+This is the non truncated version of the CopraRNA1 result.
+It contains all possible CopraRNA1 predictions.
+
+CopraRNA2_final_all.csv: (only if -cop2 was set)
+s is the non truncated version of the CopraRNA2 result.
+It contains all possible CopraRNA2 predictions.
+
+CopraRNA_option_file.txt:
+This file contains the set of input options.
+
 16s_sequences.fa:
-This is a FASTA formatted file containing the 16s sequences that
-the phylogeny is calculated on, which subsequently leads to the
-weights (zscore.weight) the individual organisms attain.
+This is the FASTA file containing the 16s sequences that
+the phylogeny is calculated on.
+
+compatible.treefile:
+This file stores the 16s phylogeny.
+
+zscore.weight/weights.warning:
+The unrooted weights for the individual organisms are stored in this file.
+If an organism has a weight greater than 0.5 then this is reported in
+weights.warning.
 
 cluster.tab:
-This tab delimited file, contains the clusters of homologous genes
-throughout the organisms participating in your analysis. The clusters
-are computed with DomClust.
-
-compatible.fneighbor:
-This file contains the nieghbor-joining tree calculated on basis of
-the 16s sequences.
-
-CopraRNA_result.csv:
-This is the final result table of your run. It contains the
-top 100 predictions.
+This tab delimited file contains the clusters of homologous 
+protein coding genes throughout the organisms participating 
+in the prediction. The clusters are computed with DomClust.
 
 *regions *pdf *ps *png:
 These image files contain the regions plots of your run.
 
-*final.csv:
-The final.csv files contain the results of the single IntaRNA whole
+*.fa.intarna.csv:
+These files contain the results of the single IntaRNA whole
 genome predictions for each organism participating in the analysis.
 One of these files is created per organism.
 
-input_sRNA.fa / ncrna.fa:
-These FASTAs contain the sequences you submitted.
+ncrna.fa:
+This FASTA contains the sequences you submitted.
 
-16s_sequences.aln:
-This is the mafft alignment of the 16s sequences.
+*_upfromstartpos_*_down_*.fa:
+These FASTA files contain the putative target sequences of the
+respective organisms in the prediction.
 
-CopraRNA_result_all.csv:
-This is the whole prediction table. CopraRNA_result.csv was created
-from this table. However, usually predictions beyond a CopraRNA p-value
-of 0.01 are not considered to be significant.
+*tags.clustered*:
+These files contain the IntaRNA predictions for for the clusters
+of homologous putative targets. _rcsize is the truncated input
+for the CopraRNA1 thread and _trunc is the truncated input
+for the CopraRNA2 (if -cop2) thread.
 
-rhodevelopment.txt:
-This file gives you an overview of the development of rho in the
-analysis. For more information on this, please resort to the publication.
-
-target_sequences_orgofint.fa:
+target_sequences_orgofint.fa: (only if -websrv was set)
 This FASTA contains the putative target sequences extracted from the
-organism of interest's genome. The putative target sequences for the
-other organisms are not stored in the archive.
+organism of interest's genome. It is a copy of one of the
+*_upfromstartpos_*_down_*.fa files. 
 
-termClusterReport.txt:
-This file contains the DAVID functional enrichment for the
-candidates with a CopraRNA p-value <= 0.01.
+*_websrv_table.csv: (only if -websrv was set)
+These are csv tables for the Freiburg RNA tools webserver frontend.
 
-zscore.weight:
-The weights for the individual organisms are stored in this file.
+termClusterReport_cop1.txt: (only if -enrich was specified)
+This file contains the DAVID functional enrichment for the amount of
+CopraRNA1 candidates specified in the -enrich parameter.
 
-copra_heatmap.html:
+org_of_interest_aux_enrichment.txt:
+This is the auxilliary enrichment file for the organism of interest.
+
+copra_heatmap.html/copraRNA.json:
 This html file contains the heatmap for the enriched terms from your prediction.
-It can be viewed in your web browser.
+It can be viewed in your web browser. The json file is needed for correct
+display of copra_heatmap.html.
+
+enriched_heatmap_big_cop1.*:
+pdf and png files for the functional enrichment heatmap.
+
+README.txt:
+This file.
 
 ";
