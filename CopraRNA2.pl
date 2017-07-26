@@ -46,7 +46,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### dependencies: (specified versions are tested and functional)
 
-# bzip2 (for the core genome archive)                                  // conda install bzip2
+# bzip2 1.0.6 (for the core genome archive)                                  // conda install bzip2
 
 ### Bio Software
 
