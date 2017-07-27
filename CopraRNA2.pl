@@ -58,7 +58,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
 
-### Perl (5.22.0) Module(s):                                           // perl via conda install perl
+### Perl (5.22.0) Module(s):                                           // conda install perl
 
 # List::MoreUtils 0.413                                                // conda install perl-list-moreutils
 # Parallel::ForkManager 1.17                                           // conda install perl-parallel-forkmanager
@@ -384,6 +384,20 @@ unless ($noclean) {
     system "rm formatdb.log" if (-e "formatdb.log");
     system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
 
-}
+    # make subdirs for IntaRNA, FASTA and Enrichment ## edit 2.0.5.1
+    system "mkdir IntaRNA";
+    system "mv *.fa.intarna.csv IntaRNA";
 
+    system "mkdir FASTA";
+    system "mv *.fa FASTA";
+    
+    if ($enrich) { 
+        system "mkdir Enrichment";
+        system "mv copra_heatmap.html Enrichment";
+        system "mv copraRNA.json Enrichment";
+        system "mv enriched_heatmap_big_cop1* Enrichment";
+        system "mv termClusterReport_cop1.txt Enrichment";
+        system "mv org_of_interest_aux_enrichment.txt Enrichment";
+    }
+}
 

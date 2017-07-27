@@ -51,7 +51,7 @@ It contains all possible CopraRNA2 predictions.
 CopraRNA_option_file.txt:
 This file contains the set of input options.
 
-16s_sequences.fa:
+16s_sequences.fa (in FASTA):
 This is the FASTA file containing the 16s sequences that
 the phylogeny is calculated on.
 
@@ -71,15 +71,15 @@ in the prediction. The clusters are computed with DomClust.
 *regions *pdf *ps *png:
 These image files contain the regions plots of your run.
 
-*.fa.intarna.csv:
+*.fa.intarna.csv (in IntaRNA):
 These files contain the results of the single IntaRNA whole
 genome predictions for each organism participating in the analysis.
 One of these files is created per organism.
 
-ncrna.fa:
+ncrna.fa (in FASTA):
 This FASTA contains the sequences you submitted.
 
-*_upfromstartpos_*_down_*.fa:
+*_upfromstartpos_*_down_*.fa (in FASTA):
 These FASTA files contain the putative target sequences of the
 respective organisms in the prediction.
 
@@ -89,7 +89,7 @@ of homologous putative targets. _rcsize is the truncated input
 for the CopraRNA1 thread and _trunc is the truncated input
 for the CopraRNA2 (if -cop2) thread.
 
-target_sequences_orgofint.fa: (only if -websrv was set)
+target_sequences_orgofint.fa: (only if -websrv was set // in FASTA)
 This FASTA contains the putative target sequences extracted from the
 organism of interest's genome. It is a copy of one of the
 *_upfromstartpos_*_down_*.fa files. 
@@ -97,19 +97,19 @@ organism of interest's genome. It is a copy of one of the
 *_websrv_table.csv: (only if -websrv was set)
 These are csv tables for the Freiburg RNA tools webserver frontend.
 
-termClusterReport_cop1.txt: (only if -enrich was specified)
+termClusterReport_cop1.txt: (only if -enrich was specified // in Enrichment)
 This file contains the DAVID functional enrichment for the amount of
 CopraRNA1 candidates specified in the -enrich parameter.
 
-org_of_interest_aux_enrichment.txt:
+org_of_interest_aux_enrichment.txt: (in Enrichment)
 This is the auxilliary enrichment file for the organism of interest.
 
-copra_heatmap.html/copraRNA.json:
+copra_heatmap.html/copraRNA.json: (in Enrichment)
 This html file contains the heatmap for the enriched terms from your prediction.
 It can be viewed in your web browser. The json file is needed for correct
 display of copra_heatmap.html.
 
-enriched_heatmap_big_cop1.*:
+enriched_heatmap_big_cop1.*: (in Enrichment)
 pdf and png files for the functional enrichment heatmap.
 
 README.txt:
