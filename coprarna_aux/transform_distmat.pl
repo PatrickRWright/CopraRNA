@@ -11,13 +11,10 @@ my $distmat = $ARGV[0];
 my $maxcluster = 0;
 my $firstswitch = 1;
 
-open(MYDATA, $distmat) or die("Error: cannot open file $distmat'\n");
-
-my @distmatlines = ();
-
-@distmatlines = <MYDATA>;
-
+open(MYDATA, $distmat) or die("\nError: cannot open file $distmat at transform_distmat.pl\n\n");
+    my @distmatlines = <MYDATA>;
 close MYDATA;
+
 my $c = 0;
 my %matrixhash = ();
 my @orgarray = ();
