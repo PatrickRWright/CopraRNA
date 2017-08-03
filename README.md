@@ -1,4 +1,5 @@
 # CopraRNA version 2.*
+![CopraRNA](https://raw.githubusercontent.com/PatrickRWright/CopraRNA/master/copra_sRNA.jpg "CopraRNA")
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
 
