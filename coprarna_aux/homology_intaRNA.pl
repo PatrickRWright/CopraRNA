@@ -323,19 +323,6 @@ system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl C
 system "head -n $topcount CopraRNA1_anno_addhomologs_padj_amountsamp.csv > CopraRNA1_final.csv";
 system "head -n $topcount CopraRNA2_anno_addhomologs_padj_amountsamp.csv > CopraRNA2_final.csv" if ($cop2);
 
-##### create regions plots
-## system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "script_R_plots_6.R --args CopraRNA1_final_all.csv 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing
-
-##### convert postscript files to PNG
-
-# thumbnails
-## system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 sRNA_regions.ps thumbnail_sRNA.png";
-## system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 mRNA_regions.ps thumbnail_mRNA.png";
-
-# blow up images
-## system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions.ps sRNA_regions.png";
-## system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions.ps mRNA_regions.png";
-
 # check for fail CopraRNA 1
 open(MYDATA, "CopraRNA1_anno_addhomologs_padj_amountsamp.csv") or die("\nError: cannot open file CopraRNA1_anno_addhomologs_padj_amountsamp.csv at homology_intaRNA.pl\n\n");
     my @CopraRNA_out_lines = <MYDATA>;

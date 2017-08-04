@@ -272,8 +272,8 @@ if ($region eq "5utr" or $region eq "3utr") { ## edit 2.0.4.2
     die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize. Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize ); ## edit 2.0.5.1
 }
 
-# check for correct range of 0.5 <= -rcsize <= 1.0 ## edit 2.0.4
-die("\nError: -rcsize can only be specified between 0.5 and 1.0. You set '$RelClusterSize'.\n\n") unless ($RelClusterSize >= 0.5 and $RelClusterSize <= 1.0);
+# check for correct range of 0.5 <= -rcsize <= 1.0 ## edit 2.0.5.1
+die("\nError: -rcsize can only be specified between 0 and 1.0. You set '$RelClusterSize'.\n\n") unless ($RelClusterSize >= 0 and $RelClusterSize <= 1.0);
 
 # check for duplicate IDs in FASTA header // not allowed ## edit 2.0.4
 my $duplicate_fasta_header = `grep ">" $sRNAs_fasta | sort | uniq -d`;
@@ -351,6 +351,21 @@ if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\
 # move full result files 
 system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv";
 system "mv CopraRNA2_anno_addhomologs_padj_amountsamp.csv CopraRNA2_final_all.csv" if ($cop2);
+
+# create regions plots
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_7.R --args CopraRNA1_final_all.csv 100 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing
+
+# convert postscript files to PNG
+
+# thumbnails png
+if ($websrv) {
+    system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 sRNA_regions_with_histogram.ps thumbnail_sRNA.png";
+    system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 mRNA_regions_with_histogram.ps thumbnail_mRNA.png";
+}
+
+# blow up images png
+system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
+system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
 # clean up
 unless ($noclean) {
