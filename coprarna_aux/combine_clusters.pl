@@ -27,7 +27,7 @@ open (DISTMAT, "compatible.distmat") or die ("\nError: cannot open compatible.di
     my @distmat_lines = <DISTMAT>;
 close (DISTMAT);
 
-my $c = 1;
+my $c = 1000; ## edit 2.0.5.1 // changed this to 1000 because it was causing  wrong matches when more than 10 long IDs were present
 my %ID_to_ID_hash = (); # new_id -> old_id
 
 system "cp compatible.distmat compatible.distmat.mapped";
