@@ -41,15 +41,55 @@ The following topics are covered by this documentation:
 <a name="deps" />
 ## Dependencies
 
+IntaRNA 2.0.4                                                        // conda install intarna
+EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
+embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
+ncbiblast-2.2.22                                                     // conda install blast-legacy
+clustalw 2.1                                                         // TODO remove this dependency in regions plot script jens
+DomClust 1.2.8a                                                      // conda install domclust
+MAFFT 7.310                                                          // conda install mafft
+
+Perl (5.22.0) Module(s):                                             // conda install perl
+
+List::MoreUtils 0.413                                                // conda install perl-list-moreutils
+Parallel::ForkManager 1.17                                           // conda install perl-parallel-forkmanager
+Getopt::Long 2.45                                                    // conda install perl-getopt-long
+Bio::SeqIO (bioperl 1.6.924)                                         // conda install perl-bioperl
+Bio::DB::EUtilities 1.75                                             // conda install perl-bio-eutilities
+Cwd 3.56                                                             // included in the conda perl installation       
+
+R Package(s):
+
+R statistics 3.2.2                                                   // conda install r-base==3.2.2
+seqinr 3.1i\_3                                                       // conda install r-seqinr 
+
+python 2.7.13                                                        // conda install python==2.7.13
+
+sys                                                                  // available from conda python (2.7.13)
+logging                                                              // available from conda python (2.7.13)
+traceback                                                            // available from conda python (2.7.13) 
+suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
+suds         (suds-jurko 0.6)                                        // conda install suds-jurko
+suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
+datetime                                                             // available from conda python (2.7.13)
+
 
 <br /><br />
 <a name="instconda" />
 ## CopraRNA via conda (bioconda channel)
 
+TODO
 
 <br /><br />
 <a name="instgithub" />
 ## Cloning *Source code* from github (or downloading ZIP-file)
+
+TODO
+
+<br /><br /><br /><br />
+<a name="usage" />
+# Usage and parameters
+
 
 
 
