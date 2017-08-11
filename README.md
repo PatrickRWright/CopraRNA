@@ -3,7 +3,7 @@
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
 
-Please note: Version 2.0.5.1 is currently experimental and changes are actively being pushed.
+Please note: Version 2.0.6 is currently experimental and changes are actively being pushed.
 
 For testing or ad hoc use of IntaRNA, you can use its webinterface at the
 
@@ -45,7 +45,7 @@ The following topics are covered by this documentation:
 - gawk 4.1.3                                                           // conda install gawk
 - sed 4.2.2.165-6e76-dirty                                             // conda install sed
 - grep 2.14                                                            // conda install grep
-- tr 8.25 
+- tr 8.25                                                              // conda install coreutils 
 - IntaRNA 2.0.4                                                        // conda install intarna
 - EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 - embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
