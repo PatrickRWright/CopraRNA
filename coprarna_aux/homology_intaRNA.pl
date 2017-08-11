@@ -21,9 +21,13 @@ my $orgcount = 0;
 my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.4
 chomp $cores; ## edit 2.0.4
 
-# check if CopraRNA2 prediction should be made
-my $cop2 = `grep 'CopraRNA2:' CopraRNA_option_file.txt | sed 's/CopraRNA2://g'`; ## edit 2.0.5.1
-chomp $cop2;
+# check if CopraRNA1 prediction should be made
+my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.5.1
+chomp $cop1;
+
+# check nooi switch
+my $nooi = `grep 'nooi:' CopraRNA_option_file.txt | sed 's/nooi://g'`; ## edit 2.0.6
+chomp $nooi;
 
 # check for verbose printing
 my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; ## edit 2.0.5.1
@@ -296,40 +300,62 @@ print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
 system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
 
 # make annotations
-system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA1_with_pvsample_sorted.csv $GenBankFiles > CopraRNA1_anno.csv"; ## edit 2.0.4 -> opt // ## edit 2.0.5.1
-system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA2_no_pvsample_sorted.csv $GenBankFiles > CopraRNA2_anno.csv" if ($cop2); ## edit 2.0.4 -> opt // ## edit 2.0.5.1 
+system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA1_with_pvsample_sorted.csv $GenBankFiles > CopraRNA1_anno.csv" if ($cop1); ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA2_prep_sorted.csv $GenBankFiles > CopraRNA2_prep_anno.csv"; ## edit 2.0.6
 
 # get additional homologs in cluster.tab
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv"; ## edit 2.0.5.1
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_anno.csv cluster.tab > CopraRNA2_anno_addhomologs.csv" if ($cop2); ## edit 2.0.5.1
+system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv" if ($cop1); ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv"; ## edit 2.0.6
 
 # add corrected p-values (padj) - first column
-system "awk -F',' '{ print \$1 }' CopraRNA1_anno_addhomologs.csv > CopraRNA1_pvalues.txt"; ## edit 2.0.5.1
-system "awk -F',' '{ print \$1 }' CopraRNA2_anno_addhomologs.csv > CopraRNA2_pvalues.txt" if ($cop2); ## edit 2.0.5.1
+system "awk -F',' '{ print \$1 }' CopraRNA1_anno_addhomologs.csv > CopraRNA1_pvalues.txt" if ($cop1); ## edit 2.0.6
+# just for formatting
+system "awk -F',' '{ print \$1 }' CopraRNA2_prep_anno_addhomologs.csv > CopraRNA2_pvalues.txt"; ## edit 2.0.6
 
-system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA1_pvalues.txt";
-system "paste padj.csv CopraRNA1_anno_addhomologs.csv -d ',' > CopraRNA1_anno_addhomologs_padj.csv";
+system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA1_pvalues.txt" if ($cop1); ## edit 2.0.6
+system "paste padj.csv CopraRNA1_anno_addhomologs.csv -d ',' > CopraRNA1_anno_addhomologs_padj.csv" if ($cop1); ## edit 2.0.6
 
-if ($cop2) {
-    system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA2_pvalues.txt";
-    system "paste padj.csv CopraRNA2_anno_addhomologs.csv -d ',' > CopraRNA2_anno_addhomologs_padj.csv";
-}
+# just for formatting
+system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA2_pvalues.txt";
+system "paste padj.csv CopraRNA2_prep_anno_addhomologs.csv -d ',' > CopraRNA2_prep_anno_addhomologs_padj.csv"; ## edit 2.0.6
 
 # add amount sampled values CopraRNA 1 // CopraRNA 2 has no sampling
-system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA1_anno_addhomologs_padj.csv 0 > CopraRNA1_anno_addhomologs_padj_amountsamp.csv"; ## edit 2.0.5.1
-system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_anno_addhomologs_padj.csv 1 > CopraRNA2_anno_addhomologs_padj_amountsamp.csv" if ($cop2); ## edit 2.0.5.1
+system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA1_anno_addhomologs_padj.csv 0 > CopraRNA1_anno_addhomologs_padj_amountsamp.csv" if ($cop1); ## edit 2.0.6
+# make consistent names
+system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv" if ($cop1); ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; ## edit 2.0.6
+
+# get ooi refseq id
+my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
+# get the first id entry
+my $ooi_refseq_id = $split[0];
+# perform actual CopraRNA 2 p-value combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id"; ## edit 2.0.6
 
 # truncate final output // ## edit 2.0.5.1
-system "head -n $topcount CopraRNA1_anno_addhomologs_padj_amountsamp.csv > CopraRNA1_final.csv";
-system "head -n $topcount CopraRNA2_anno_addhomologs_padj_amountsamp.csv > CopraRNA2_final.csv" if ($cop2);
+system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); ## edit 2.0.6
+system "head -n $topcount CopraRNA2_final_all_ooi.csv > CopraRNA2_final_ooi.csv"; ## edit 2.0.6
+system "head -n $topcount CopraRNA2_final_all_evo.csv > CopraRNA2_final_evo.csv"; ## edit 2.0.6
 
-# check for fail CopraRNA 1
-open(MYDATA, "CopraRNA1_anno_addhomologs_padj_amountsamp.csv") or die("\nError: cannot open file CopraRNA1_anno_addhomologs_padj_amountsamp.csv at homology_intaRNA.pl\n\n");
+# figure out which result is the primary result ## edit 2.0.6
+if ($cop1) { # CopraRNA 1 is the primary requested result
+    system "cp CopraRNA1_final.csv CopraRNA_result.csv";    
+    system "cp CopraRNA1_final_all.csv CopraRNA_result_all.csv";    
+} elsif ($nooi) { # CopraRNA 2 with evo mode is the requested result
+    system "cp  CopraRNA2_final_evo.csv CopraRNA_result.csv";
+    system "cp  CopraRNA2_final_all_evo.csv CopraRNA_result_all.csv";
+} else { # CopraRNA 2 with org of interest focus is requested (standard)
+    system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
+    system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";
+}
+
+# check for run fail CopraRNA
+open(MYDATA, "CopraRNA_result.csv") or die("\nError: cannot open file CopraRNA_result.csv at homology_intaRNA.pl\n\n");
     my @CopraRNA_out_lines = <MYDATA>;
 close MYDATA;
 
-if (scalar(@CopraRNA_out_lines) <= 1) {
-    print ERRORLOG "Error: CopraRNA1 run failed.\n"; ## edit 2.0.2
+if (scalar(@CopraRNA_out_lines) <= 1) { ## edit 2.0.6
+    print ERRORLOG "Error: No predictions in CopraRNA_result.csv. CopraRNA run failed.\n"; ## edit 2.0.2
 }
 
 if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5.1
@@ -342,42 +368,26 @@ if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5
     my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
 
     # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    my $top_predictons_locus_tags_c1 = `awk -F',' '{print \$3}' CopraRNA1_final.csv | sed 's/(.*)//g' | tr '\n' ','`;
-    my $top_predictons_locus_tags_c2 = `awk -F',' '{print \$3}' CopraRNA2_final.csv | sed 's/(.*)//g' | tr '\n' ','` if ($cop2);
+    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ',' | sed 's/!//g'`; ## edit 2.0.6 switched to generic output file and added sed at the end
 
     # split
-    my @split_c1 = split(/,/, $top_predictons_locus_tags_c1);
-    my @split_c2 = split(/,/, $top_predictons_locus_tags_c2) if ($cop2);
+    my @split = split(/,/, $top_predictons_locus_tags);
     
     # remove RefSeqID
-    shift @split_c1;
-    shift @split_c2 if ($cop2);
+    shift @split;
 
-    foreach (@split_c1) {
+    foreach (@split) {
         if ($_) {
-            system "grep -iA1 '$_' $orgofintTargets >> CopraRNA1_top_targets.fa";
+            system "grep -iA1 '$_' $orgofintTargets >> CopraRNA_top_targets.fa";
         }
     }
 
-    if ($cop2) {
-        foreach (@split_c2) {
-            if ($_) {
-                system "grep -iA1 '$_' $orgofintTargets >> CopraRNA2_top_targets.fa";
-            }
-        }
-    }
-    
-    system "IntaRNA_1ui.pl -t CopraRNA1_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop1_IntaRNA1_ui.intarna";
+    system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
     # fix for ambiguous nt in intarna output
-    system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop1_IntaRNA1_ui.intarna";
-    system "IntaRNA_1ui.pl -t CopraRNA2_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop2_IntaRNA1_ui.intarna" if ($cop2);
-    # fix for ambiguous nt in intarna output
-    system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop2_IntaRNA1_ui.intarna" if ($cop2);
+    system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop_IntaRNA1_ui.intarna";
 
-    system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA1_final.csv Cop1_IntaRNA1_ui.intarna";
-    system "mv coprarna_internal_table.csv coprarna1_websrv_table.csv";
-    system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA2_final.csv Cop2_IntaRNA1_ui.intarna" if ($cop2);
-    system "mv coprarna_internal_table.csv coprarna2_websrv_table.csv" if ($cop2);
+    system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA_result.csv Cop_IntaRNA1_ui.intarna";
+    system "mv coprarna_internal_table.csv coprarna_websrv_table.csv";
 
     system "cp $orgofintTargets target_sequences_orgofint.fa";
 }

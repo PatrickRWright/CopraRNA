@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.0.5.1
+# CopraRNA 2.0.6
 
  # License: MIT
 
@@ -46,7 +46,11 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### dependencies: (specified versions are tested and functional)
 
-# bzip2 1.0.6 (for the core genome archive)                                  // conda install bzip2
+# bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
+# gawk 4.1.3                                                           // conda install gawk
+# sed 4.2.2.165-6e76-dirty                                             // conda install sed
+# grep 2.14                                                            // conda install grep
+# tr 8.25                                                              // conda install coreutils
 
 ### Bio Software
 
@@ -54,7 +58,6 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 # embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
-# clustalw 2.1                                                         // TODO remove this dependency in regions plot script jens
 # DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
 
@@ -87,6 +90,14 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.0.6   : new p-value combination (no hard cutoff anymore // switching to integrated superior method) 
+#            standard root function for weights is now 1 instead of 2.5 (no more weight reduction)
+#            added phylogeny output directory in clean output
+#            -cop2 option is now -cop1 since CopraRNA2 will be standard
+#            removed -pvcut option
+#            added -nooi option
+#            added gawk, sed, grep and tr as dependencies
+#
 # v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
 #            adjusted update_kegg2refseq for new format of prokaryotes.txt
@@ -136,13 +147,14 @@ my $RelClusterSize = 0.5;
 my $core_count = 1; # how many parallel processes are allowed
 my $winsize = 150; # IntaRNA window size
 my $maxbpdist = 100; # IntaRNA maximum base pair distance 
-my $cop2 = 0;
+my $cop1 = 0;
+my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 evo else ooi ## edit 2.0.6
 my $verbose = 0; ## edit 2.0.5.1
 my $noclean = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
 my $topcount = 100; # amount of top predictions // ## edit 2.0.5.1
-my $root = 2.5; # root function to apply to the weights // ## edit 2.0.5.1
+my $root = 1; # root function to apply to the weights // ## edit 2.0.5.1
 my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on 
                 ##              // this option also allows to specify how many top predictions to use for the enrichment
 
@@ -163,38 +175,44 @@ GetOptions ( ## edit 2.0.4
     'rcsize:f'		=> \$RelClusterSize,
     'winsize:i'		=> \$winsize,    ## edit 2.0.5.1 
     'maxbpdist:i'	=> \$maxbpdist,  ## edit 2.0.5.1
-    'cop2'		=> \$cop2, # switch for coprarna2, if set then coprarna1 and 2 are run // else only coprarna1
+    'cop1'		=> \$cop1, # switch for coprarna1, if set then coprarna1 is run // else only coprarna2
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
     'noclean'		=> \$noclean, # switch to prevent cleaning of files
-    'pvcut:f'		=> \$pvalcutoff, # p-value cutoff for CopraRNA 2
+    'nooi'		=> \$nooi, # switch to set prediction mode to evolutionary focus
     'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
 );
 
 # TODO:
-# - think about enrichment for CopraRNA2 output // also chartreport... second aux enrichment
-# - switch nocop1
+
+# - fix enrichment
+# - fix regions plot and allow to pass topcount to it (Jens)
+# - add some more verbose printing (e.g. org of interest)
+# - think about enrichment for CopraRNA2 output -> this can be now done like CopraRNA 1 enrichment since Cop 2 is globally better 
 # - do manual testing
-# - replace clustalw in regions plots - also make density plot discrete...
+# - option to keep all prediction mode results (--predall)
+# - check print archive README for new output
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
-print "\nCopraRNA 2.0.5.1\n\n",
+print "\nCopraRNA 2.0.6\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
-"by combination of distinct whole genome IntaRNA predictions. As input, CopraRNA requires\n",
+"by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
 "at least 3 homologous sRNA sequences from 3 distinct organisms in FASTA format.\n", 
 "Furthermore, each organisms' genome has to be part of the NCBI Reference Sequence (RefSeq)\n",
 "database (i.e. it should have exactly this NZ_* or this NC_XXXXXX format where * stands\n",
 "for any character and X stands for a digit between 0 and 9). Depending on sequence length\n",
 "(target and sRNA), amount of input organisms and genome sizes, CopraRNA can take up to 24h\n",
-"or longer to compute. In most cases it is significantly faster. The central result tables\n",
-"are CopraRNA1_final.csv and CopraRNA2_final.csv (if --cop2 is set). Further explanations\n",
-"concerning the files in the run directory can be found in README.txt.\n\n",
+"or longer to compute. In most cases it is significantly faster. The central result table\n",
+"is CopraRNA_result.csv. Further explanations concerning the files in the run directory\n", 
+"can be found in README.txt.\n\n",
 
-"It is suggested to run CopraRNA in a dedicated empty directory to avoid unexpected behaviour.\n\n",
+"CopraRNA produces a lot of file I/O.\n", 
+"It is suggested to run CopraRNA in a dedicated\n",
+"empty directory to avoid unexpected behaviour.\n\n",
 
 "The following options are available:\n\n",
 " --help                    this help\n\n",
@@ -207,19 +225,19 @@ print "\nCopraRNA 2.0.5.1\n\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
 " --rcsize                  minumum amount (%) of putative target homologs that need to be available \n",
-"                           for a target cluster to be considered in the CopraRNA1 part of the prediction (def:0.5)\n",  ## edit 2.0.5.1
+"                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)\n",  ## edit 2.0.5.1
 " --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",                                 ## edit 2.0.5.1
 " --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)\n",
-" --cop2                    switch for CopraRNA2 prediction (def:off)\n",
+" --cop1                    switch for CopraRNA1 prediction (def:off)\n",  ## edit 2.0.6
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",  ## edit 2.0.5.1
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
-" --pvcut                   specifies the p-values to remove before joined p-value computation (def:0.15)\n",
-" --root                    specifies root function to apply to the weights (def:2.5)\n",
+" --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",  ## edit 2.0.6
+" --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return (def:100)\n\n", ## edit 2.0.5.1
 
-"Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -rcsize 0.5 -winsize 150 -maxbpdist 100 -cop2 -enrich 100 -pvcut 0.15 -topcount 100 -cores 4\n\n",
+"Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
 "References: \n",
 "1. Wright PR et al., Comparative genomics boosts target prediction for bacterial small RNAs\n   Proc Natl Acad Sci USA, 2013, 110(37), E3487–E3496\n",
@@ -290,15 +308,15 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "core count:" . $core_count . "\n";
     print WRITETOOPTIONS "win size:" . $winsize . "\n";
     print WRITETOOPTIONS "max bp dist:" . $maxbpdist . "\n";
-    print WRITETOOPTIONS "CopraRNA2:" . $cop2 . "\n";
+    print WRITETOOPTIONS "CopraRNA1:" . $cop1 . "\n";
     print WRITETOOPTIONS "verbose:" . $verbose . "\n";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
-    print WRITETOOPTIONS "p-value cutoff:" . $pvalcutoff . "\n";
+    print WRITETOOPTIONS "nooi:" . $nooi . "\n";
     print WRITETOOPTIONS "top count:" . $topcount . "\n";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
-    print WRITETOOPTIONS "version:CopraRNA 2.0.5.1\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "version:CopraRNA 2.0.6\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
 
@@ -343,17 +361,13 @@ system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted.
 # 1. not correctly downloaded RefSeq files 
 # 2. gene no CDS issue 
 # 3. wrong 16S counts
-# 4. empty CopraRNA1_anno_addhomologs_padj_amountsamp.csv
+# 4. empty CopraRNA_result.csv 
 # 5. the exception in add_pval_to_csv_evdfit.R
 # -s  File has nonzero size (returns size in bytes).
 if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
 
-# move full result files 
-system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv";
-system "mv CopraRNA2_anno_addhomologs_padj_amountsamp.csv CopraRNA2_final_all.csv" if ($cop2);
-
 # create regions plots
-system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_7.R --args CopraRNA1_final_all.csv 100 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_7.R --args CopraRNA_result_all.csv 100 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing // ## edit 2.0.6 new input file
 
 # convert postscript files to PNG
 
@@ -367,19 +381,34 @@ if ($websrv) {
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
+
+######################################
+
+# experimental
+# test jens' pvalue combinations
+
+# NA causes sorting issue
+#system "sed -i 's/NA/10000/g' CopraRNA_rocketscience_nobel_prize_output.txt";
+#system "env LC_ALL=C sort -t';' -g -k1 CopraRNA_rocketscience_nobel_prize_output.txt > CopraRNA_opt_rho_root30.csv";
+#system "env LC_ALL=C sort -t';' -g -k2 CopraRNA_rocketscience_nobel_prize_output.txt > CopraRNA_opt_rho_ooi_root30.csv";
+
+######################################
+
+
 # clean up
 unless ($noclean) {
 
     system "rm enrichment_cop1.txt *DAVID* IntaRNA* intarna*" if ($enrich);
     system "rm *IntaRNA1_ui* *top_targets*" if ($websrv);
-    system "rm *.gb 16s_sequences.aln *pvsample*";
-    system "rm compatible.fneighbor compatible.distmat.mapped compatible.distmat";
+    system "rm *.gb";
+    system "rm *pvsample*" if ($cop1);
+    system "rm compatible.distmat.mapped";
     system "rm err.log *anno* padj.csv";
-    system "rm *pvalues* ncRNA_* rhodevelopment.txt";
+    system "rm *pvalues* ncRNA_*";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
-    system "rm -r weight_permutations" if ($cop2);
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
+    system "rm CopraRNA2_prep*";
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
@@ -400,13 +429,17 @@ unless ($noclean) {
     system "rm formatdb.log" if (-e "formatdb.log");
     system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
 
-    # make subdirs for IntaRNA, FASTA and Enrichment ## edit 2.0.5.1
+    # make subdirs for IntaRNA, FASTA, Enrichment and Phylogeny ## edit 2.0.5.1 // 2.0.6
     system "mkdir IntaRNA";
     system "mv *.fa.intarna.csv IntaRNA";
 
+    system "mkdir Phylogeny";
+    system "mv compatible.* Phylogeny";
+    system "mv 16s_sequences.* Phylogeny";
+
     system "mkdir FASTA";
     system "mv *.fa FASTA";
-    
+   
     if ($enrich) { 
         system "mkdir Enrichment";
         system "mv copra_heatmap.html Enrichment";

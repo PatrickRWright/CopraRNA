@@ -1,6 +1,6 @@
 
 # call
-# R --slave -f ../script_R_plots_7.R --args CopraRNA1_final.csv 
+# R --slave -f ../script_R_plots_7.R --args CopraRNA_result_all.csv
 # script by Jens Georg
 
 # numplot2:		The number of best predictions for which the targets sequences of 
@@ -59,8 +59,6 @@ d
 
 
 #Mafft aufruf
-
-
 	
 mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa"){
 	command<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", filename, " > ", outname, sep="" )

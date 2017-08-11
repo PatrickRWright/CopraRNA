@@ -26,13 +26,13 @@ my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.4
 chomp $cores; ## edit 2.0.4
 
-# check if CopraRNA2 prediction should be made
-my $cop2 = `grep 'CopraRNA2:' CopraRNA_option_file.txt | sed 's/CopraRNA2://g'`; ## edit 2.0.5.1
-chomp $cop2;
-
 # check for verbose printing
 my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; ## edit 2.0.5.1
 chomp $verbose;
+
+# check if CopraRNA1 prediction should be made
+my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.5.1
+chomp $cop1;
 
 # get window size option
 my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; ## edit 2.0.5.1
@@ -180,32 +180,9 @@ system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "add_pval_to_csv_evdfit.R"; ##
 system $PATH_COPRA_SUBSCRIPTS . "cluster_intarna_csv.pl > opt_tags.clustered"; ## edit 2.0.4.1 // reimplemented cluster_intarna_csv.pl from hash_clusters
 
 ## create opt_tags.clustered_rcsize
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_clusters_under_percantage.R"; ## edit 2.0.1
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_clusters_under_percantage.R" if ($cop1); ## edit 2.0.1
 
-## need to do this now -> compatible.distmat needed in prev. weight calc 
 system "mafft --localpair --quiet 16s_sequences.fa > 16s_sequences.aln";
 system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2> /dev/null"; ## edit 2.0.5.1 // added 2> /dev/null to prevent output to the terminal
 system $PATH_COPRA_SUBSCRIPTS . "transform_distmat.pl distmat.out > compatible.distmat";
-
-## prepare opt_tags.clustered_trunc for cop2 prediction // ## edit 2.0.5.1
-
-if ($cop2) {
-    ## get p-value cutoff
-    my $pvcut = `grep 'p-value cutoff:' CopraRNA_option_file.txt | grep -oP '\\d+\\.\\d+'`; ## edit 2.0.5.1
-    chomp $pvcut; ## edit 2.0.5.1
-
-    ## truncate the tags.clustered file according to the specified pvalue cutoff
-    ## 36 is the field with the p-value and 0 is the line
-    system "awk -F';' '{ if (\$36 <= $pvcut) print \$0 }' opt_tags.clustered > opt_tags.clustered_trunc_no_head";
-    system "head -n 1 opt_tags.clustered > temp_head";
-    system "cat temp_head opt_tags.clustered_trunc_no_head > opt_tags.clustered_trunc";
-    system "rm opt_tags.clustered_trunc_no_head temp_head";
-
-    # cop1: opt_tags.clustered_rcsize
-    # cop2: opt_tags.clustered_trunc
-
-    # calculate all weights for coprarna2 prediction
-    system $PATH_COPRA_SUBSCRIPTS . "parallelize_mafft_for_weights.pl opt_tags.clustered_trunc";
-}
-
 

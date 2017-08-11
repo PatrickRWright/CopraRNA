@@ -8,11 +8,11 @@ use warnings;
 my $CopraRNA_out = $ARGV[0];
 my $intarna_out = $ARGV[1];
 
-open(MYDATA, $CopraRNA_out) or die("Error: cannot open file $CopraRNA_out\n");
+open(MYDATA, $CopraRNA_out) or die("Error: cannot open file $CopraRNA_out at prepare_output_for_websrv_new.pl\n");
     my @CopraRNA_out_lines = <MYDATA>;
 close MYDATA;
 
-open(MYDATA, $intarna_out) or die("Error: cannot open file $intarna_out\n");
+open(MYDATA, $intarna_out) or die("Error: cannot open file $intarna_out at prepare_output_for_websrv_new.pl\n");
     my @intarna_out_lines = <MYDATA>;
 close MYDATA;
 
@@ -40,37 +40,37 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
 
         # print the IntaRNA outputs for the organism of interest
         # split up organism of interest cell
-        my @split2 = split(/[\(,|]/, $split[2]); ## edit 1.1.0
-        #locus tag
-        print WRITEINTERNAL $split2[0] . ",";
-        #gene name
-        print WRITEINTERNAL $split2[1] . ",";
-        #IntaRNA energy score
-        printf WRITEINTERNAL ("%.2f", $split2[2]);
+        my @split_ooi = split(/[\(,|]/, $split[2]); ## edit 2.0.6 changed var name to split_ooi
+        # locus tag
+        my $ltag = $split_ooi[0]; ## edit 2.0.6
+        $ltag =~ s/\!//g; ## edit 2.0.6 // remove flagging for webserver
+        print WRITEINTERNAL $ltag . ",";
+        # gene name
+        print WRITEINTERNAL $split_ooi[1] . ",";
+        # IntaRNA energy score
+        printf WRITEINTERNAL ("%.2f", $split_ooi[2]);
         print WRITEINTERNAL ",";
-        #IntaRNA p-value
-        printf WRITEINTERNAL ("%.6f", $split2[3]);
+        # IntaRNA p-value
+        printf WRITEINTERNAL ("%.6f", $split_ooi[3]);
         print WRITEINTERNAL ",";
-        #interacting region mRNA
-        my $intmRNA = $split2[4] . " -- " . $split2[5];
-        print WRITEINTERNAL $split2[4] . " -- " . $split2[5] . ",";
-        #interacting region ncRNA
-        my $intncRNA = $split2[6] . " -- " . $split2[7];
-        print WRITEINTERNAL $split2[6] . " -- " . $split2[7] . ",";
+        # interacting region mRNA
+        my $intmRNA = $split_ooi[4] . " -- " . $split_ooi[5];
+        print WRITEINTERNAL $split_ooi[4] . " -- " . $split_ooi[5] . ",";
+        # interacting region ncRNA
+        my $intncRNA = $split_ooi[6] . " -- " . $split_ooi[7];
+        print WRITEINTERNAL $split_ooi[6] . " -- " . $split_ooi[7] . ",";
 
-        ## annotation
+        # annotation
         print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
-        ## additional homologs
+        # additional homologs
         my $temp = $split[-2]; ## edit 2.0.1
         chomp $temp;
         print WRITEINTERNAL $temp . ",";
         my $GID = "";
-        if ($split2[8] =~ m/GeneID:(\d+)\)/) {
+        if ($split_ooi[8] =~ m/GeneID:(\d+)\)/) {
             $GID = $1;
         }
         print WRITEINTERNAL $GID . ",";
-        # $split2[0] has the locus tag, which is the key to specifically accessing the interactions we want
-        my $ltag = $split2[0];
         my @intarna_array = [];
         for (my $j=0; $j<scalar(@intarna_out_lines);$j++) {
             if ($intarna_out_lines[$j] =~ m/$ltag/i) {

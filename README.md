@@ -41,9 +41,14 @@ The following topics are covered by this documentation:
 <a name="deps" />
 ## Dependencies
 
-- IntaRNA 2.0.4								// conda install intarna
-- EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)	// conda install emboss
-- embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)	// conda install embassy-phylip
+- bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
+- gawk 4.1.3                                                           // conda install gawk
+- sed 4.2.2.165-6e76-dirty                                             // conda install sed
+- grep 2.14                                                            // conda install grep
+- tr 8.25 
+- IntaRNA 2.0.4                                                        // conda install intarna
+- EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
+- embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
 - ncbiblast-2.2.22                                                     // conda install blast-legacy
 - DomClust 1.2.8a                                                      // conda install domclust
 - MAFFT 7.310                                                          // conda install mafft
@@ -70,7 +75,6 @@ The following topics are covered by this documentation:
     - suds         (suds-jurko 0.6)                                        // conda install suds-jurko
     - suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
     - datetime                                                             // available from conda python (2.7.13)
-
 
 <br /><br />
 <a name="instconda" />

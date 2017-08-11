@@ -18,9 +18,9 @@ my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
 $ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
-# check if CopraRNA2 prediction should be made
-my $cop2 = `grep 'CopraRNA2:' CopraRNA_option_file.txt | sed 's/CopraRNA2://g'`; ## edit 2.0.5.1
-chomp $cop2;
+# check if CopraRNA1 prediction should be made
+my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.6
+chomp $cop1;
 
 # fix issue with IDs that are longer than 10 chars ## edit 2.0.3.2
 open (DISTMAT, "compatible.distmat") or die ("\nError: cannot open compatible.distmat in combine_clusters.pl\n\n");
@@ -63,25 +63,19 @@ for my $key (keys %ID_to_ID_hash) {
 # calculate full organism set weights
 system $PATH_COPRA_SUBSCRIPTS . "read_fneighfile.pl compatible.treefile compatible.fneighbor > zscore.weight"; ## edit 2.0.4 // changed read_fneighfile.pl for UPGMA tree
 
-
 ## calculate combined pvalues
 
 # combination with missing p-value sampling and empiric rho estimation
 # CopraRNA1 table combination with p-value sampling
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered_rcsize"; ## edit 2.0.5.1 // added input args
-system "mv final.out CopraRNA1_with_pvsample.csv"; ## edit 2.0.5.1
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered_rcsize 0" if ($cop1); ## edit 2.0.6 // added prep 0/1 parameter
 
-if ($cop2) {
-    # combination without p-value sampling and without empiric rho estimation
-    # CopraRNA2 table combination no p-value sampling
-    system $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.pl opt_tags.clustered_trunc"; ## edit 2.0.5.1
-    system "mv CopraRNA_result_no_pvsample.csv CopraRNA2_no_pvsample.csv"; ## edit 2.0.5.1
-}
+# prepare input for CopraRNA 2 combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered 1"; ## edit 2.0.6 // prepare lines for CopraRNA 2 combination
 
 # sort the final raw output
 # with pvalue sampling
-system "env LC_ALL=C sort -g -k1 CopraRNA1_with_pvsample.csv > CopraRNA1_with_pvsample_sorted.csv";
+system "env LC_ALL=C sort -g -k1 CopraRNA1_with_pvsample.csv > CopraRNA1_with_pvsample_sorted.csv" if ($cop1); ## edit 2.0.6
 
 # without pvalue sampling
-system "env LC_ALL=C sort -g -k1 CopraRNA2_no_pvsample.csv > CopraRNA2_no_pvsample_sorted.csv" if ($cop2);
+system "env LC_ALL=C sort -g -k1 CopraRNA2_prep.csv > CopraRNA2_prep_sorted.csv"; ## edit 2.0.6
 
