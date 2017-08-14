@@ -50,7 +50,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # gawk 4.1.3                                                           // conda install gawk
 # sed 4.2.2.165-6e76-dirty                                             // conda install sed
 # grep 2.14                                                            // conda install grep
-# tr 8.25                                                              // conda install coreutils
+# GNU coreutils 8.25                                                   // conda install coreutils
 
 ### Bio Software
 
