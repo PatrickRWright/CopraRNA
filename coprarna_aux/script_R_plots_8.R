@@ -1,6 +1,5 @@
-
 # call
-# R --slave -f ../script_R_plots_7.R --args CopraRNA_result_all.csv
+# R --slave -f ../script_R_plots_8.R --args CopraRNA_result_all.csv 200
 # script by Jens Georg
 
 # numplot2:		The number of best predictions for which the targets sequences of 
@@ -14,7 +13,7 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 inputFile <- args[1]
-numplot2 <- args[2]
+numplot2 <- as.numeric(args[2])
 
 map<-function(y){
 se<-y
@@ -77,8 +76,8 @@ da<-read.csv(inputFile) ## edit 2.0.2
 
 #danc<-read.fasta("ncrna.fa")
 #d<-clustalW(danc,clustal.path="clustalw")
-d<-mafft(filename="input_sRNA.fa", outname="ncrna_aligned.fa")
-
+d<-mafft(filename="ncrna.fa", outname="ncrna_aligned.fa")
+names(d)<-gsub("ncRNA_","",names(d))
 d<-map(d)
 
 en<-grep("Annotation", colnames(da))
@@ -109,7 +108,7 @@ da4<-list()
 da4[[1]]<-da[,1]
 for(i in 1:ncol(da2)){
 
-da3<-(strsplit(as.character(da2[,i]), "\\|"))
+da3<-(strsplit(gsub("!","",as.character(da2[,i])), "\\|"))
 
 for(j in 1: length(da3)){
 if(length(da3[[j]])==0){
@@ -124,6 +123,7 @@ geneID<-sub("\\)","",geneID)
 da3[,8]<-geneID
 
 Locustag<-(strsplit(as.character(da3[,1]), "\\("))
+
 for(j in 1: length(Locustag)){
 if(length(Locustag[[j]])!=2){
 Locustag[[j]]<-rep("NA",2)
@@ -786,5 +786,3 @@ dev.off()
 
 
 CopraRNA_plot(numplot2=numplot2, numdens=100)
-
-

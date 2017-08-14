@@ -97,6 +97,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            removed -pvcut option
 #            added -nooi option
 #            added gawk, sed, grep and tr as dependencies
+#            added extended regions plots
 #
 # v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
@@ -187,10 +188,8 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - fix enrichment
 # - fix regions plot and allow to pass topcount to it (Jens)
 # - add some more verbose printing (e.g. org of interest)
-# - think about enrichment for CopraRNA2 output -> this can be now done like CopraRNA 1 enrichment since Cop 2 is globally better 
 # - do manual testing
 # - option to keep all prediction mode results (--predall)
 # - check print archive README for new output
@@ -235,7 +234,7 @@ print "\nCopraRNA 2.0.6\n\n",
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
 " --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",  ## edit 2.0.6
 " --root                    specifies root function to apply to the weights (def:1)\n",
-" --topcount                specifies the amount of top predictions to return (def:100)\n\n", ## edit 2.0.5.1
+" --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:100)\n\n", ## edit 2.0.6
 
 "Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -367,7 +366,7 @@ system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted.
 if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
 
 # create regions plots
-system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_7.R --args CopraRNA_result_all.csv 100 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing // ## edit 2.0.6 new input file
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing // ## edit 2.0.6 new input file
 
 # convert postscript files to PNG
 
@@ -409,6 +408,7 @@ unless ($noclean) {
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
+    system "rm fasta_temp_file fasta_temp_file_out";
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
@@ -429,7 +429,7 @@ unless ($noclean) {
     system "rm formatdb.log" if (-e "formatdb.log");
     system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
 
-    # make subdirs for IntaRNA, FASTA, Enrichment and Phylogeny ## edit 2.0.5.1 // 2.0.6
+    # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots ## edit 2.0.5.1 // 2.0.6
     system "mkdir IntaRNA";
     system "mv *.fa.intarna.csv IntaRNA";
 
@@ -439,7 +439,11 @@ unless ($noclean) {
 
     system "mkdir FASTA";
     system "mv *.fa FASTA";
-   
+
+    system "mkdir Regions_plots";
+    system "mv *regions* Regions_plots";
+    system "mv thumbnail_* Regions_plots" if ($websrv);   
+
     if ($enrich) { 
         system "mkdir Enrichment";
         system "mv copra_heatmap.html Enrichment";
