@@ -97,7 +97,7 @@ organism of interest's genome. It is a copy of one of the
 *_websrv_table.csv: (only if -websrv was set)
 These are csv tables for the Freiburg RNA tools webserver frontend.
 
-termClusterReport_cop1.txt: (only if -enrich was specified // in Enrichment)
+termClusterReport.txt: (only if -enrich was specified // in Enrichment)
 This file contains the DAVID functional enrichment for the amount of
 CopraRNA1 candidates specified in the -enrich parameter.
 
@@ -109,7 +109,7 @@ This html file contains the heatmap for the enriched terms from your prediction.
 It can be viewed in your web browser. The json file is needed for correct
 display of copra_heatmap.html.
 
-enriched_heatmap_big_cop1.*: (in Enrichment)
+enriched_heatmap_big.*: (in Enrichment)
 pdf and png files for the functional enrichment heatmap.
 
 README.txt:

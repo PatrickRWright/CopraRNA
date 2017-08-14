@@ -7,7 +7,7 @@ use warnings;
 # for the organism of interest
 
 # read in main termClusterReport
-open(DATA,"termClusterReport_cop1.txt") or die ("\nError: cannot open termClusterReport_cop1.txt at find_single_specific_targets_in_termCluster.pl\n\n");
+open(DATA,"termClusterReport.txt") or die ("\nError: cannot open termClusterReport.txt at find_single_specific_targets_in_termCluster.pl\n\n"); ## edit 2.0.6
     my @mainClustering = <DATA>;
 close DATA;
 

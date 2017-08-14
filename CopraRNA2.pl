@@ -398,7 +398,7 @@ system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_wi
 # clean up
 unless ($noclean) {
 
-    system "rm enrichment_cop1.txt *DAVID* IntaRNA* intarna*" if ($enrich);
+    system "rm enrichment.txt *DAVID* IntaRNA* intarna*" if ($enrich);
     system "rm *IntaRNA1_ui* *top_targets*" if ($websrv);
     system "rm *.gb";
     system "rm *pvsample*" if ($cop1);
@@ -444,8 +444,8 @@ unless ($noclean) {
         system "mkdir Enrichment";
         system "mv copra_heatmap.html Enrichment";
         system "mv copraRNA.json Enrichment";
-        system "mv enriched_heatmap_big_cop1* Enrichment";
-        system "mv termClusterReport_cop1.txt Enrichment";
+        system "mv enriched_heatmap_big* Enrichment";
+        system "mv termClusterReport.txt Enrichment";
         system "mv org_of_interest_aux_enrichment.txt Enrichment";
     }
 }
