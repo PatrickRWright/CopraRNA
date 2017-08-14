@@ -8,6 +8,10 @@ use warnings;
 my $CopraRNA_out = $ARGV[0];
 my $intarna_out = $ARGV[1];
 
+# check CopraRNA1 switch 
+my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.5.1
+chomp $cop1;
+
 open(MYDATA, $CopraRNA_out) or die("Error: cannot open file $CopraRNA_out at prepare_output_for_websrv_new.pl\n");
     my @CopraRNA_out_lines = <MYDATA>;
 close MYDATA;
@@ -60,12 +64,21 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         my $intncRNA = $split_ooi[6] . " -- " . $split_ooi[7];
         print WRITEINTERNAL $split_ooi[6] . " -- " . $split_ooi[7] . ",";
 
-        # annotation
-        print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
-        # additional homologs
-        my $temp = $split[-2]; ## edit 2.0.1
-        chomp $temp;
-        print WRITEINTERNAL $temp . ",";
+        if ($cop1) {
+            # annotation
+            print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
+            # additional homologs
+            my $temp = $split[-2]; ## edit 2.0.1
+            chomp $temp;
+            print WRITEINTERNAL $temp . ",";
+        } else { ## edit 2.0.6
+            # annotation
+            print WRITEINTERNAL $split[-2] . ",";
+            # additional homologs
+            my $temp = $split[-1];
+            chomp $temp;
+            print WRITEINTERNAL $temp . ",";
+        }
         my $GID = "";
         if ($split_ooi[8] =~ m/GeneID:(\d+)\)/) {
             $GID = $1;
@@ -102,8 +115,11 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         print WRITEINTERNAL ",";       
  
         # these are the interaction properties
-        print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . $split[-1]; ## edit 2.0.1
-               
+        if ($cop1) {
+            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . $split[-1]; ## edit 2.0.1
+        } else { ## edit 2.0.6
+            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . "0\n";
+        }       
     }
 }
 
