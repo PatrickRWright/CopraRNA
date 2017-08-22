@@ -188,11 +188,12 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - fix regions plot and allow to pass topcount to it (Jens)
+# - core genome dump (ask bjoern)
+# - stop space removal in functional enrichment
 # - add some more verbose printing (e.g. org of interest)
 # - do manual testing
-# - option to keep all prediction mode results (--predall)
 # - check print archive README for new output
+# - check cds option
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
@@ -211,7 +212,7 @@ print "\nCopraRNA 2.0.6\n\n",
 
 "CopraRNA produces a lot of file I/O.\n", 
 "It is suggested to run CopraRNA in a dedicated\n",
-"empty directory to avoid unexpected behaviour.\n\n",
+"empty directory to avoid unexpected behavior.\n\n",
 
 "The following options are available:\n\n",
 " --help                    this help\n\n",
@@ -223,7 +224,7 @@ print "\nCopraRNA 2.0.6\n\n",
 " --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
-" --rcsize                  minumum amount (%) of putative target homologs that need to be available \n",
+" --rcsize                  minimum amount (%) of putative target homologs that need to be available \n",
 "                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)\n",  ## edit 2.0.5.1
 " --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",                                 ## edit 2.0.5.1
 " --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)\n",
@@ -239,7 +240,7 @@ print "\nCopraRNA 2.0.6\n\n",
 "Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
 "References: \n",
-"1. Wright PR et al., Comparative genomics boosts target prediction for bacterial small RNAs\n   Proc Natl Acad Sci USA, 2013, 110(37), E3487–E3496\n",
+"1. Wright PR et al., Comparative genomics boosts target prediction for bacterial small RNAs\n   Proc Natl Acad Sci USA, 2013, 110 (37), E3487–E3496\n",
 "2. Wright PR et al., CopraRNA and IntaRNA: predicting small RNA targets, networks and interaction domains\n   Nucleic Acids Research, 2014, 42 (W1), W119-W123\n",
 "\n";
 
@@ -379,20 +380,6 @@ if ($websrv) {
 # blow up images png
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
-
-
-######################################
-
-# experimental
-# test jens' pvalue combinations
-
-# NA causes sorting issue
-#system "sed -i 's/NA/10000/g' CopraRNA_rocketscience_nobel_prize_output.txt";
-#system "env LC_ALL=C sort -t';' -g -k1 CopraRNA_rocketscience_nobel_prize_output.txt > CopraRNA_opt_rho_root30.csv";
-#system "env LC_ALL=C sort -t';' -g -k2 CopraRNA_rocketscience_nobel_prize_output.txt > CopraRNA_opt_rho_ooi_root30.csv";
-
-######################################
-
 
 # clean up
 unless ($noclean) {
