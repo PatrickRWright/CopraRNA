@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use List::MoreUtils qw(uniq); # liblist-moreutils-perl
+use List::MoreUtils qw(uniq);
 
 ## edit 2.0.4.1 // rewrote this script
 ## run in a CopraRNA directory with
