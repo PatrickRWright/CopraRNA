@@ -188,7 +188,9 @@ sub calctree
 }
 
 # print result
-for my $entry (keys %weighthash) {
-    print "$entry;$weighthash{$entry}\n";
+for my $entry (sort keys %weighthash) {
+    print "$entry;";
+    printf("%.7f",$weighthash{$entry});
+    print "\n";
 }
 
