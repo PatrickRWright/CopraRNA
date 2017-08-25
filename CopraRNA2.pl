@@ -190,7 +190,6 @@ GetOptions ( ## edit 2.0.4
 
 # - core genome dump (ask bjoern)
 # - stop space removal in functional enrichment
-# - add some more verbose printing (e.g. org of interest)
 # - do manual testing
 # - check print archive README for new output
 # - check cds option
@@ -333,6 +332,15 @@ system "mv $sRNAs_fasta.temp $sRNAs_fasta";
 # build RefSeq input based on the sRNA input fasta (can only contain refseq IDs in header)
 my $RefSeqIds = `grep '>' $sRNAs_fasta | sed 's/>//g' | tr '\n' ' '`;
 
+# print org of interest
+if ($verbose) {
+    my $ooi_rid = `grep ">" input_sRNA.fa | head -n1 | sed 's/>//g'`;
+    chomp $ooi_rid;
+    my $full_ooi = `grep '$ooi_rid' "$PATH_COPRA/coprarna_aux/CopraRNA_available_organisms.txt"`;
+    chomp $full_ooi;
+    print "Organism of interest: $full_ooi \n";
+}
+
 # run homology_intaRNA.pl 
 print $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds\n" if ($verbose);
 system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
@@ -347,6 +355,7 @@ my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down
 
 if ($enrich) { ## edit 2.0.5.1
     # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
+    print "Performing auxilliary enrichment\n" if ($verbose);
     system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
     system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
@@ -367,6 +376,7 @@ system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted.
 if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
 
 # create regions plots
+print "Preparing interaction plots\n" if ($verbose);
 system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing // ## edit 2.0.6 new input file
 
 # convert postscript files to PNG
@@ -383,6 +393,8 @@ system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_wi
 
 # clean up
 unless ($noclean) {
+
+    print "Cleaning run directory\n" if ($verbose);
 
     system "rm enrichment.txt *DAVID* IntaRNA* intarna*" if ($enrich);
     system "rm *IntaRNA1_ui* *top_targets*" if ($websrv);
