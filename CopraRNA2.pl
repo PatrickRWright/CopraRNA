@@ -189,7 +189,6 @@ GetOptions ( ## edit 2.0.4
 # TODO:
 
 # - core genome dump (ask bjoern)
-# - stop space removal in functional enrichment
 # - do manual testing
 # - check print archive README for new output
 # - check cds option
@@ -359,7 +358,7 @@ if ($enrich) { ## edit 2.0.5.1
     system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
     system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
-    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/\\s//g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.3.1
+    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.6 // no longer removing all spaces
     system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
 }
 
