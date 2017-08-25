@@ -125,7 +125,9 @@ for (i in 1:length(files_opt)) {
     mu <- gevenergies$par.ests[3] # read mu
     # get pvalues
     opt_pvals <- 1-(pgev(energy_opt, xi, mu, sigma))
+    opt_pvals <- round(opt_pvals, digits=7)
     subopt_pvals <- 1-(pgev(energy_subopt, xi, mu, sigma))
+    subopt_pvals <- round(subopt_pvals, digits=7)
     # add pvals to data frame
     data_opt <- cbind(data_opt, opt_pvals)
     data_subopt <- cbind(data_subopt, subopt_pvals)
