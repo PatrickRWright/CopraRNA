@@ -9,7 +9,7 @@ my $clusterCounter = 1;
 my $header = "Category\tTerm\tCount\t%\tPvalue\tGenes\tList Total\tPop Hits\tPop Total\tFold Enrichment\tBonferroni\tBenjamini\tFDR\n";
 my $firstSwtich = 1;
 
-open(MYDATA, $pythonEnrichment) or die("Error: cannot open file $pythonEnrichment\n");
+open(MYDATA, $pythonEnrichment) or die("\nError: cannot open file $pythonEnrichment at make_enrichment_table_from_py_output.pl\n\n");
     my @pythonEnrichmentLine = ();
     @pythonEnrichmentLine = <MYDATA>;
 close MYDATA;
