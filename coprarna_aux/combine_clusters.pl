@@ -67,10 +67,10 @@ system $PATH_COPRA_SUBSCRIPTS . "read_fneighfile.pl compatible.treefile compatib
 
 # combination with missing p-value sampling and empiric rho estimation
 # CopraRNA1 table combination with p-value sampling
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered_rcsize 0" if ($cop1); ## edit 2.0.6 // added prep 0/1 parameter
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered_rcsize" if ($cop1);
 
 # prepare input for CopraRNA 2 combination
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna1.R --args opt_tags.clustered 1"; ## edit 2.0.6 // prepare lines for CopraRNA 2 combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prep_cop2.R --args opt_tags.clustered"; ## edit 2.0.6 // prepare lines for CopraRNA 2 combination
 
 # sort the final raw output
 # with pvalue sampling

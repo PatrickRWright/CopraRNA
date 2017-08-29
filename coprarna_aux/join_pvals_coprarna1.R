@@ -2,7 +2,6 @@
 
 args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
 inputFile <- args[1] ## edit 2.0.5.1
-prep_for_cop2 <- args[2] ## edit 2.0.6
 
 ####################### retrieve cov matrix from max clusters
 
@@ -106,7 +105,6 @@ compute_rho <- function(interval, data, weightdata, means, covmatrix) {  # left:
         final.out_lines_temp <- c()
         # for every cluster
         for (i in unique(data$clusternumber)) { ## edit 2.0.0
-
             curr_cluster<-data[which(data$clusternumber==i),]
             curr_cluster$id2<-sub("ncrna_", "", curr_cluster$id2) ## edit 2.0.5.1 // changed to id2
             curr_cluster <- curr_cluster[order(curr_cluster$id2),] ## edit 2.0.5.1 // changed to id2
@@ -184,18 +182,10 @@ if (prelim_rho == 0) {
     prelim_rho <- 0.1
 }
 
-## edit 2.0.6 // added this part to prepare cop2 combination input lines with reduced runtime
-if (prep_for_cop2 == 1) {
-    coprarna2_prep_lines <- prelim_rho_output[[2]]
-    write.table(file="CopraRNA2_prep.csv", coprarna2_prep_lines, row.names=FALSE, col.names=FALSE, quote=FALSE)   
-}
-
 ## edit 2.0.6 // removed rhodevelopment.txt
 
-if (prep_for_cop2 == 0) {
-    final_rho_output<-compute_rho(seq((prelim_rho-0.1),(prelim_rho+0.1),by=0.01), data, weightdata, means, covmatrix)
-    final_rho <- final_rho_output[[1]]
-    final_out_lines <- final_rho_output[[2]]
-    write.table(file="CopraRNA1_with_pvsample.csv",final_out_lines, row.names=FALSE, col.names=FALSE, quote=FALSE)
-}
+final_rho_output<-compute_rho(seq((prelim_rho-0.1),(prelim_rho+0.1),by=0.01), data, weightdata, means, covmatrix)
+final_rho <- final_rho_output[[1]]
+final_out_lines <- final_rho_output[[2]]
+write.table(file="CopraRNA1_with_pvsample.csv",final_out_lines, row.names=FALSE, col.names=FALSE, quote=FALSE)
 

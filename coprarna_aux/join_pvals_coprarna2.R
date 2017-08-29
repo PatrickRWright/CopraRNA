@@ -1,4 +1,3 @@
-
 # Parameter:
 # ooi as refseq id
 # script by Jens Georg
@@ -27,7 +26,7 @@ da3<-(strsplit(as.character(da2[,i]), "\\|"))
 
 for(j in 1: length(da3)){
 if(length(da3[[j]])==0){
-da3[[j]]<-rep(0,8)
+da3[[j]]<-rep(NA,8)
 }}
 da3<-as.data.frame(da3)
 colnames(da3)<-seq(1:ncol(da3))
@@ -81,8 +80,18 @@ if(root>0){
 	weight[,2]<-weight[,2]^(1/root)
 }
 
+int_table<-c()
+for(i in 1:le){
+	int_table<-cbind(int_table,as.numeric(dat[[i+1]][,4]))
+	
+}
+colnames(int_table)<-colnames(da2)
+
 out_rho<-as.matrix(da[,3:(ncol(da)-1)])
 out_rho_ooi<-as.matrix(da[,3:(ncol(da)-1)])
+
+out_rho_evo<-as.matrix(da[,3:(ncol(da)-1)])
+out_rho_evo[,1:(ncol(out_rho_evo)-2)]<-NA
 
 rho<-c()
 rho.names<-c()
@@ -127,7 +136,7 @@ for(i in 1:ro){
 	names(w)<-na
 	p<-sort(p)
 	
-	w<-w[match(names(w),names(p))]
+	w<-w[match(names(p),names(w))]
 
 	pv4temp<-c()
 	pv3temp<-c()
@@ -170,6 +179,9 @@ for(i in 1:ro){
 			
 			rho.names<-c(rho.names,tempname)
 		}
+		
+		
+		
 		p3<-z.transform.rho(p[1:(2+j)], w[1:(2+j)],rhotemp)
 		
 		pv3temp<-c(pv3temp,p3)
@@ -179,6 +191,14 @@ for(i in 1:ro){
 			pv4temp[length(pv4temp)]<-1
 			
 		}
+	}
+	
+	for(jj in 1:length(pv3temp)){
+		natemp<-match(names(p)[1:(2+jj)], colnames(out_rho_evo))
+		if(jj>3){
+			natemp<-natemp[length(natemp)]
+		}
+		out_rho_evo[i,natemp]<-pv3temp[jj]
 	}
 	
 	pv3pos<-names(p[1:(tail(which(pv3temp==min(pv3temp)),n=1)+minorg-1)])
@@ -219,3 +239,5 @@ out_rho_ooi<-out_rho_ooi[order(as.numeric(out_rho_ooi[,2])),]
 
 write.table(out_rho, file="CopraRNA2_final_all_evo.csv",sep=",", quote=F, row.names=F) ## edit prw changed file
 write.table(out_rho_ooi, file="CopraRNA2_final_all_ooi.csv",sep=",", quote=F, row.names=F) ## edit prw changed file
+#write.table(out_rho_evo, file="CopraRNA2_final_all_evo_table.csv",sep=",", quote=F, row.names=F) 
+#write.table(int_table, file="CopraRNA2_final_all_evo_intaRNA_p-value_table.csv",sep=",", quote=F, row.names=F) 

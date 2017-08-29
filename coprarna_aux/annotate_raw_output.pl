@@ -3,9 +3,14 @@
 use strict;
 use warnings;
 
+# replaces get_genname_genid_note_from_gbk_opt.pl
+# and now works with tags.clustered files as
+# input to annotate IntaRNA result parts
+
 use Bio::SeqIO;
 
 my $finallist = $ARGV[0];
+my $tags_clusterd = $ARGV[1]; ## edit 2.0.6
 my %ltaggennamehash = ();
 my $ltag = "";
 my @gbklines = ();
@@ -20,7 +25,7 @@ my $argofinterestswitch = 1;
 
 print "p-value,";
 
-for(my $i=1;$i<=(scalar(@ARGV)-1);$i++) {
+for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) { ## edit 2.0.6
         $columncount++;
         my @splitarg = split(/,/, $ARGV[$i]);
         if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb/) { ## edit 2.0.2
@@ -94,34 +99,30 @@ print "Annotation";
 
 print "\n";
 
-open(MYDATA, $finallist) or die("Error: cannot open file " . $finallist . "\n");
+open(MYDATA, $finallist) or die("\nError: cannot open file " . $finallist . " at annotate_raw_output.pl\n\n");
     my @finallistlines = <MYDATA>;
 close MYDATA;
 
-
-my @files = ();
-@files = <*_opt.intarna.csv>; ## edit 2.0.5.1
 my %pvalenergyhash = ();
 my $pvalenergy = '';
 
-foreach (@files) {
-    open (DATA, $_) or die ("\nError: cannot open file" . $_ . "at get_genname_genid_note_from_gbk_opt.pl\n\n");
-        my @datalines = <DATA>;
-    close DATA;
-    foreach my $line (@datalines) {
-        my @splitarg = split(/;/, $line);
-        foreach(@splitarg) { chomp $_; }
-        $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-1] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11]; ## edit 2.0.5.1 // changed indices to accomodate for IntaRNA 2 output
-        chomp $pvalenergy;
-        $pvalenergyhash{lc($splitarg[0])} = $pvalenergy;
-    }
+open (DATA, $tags_clusterd) or die ("\nError: cannot open file " . $tags_clusterd . " at annotate_raw_output.pl\n\n");
+    my @datalines = <DATA>;
+close DATA;
+
+foreach my $line (@datalines) {
+    my @splitarg = split(/;/, $line);
+    foreach(@splitarg) { chomp $_; }
+    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-2] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11]; ## edit 2.0.6 // changed indices to accomodate for tags.clustered file
+    chomp $pvalenergy;
+    $pvalenergyhash{lc($splitarg[0])} = $pvalenergy;
 }
 
 my %annotationhash = (); #locustags -> annotation
 
-my @splitScndArgv = split(/,/,$ARGV[1]);
+my @splitThirdArgv = split(/,/,$ARGV[2]); ## edit 2.0.6
 
-foreach (@splitScndArgv) {
+foreach (@splitThirdArgv) {
     my $in  = Bio::SeqIO->new(-file => $_ , '-format' => 'genbank');
     while ( my $seq = $in->next_seq() ) {
         foreach my $sf ( $seq->get_SeqFeatures() ) {
@@ -217,7 +218,7 @@ foreach (@finallistlines) {
 $nscount++;
 }
 # print annotation
-for(my $i=$commacount; $i < scalar(@ARGV); $i++) {
+for(my $i=$commacount; $i < (scalar(@ARGV)-1); $i++) { ## edit 2.0.6
         print ",";
 }
 

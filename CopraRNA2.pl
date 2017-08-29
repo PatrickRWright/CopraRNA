@@ -337,7 +337,7 @@ if ($verbose) {
     chomp $ooi_rid;
     my $full_ooi = `grep '$ooi_rid' "$PATH_COPRA/coprarna_aux/CopraRNA_available_organisms.txt"`;
     chomp $full_ooi;
-    print "Organism of interest: $full_ooi \n";
+    print "\nOrganism of interest: $full_ooi\n\n";
 }
 
 # run homology_intaRNA.pl 

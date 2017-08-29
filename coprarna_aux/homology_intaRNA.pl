@@ -300,8 +300,8 @@ print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
 system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
 
 # make annotations
-system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA1_with_pvsample_sorted.csv $GenBankFiles > CopraRNA1_anno.csv" if ($cop1); ## edit 2.0.6
-system $PATH_COPRA_SUBSCRIPTS . "get_genname_genid_note_from_gbk_opt.pl CopraRNA2_prep_sorted.csv $GenBankFiles > CopraRNA2_prep_anno.csv"; ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA1_with_pvsample_sorted.csv opt_tags.clustered_rcsize $GenBankFiles > CopraRNA1_anno.csv" if ($cop1); ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv"; ## edit 2.0.6
 
 # get additional homologs in cluster.tab
 system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv" if ($cop1); ## edit 2.0.6
