@@ -9,9 +9,9 @@ use strict;
 my $treefile = $ARGV[0];
 my $fneighfile = $ARGV[1];
 
-open(MYDATA, $treefile) or die("Error: cannot open file $treefile'\n");
-my @treefilelines = ();
-@treefilelines = <MYDATA>;
+open(MYDATA, $treefile) or die("\nError: cannot open file $treefile at compute_weights.pl\n\n");
+    my @treefilelines = ();
+    @treefilelines = <MYDATA>;
 close MYDATA;
 
 
@@ -29,8 +29,8 @@ foreach(@treefilelines) {
     }
 }
 
-open(MYDATA, $fneighfile) or die("Error: cannot open file $fneighfile'\n");
-my @fneighfilelines = ();
+open(MYDATA, $fneighfile) or die("\nError: cannot open file $fneighfile at compute_weights.pl\n\n");
+    my @fneighfilelines = ();
     @fneighfilelines = <MYDATA>;
 close MYDATA;
 
@@ -57,6 +57,7 @@ foreach(@fneighfilelines) {
     }
     if($switch) {
         if($_ =~ m/\d/) {
+            $_ =~ s/-//g; ## edit 2.0.6 // remove negative branch lengths
             push @lastlines, $_;
         }
     }

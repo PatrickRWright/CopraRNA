@@ -61,7 +61,7 @@ for my $key (keys %ID_to_ID_hash) {
 # end fix IDs issue end ## edit 2.0.3.2
 
 # calculate full organism set weights
-system $PATH_COPRA_SUBSCRIPTS . "read_fneighfile.pl compatible.treefile compatible.fneighbor > zscore.weight"; ## edit 2.0.4 // changed read_fneighfile.pl for UPGMA tree
+system $PATH_COPRA_SUBSCRIPTS . "compute_weights.pl compatible.treefile compatible.fneighbor > zscore.weight"; ## edit 2.0.6 // renamed to compute_weights.pl
 
 ## calculate combined pvalues
 
