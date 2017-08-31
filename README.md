@@ -48,7 +48,7 @@ The following topics are covered by this documentation:
 - GNU coreutils 8.25                                                   // conda install coreutils 
 - IntaRNA 2.0.4                                                        // conda install intarna
 - EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
-- embassy-phylip 3.69.650 - fneighbor (creates from distance matrix)   // conda install embassy-phylip
+- embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
 - ncbiblast-2.2.22                                                     // conda install blast-legacy
 - DomClust 1.2.8a                                                      // conda install domclust
 - MAFFT 7.310                                                          // conda install mafft
