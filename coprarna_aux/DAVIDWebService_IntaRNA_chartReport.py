@@ -2,6 +2,7 @@
 
 import sys
 IntaRNA_result = sys.argv[1]
+enrich_count = int(sys.argv[2])
 #print IntaRNA_result
 
 with open(IntaRNA_result) as file:
@@ -22,7 +23,7 @@ backgroundList = map(str,backgroundList)
 
 print "background:" + str(len(backgroundList))
 
-inputList = backgroundList[0:100]
+inputList = backgroundList[0:enrich_count]
 print "input:" + str(len(inputList))
 
 inputIds = ",".join(inputList)

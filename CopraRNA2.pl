@@ -98,6 +98,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added -nooi option
 #            added gawk, sed, grep and tr as dependencies
 #            added extended regions plots
+#            aux enrichment now also done for count specified by $enrich
 #
 # v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
@@ -357,7 +358,7 @@ if ($enrich) { ## edit 2.0.5.1
     print "Performing auxiliary enrichment\n" if ($verbose);
     system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
-    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv > IntaRNA_chartReport.txt"; ## edit 2.0.3.1
+    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## edit 2.0.6 // aux einrich for same amout as regular enrichment
     system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.6 // no longer removing all spaces
     system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
 }
