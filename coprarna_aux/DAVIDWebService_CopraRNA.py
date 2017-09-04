@@ -88,12 +88,12 @@ print client.service.getDefaultCategoryNames()
 #print client.service.getChartReport(thd, count)
 
 #getTermClusterReport
-## edit 2.0.3.2 chaning parameters to medium
+## edit 2.0.6 changing parameters to high
 overlap = 3
-initialSeed = 3 #2
-finalSeed = 3 #2
+initialSeed = 2
+finalSeed = 2
 linkage = 0.5
-kappa = 50 #85
+kappa = 85
 print client.service.getTermClusterReport(overlap, initialSeed, finalSeed, linkage, kappa)
 
 
