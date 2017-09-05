@@ -96,7 +96,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            -cop2 option is now -cop1 since CopraRNA2 will be standard
 #            removed -pvcut option
 #            added -nooi option
-#            added gawk, sed, grep and tr as dependencies
+#            added gawk, sed, grep, tr, sort as dependencies
 #            added extended regions plots
 #            aux enrichment now also done for count specified by $enrich
 #
@@ -361,6 +361,17 @@ if ($enrich) { ## edit 2.0.5.1
     system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## edit 2.0.6 // aux einrich for same amout as regular enrichment
     system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.6 // no longer removing all spaces
     system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
+    ## edit 2.0.6 new aux table
+    system "echo 'locus_tag;start_tar;stop_tar;start_query;stop_query;energy;p-value;gene_name;gene_id;annotation' > aux_table.csv";
+    system "awk -F';' '{ print \$1\",\"\$9\",\"\$10\",\"\$11\",\"\$12\",\"\$15\",\"\$36\",\"\$37\",\"\$38\",\"\$39 }' intarna_websrv_table_ncbi.csv > intarna_websrv_table_ncbi_awk.csv";
+    my $aux_gids = `grep -oP ';\\d+\\(' org_of_interest_aux_enrichment.txt | sed 's/[;(]//g' | sort -u | tr '\n' ';'`;
+    chop $aux_gids; # remove trailing ';' 
+    my @split_aux_gids = split(/;/, $aux_gids);
+    print scalar(@split_aux_gids) . "\n";
+    foreach(@split_aux_gids) {
+        system "grep -P ';$_;' intarna_websrv_table_ncbi_awk.csv >> aux_table.csv";
+    }
+    #system "cat CopraRNA_result.csv aux_lines.csv > CopraRNA_result_with_aux.csv";
 }
 
 # output warnings
