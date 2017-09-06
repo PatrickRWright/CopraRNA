@@ -9,8 +9,6 @@ enrichment_count = int(sys.argv[2]) ## edit 2.0.5.1
 with open(CopraRNA_result) as file:
     CopraRNA_lines = file.readlines()
 
-#print CopraRNA_lines[1]
-
 backgroundList = []
 # go through CopraRNA output line by line and extract Entrez Gene Ids
 for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
