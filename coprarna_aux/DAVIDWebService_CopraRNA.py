@@ -67,7 +67,7 @@ print client
 #authenticate user email 
 print client.service.authenticate('patrickrw@gmx.net')
 
-# add top 100 predicted
+# add enrichment_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'
 listName = 'make_up'
 listType = 0

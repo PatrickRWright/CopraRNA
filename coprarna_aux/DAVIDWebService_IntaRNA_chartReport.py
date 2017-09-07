@@ -38,7 +38,6 @@ sys.path.append('../')
 import logging
 import traceback as tb
 import suds.metrics as metrics
-#from tests import *
 from suds import *
 from suds.client import Client
 from datetime import datetime
@@ -64,20 +63,14 @@ print client
 #authenticate user email 
 print client.service.authenticate('patrickrw@gmx.net')
 
-# add top 100 predicted
+# add enrich_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'
 listName = 'make_up'
 listType = 0
 print client.service.addList(inputIds, idType, listName, listType)
 
-# add background
-#listNameBack = 'back'
-#listTypeBack = 1
-#print client.service.addList(backgroundIds, idType, listNameBack, listTypeBack)
-
 print client.service.getDefaultCategoryNames()
 
-#getTermClusterReport
 thd = 1
 ct = 1
 print client.service.getChartReport(thd,ct)
