@@ -1,5 +1,4 @@
-## last updated: \c
-Tue Sep 12 11:52:35 CEST 2017
+## last updated: Tue Sep 12 12:12:36 CEST 2017
 ## please contact us if you know your 
 ## organism is part of the RefSeq database 
 ## and has an ID in the RefSeq format but 
