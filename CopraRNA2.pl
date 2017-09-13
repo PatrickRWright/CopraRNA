@@ -189,6 +189,7 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
+# - ask martin about the IntaRNA2 issue
 # - core genome dump (ask bjoern)
 # - do manual testing
 # - check print archive README for new output
@@ -367,9 +368,8 @@ if ($enrich) { ## edit 2.0.5.1
     my $aux_gids = `grep -oP ';\\d+\\(' org_of_interest_aux_enrichment.txt | sed 's/[;(]//g' | sort -u | tr '\n' ';'`;
     chop $aux_gids; # remove trailing ';' 
     my @split_aux_gids = split(/;/, $aux_gids);
-    print scalar(@split_aux_gids) . "\n";
     foreach(@split_aux_gids) {
-        system "grep -P ';$_;' intarna_websrv_table_ncbi_awk.csv >> aux_table.csv";
+        system "grep -P ',$_,' intarna_websrv_table_ncbi_awk.csv >> aux_table.csv";
     }
     #system "cat CopraRNA_result.csv aux_lines.csv > CopraRNA_result_with_aux.csv";
 }
@@ -461,6 +461,7 @@ unless ($noclean) {
         system "mv enriched_heatmap_big* Enrichment";
         system "mv termClusterReport.txt Enrichment";
         system "mv org_of_interest_aux_enrichment.txt Enrichment";
+        system "mv aux_table.csv Enrichment";
     }
 }
 
