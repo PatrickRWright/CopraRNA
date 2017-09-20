@@ -74,6 +74,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 # R statistics 3.2.2                                                   // conda install r-base==3.2.2
 # seqinr 3.1_3                                                         // conda install r-seqinr 
+# robustrankaggreg 1.1                                                 // conda install r-robustrankaggreg
 
 ### python 2.7.13                                                      // conda install python==2.7.13
 
