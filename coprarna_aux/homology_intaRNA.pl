@@ -335,15 +335,15 @@ system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args
 # truncate final output // ## edit 2.0.5.1
 system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); ## edit 2.0.6
 system "head -n $topcount CopraRNA2_final_all_ooi.csv > CopraRNA2_final_ooi.csv"; ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_evo.csv > CopraRNA2_final_evo.csv"; ## edit 2.0.6
+system "head -n $topcount CopraRNA2_final_all_balanced.csv > CopraRNA2_final_balanced.csv"; ## edit 2.0.6
 
 # figure out which result is the primary result ## edit 2.0.6
 if ($cop1) { # CopraRNA 1 is the primary requested result
     system "cp CopraRNA1_final.csv CopraRNA_result.csv";    
     system "cp CopraRNA1_final_all.csv CopraRNA_result_all.csv";    
-} elsif ($nooi) { # CopraRNA 2 with evo mode is the requested result
-    system "cp  CopraRNA2_final_evo.csv CopraRNA_result.csv";
-    system "cp  CopraRNA2_final_all_evo.csv CopraRNA_result_all.csv";
+} elsif ($nooi) { # CopraRNA 2 with balanced mode is the requested result
+    system "cp  CopraRNA2_final_balanced.csv CopraRNA_result.csv";
+    system "cp  CopraRNA2_final_all_balanced.csv CopraRNA_result_all.csv";
 } else { # CopraRNA 2 with org of interest focus is requested (standard)
     system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";

@@ -2,14 +2,17 @@
 # ooi as refseq id
 # script by Jens Georg
 
-# R --slave -f ./join_pvals_coprarna2.R --args NC_000913 
+# R --slave -f ../join_pvals_coprarna2.R --args NC_000913 
 
 args <- commandArgs(trailingOnly = TRUE) 
 ooi <- args[1] 
 
+
 da<-read.csv("CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv") ## edit prw changed file name 
 options <- read.table("CopraRNA_option_file.txt", sep=":") 
 root<-as.numeric(as.character(options[14,2]))
+
+all_dat<-read.csv("opt_tags.clustered", sep=";", header=T)
 
 en<-grep("Annotation", colnames(da))
 da2<-da[,3:(en-1)]
@@ -80,18 +83,20 @@ if(root>0){
 	weight[,2]<-weight[,2]^(1/root)
 }
 
-int_table<-c()
-for(i in 1:le){
-	int_table<-cbind(int_table,as.numeric(dat[[i+1]][,4]))
+ int_table<-c()
+ for(i in 1:le){
+	 int_table<-cbind(int_table,as.numeric(dat[[i+1]][,4]))
 	
-}
-colnames(int_table)<-colnames(da2)
+ }
+ colnames(int_table)<-colnames(da2)
 
 out_rho<-as.matrix(da[,3:(ncol(da)-1)])
 out_rho_ooi<-as.matrix(da[,3:(ncol(da)-1)])
 
-out_rho_evo<-as.matrix(da[,3:(ncol(da)-1)])
-out_rho_evo[,1:(ncol(out_rho_evo)-2)]<-NA
+out_rho_evo<-as.matrix(da[,3:(ncol(da)-3)])
+out_rho_evo[]<-NA
+
+out_intaRNA_pvalue<-out_rho_evo
 
 rho<-c()
 rho.names<-c()
@@ -117,7 +122,7 @@ qtrans<-function(dat2){
 minorg<-max(3)
 
 for(i in 1:ro){
-        #print(i)
+        print(paste(i,"/",ro,sep=""))
 	p<-c()
 	w<-c()
 	na<-c()
@@ -129,6 +134,7 @@ for(i in 1:ro){
 			w<-c(w,weight[j,2])
 			p<-c(p, as.numeric(ptemp))
 			na<-c(na, colnames(da)[(j+2)])
+			out_intaRNA_pvalue[i,j]<-as.numeric(ptemp)
 		}
 	}
 	if(length(p)>(minorg-1)){
@@ -201,6 +207,23 @@ for(i in 1:ro){
 		out_rho_evo[i,natemp]<-pv3temp[jj]
 	}
 	
+	
+	for(jj in 1:ncol(out_rho_evo)){
+		natemp<-match(colnames(out_rho_evo)[jj], names(p))
+		if(is.na(natemp)==F){
+		if(natemp<=3){
+			p_temp<-min(pv3temp)
+		}
+		if(natemp>3){
+			p_temp<-min(pv3temp[(natemp-2):length(pv3temp)])
+		}
+		
+		out_rho_evo[i,jj]<-p_temp
+		
+	}
+	
+	}
+	
 	pv3pos<-names(p[1:(tail(which(pv3temp==min(pv3temp)),n=1)+minorg-1)])
 	pv3pos<-match(pv3pos,colnames(out_rho))
 	out_rho[i,pv3pos]<-paste("!",as.character(out_rho[i,pv3pos]), sep="")
@@ -228,16 +251,121 @@ pv4_fdr<-p.adjust(pv4, method="BH")
 pv3<-cbind(pv3_fdr,pv3)
 pv4<-cbind(pv4_fdr,pv4)
 
+initial_sorting<-seq(1,nrow(pv3))
+
 colnames(pv3)<-c("fdr","p-value") ## edit prw changed spelling
 colnames(pv4)<-c("fdr","p-value") ## edit prw changed spelling
 
-out_rho<-cbind(pv3, out_rho)
-out_rho_ooi<-cbind(pv4, out_rho_ooi)
+out_rho<-cbind(pv3, out_rho,initial_sorting)
+out_rho_ooi<-cbind(pv4, out_rho_ooi,initial_sorting)
 
 out_rho<-out_rho[order(as.numeric(out_rho[,2])),]
 out_rho_ooi<-out_rho_ooi[order(as.numeric(out_rho_ooi[,2])),]
 
-write.table(out_rho, file="CopraRNA2_final_all_evo.csv",sep=",", quote=F, row.names=F) ## edit prw changed file
+write.table(out_rho, file="CopraRNA2_final_all_balanced.csv",sep=",", quote=F, row.names=F) ## edit prw changed file
 write.table(out_rho_ooi, file="CopraRNA2_final_all_ooi.csv",sep=",", quote=F, row.names=F) ## edit prw changed file
-#write.table(out_rho_evo, file="CopraRNA2_final_all_evo_table.csv",sep=",", quote=F, row.names=F) 
-#write.table(int_table, file="CopraRNA2_final_all_evo_intaRNA_p-value_table.csv",sep=",", quote=F, row.names=F) 
+
+out_rho_evo<-as.matrix(out_rho_evo)
+out_evo_rank<-out_rho_evo
+top<-c()
+rank_thres<-200
+
+anno<-da
+
+ for(i in 1:ncol(out_evo_rank)){
+	 out_evo_rank[,i]<-rank(as.numeric(out_rho_evo[,i]), na.last="keep" ,ties.method="first")
+	 temp<-which(as.numeric(out_evo_rank[,i])<=rank_thres)
+	 top<-c(top, temp)
+ }
+
+ top<-unique(top)
+
+initial_sorting<-initial_sorting[top]
+ evo_ooi_pvalue<-out_rho_evo[top,]
+ evo_ooi_rank<-out_evo_rank[top,]
+ evo_int_pvalue<-out_intaRNA_pvalue[top,]
+ evo_anno<-anno[top,3:ncol(anno)]
+
+
+#### rank sum ordering , NA = 200
+
+rank_list<-list()
+for(i in 1:ncol(evo_ooi_rank)){
+	temp<-evo_ooi_rank[,i]
+	names(temp)<-seq(1,nrow(evo_ooi_rank))
+	temp<-names(sort(temp,na.last=NA))
+	print(length(temp))
+	rank_list[[i]]<-temp
+
+}
+
+require(RobustRankAggreg)
+rank_list2<-aggregateRanks(rank_list,method = "RRA")
+rank_list3<-as.numeric(as.character(rank_list2[,"Name"]))
+
+initial_sorting<-initial_sorting[rank_list3]
+evo_ooi_pvalue<-evo_ooi_pvalue[rank_list3,]
+evo_ooi_rank<-evo_ooi_rank[rank_list3,]
+evo_int_pvalue<-evo_int_pvalue[rank_list3,]
+evo_anno<-evo_anno[rank_list3,]
+
+evo_ooi_pvalue_scored<-evo_ooi_pvalue
+evo_ooi_rank_scored<-evo_ooi_rank
+evo_int_pvalue_scored<-evo_int_pvalue
+
+evo_ooi_pvalue_scored[]<-0
+evo_ooi_rank_scored[]<-0
+evo_int_pvalue_scored[]<-0
+
+evo_rank_thres<-250
+int_p_thres<-0.3
+ooi_p_tres<-0.001
+
+for(i in 1:ncol(evo_ooi_pvalue)){
+	temp<-which(as.numeric(evo_ooi_pvalue[,i])<=ooi_p_tres)
+	evo_ooi_pvalue_scored[temp,i]<-1
+	
+	temp<-which(as.numeric(evo_ooi_rank[,i])<=evo_rank_thres)
+	evo_ooi_rank_scored[temp,i]<-1
+	
+	temp<-which(as.numeric(evo_int_pvalue[,i])<=int_p_thres)
+	evo_int_pvalue_scored[temp,i]<-1
+}
+
+evo_ooi_p_result<-c()
+evo_ooi_rank_result<-c()
+evo_int_p_result<-c()
+
+for(i in 1:nrow(evo_ooi_pvalue)){
+	#print(i)
+	temp<-sum(as.numeric(evo_ooi_pvalue_scored[i,]))
+	temp<-temp/ncol(evo_ooi_pvalue_scored)
+	evo_ooi_p_result<-c(evo_ooi_p_result, temp)
+	
+	temp<-sum(as.numeric(evo_ooi_rank_scored[i,]))
+	temp<-temp/ncol(evo_ooi_rank_scored)
+	evo_ooi_rank_result<-c(evo_ooi_rank_result, temp)
+	
+	temp<-sum(as.numeric(evo_int_pvalue_scored[i,]))
+	temp<-temp/ncol(evo_int_pvalue_scored)
+	evo_int_p_result<-c(evo_int_p_result, temp)	
+}
+rho_out<-list(rho.names,rho)
+
+save(rho_out, file="rho_out.Rdata")
+
+Rank_p_value<-rank_list2
+Rank_p_value<-Rank_p_value[,2]
+evo_analysis<-cbind(Rank_p_value,evo_ooi_rank_result,evo_ooi_p_result,evo_int_p_result,evo_anno,evo_ooi_rank,evo_ooi_pvalue,evo_int_pvalue,initial_sorting)
+write.table(evo_analysis, file="CopraRNA2_final_all_evo.csv", sep="\t", row.names=F)
+
+evo_int_pvalue<-matrix(as.numeric(evo_int_pvalue),nrow(evo_int_pvalue),ncol(evo_int_pvalue))
+evo_int_pvalue_scored<-matrix(as.numeric(evo_int_pvalue_scored),nrow(evo_int_pvalue_scored),ncol(evo_int_pvalue_scored))
+
+napos<-which(is.na(evo_int_pvalue))
+evo_int_pvalue_scored[napos]<--1
+
+colnames(evo_int_pvalue_scored)<-colnames(da2)
+write.table(evo_int_pvalue_scored, file="IntaRNA_heatmap_table", sep="\t", row.names=F)
+
+

@@ -181,7 +181,7 @@ GetOptions ( ## edit 2.0.4
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
     'noclean'		=> \$noclean, # switch to prevent cleaning of files
-    'nooi'		=> \$nooi, # switch to set prediction mode to evolutionary focus
+    'nooi'		=> \$nooi, # switch to set prediction mode to balanced mode
     'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
