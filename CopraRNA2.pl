@@ -189,7 +189,6 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - ask martin about the IntaRNA2 issue
 # - core genome dump (ask bjoern)
 # - do manual testing
 # - check print archive README for new output
