@@ -97,7 +97,7 @@ TODO
 
 <br /><br /><br /><br />
 <a name="updateava" />
-# Upadte CopraRNA available organisms
+# Update CopraRNA available organisms
 
 In the update_kegg2refseq directory you create a new run directory and change into this directory.
 Here you can execute build_kegg2refseq.pl which will download prokaryotes.txt from the
