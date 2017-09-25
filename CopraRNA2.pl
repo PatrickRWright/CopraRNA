@@ -244,7 +244,7 @@ print "\nCopraRNA 2.0.6\n\n",
 "2. Wright PR et al., CopraRNA and IntaRNA: predicting small RNA targets, networks and interaction domains\n   Nucleic Acids Research, 2014, 42 (W1), W119-W123\n",
 "\n";
 
-exit(-1);
+exit(0);
 
 }
 
