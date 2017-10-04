@@ -14,7 +14,7 @@ if (! $skip_sort) {
 		$1<=$2 {print}
 		$1>$2 {print $2,$1,$3,$4,$5,$6,$9,$10,$7,$8,$11,$12}' | } .
 	## sort by name pair followed by E-value
-	"sort -k 1,2 -k 11,11g | ";
+	"sort -T . -k 1,2 -k 11,11g | "; ## edit 2.0.6 // added -T to prevent tmp space limitation
 }
 
 open(IN, $infile) || die;
