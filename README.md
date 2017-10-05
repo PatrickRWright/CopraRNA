@@ -66,6 +66,7 @@ The following topics are covered by this documentation:
 
     - seqinr 3.1\_3                                                       // conda install r-seqinr 
     - robustrankaggreg 1.1                                                // conda install r-robustrankaggreg
+    - pheatmap 1.0.8                                                      // conda install r-pheatmap
 
 - python 2.7.13                                                        // conda install python==2.7.13
 
