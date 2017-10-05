@@ -100,6 +100,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added gawk, sed, grep, tr, sort as dependencies
 #            added extended regions plots
 #            aux enrichment now also done for count specified by $enrich
+#            adding consensus prediction
 #
 # v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
@@ -190,8 +191,10 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
+# - suggest using at least an 8GB RAM machine
+# - remove "!" removal from final ooi/balanced file
 # - core genome dump (ask bjoern)
-# - do manual testing
+# - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
 # - check print archive README for new output
 # - check cds option
 
