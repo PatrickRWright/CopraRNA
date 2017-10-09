@@ -193,7 +193,6 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - suggest using at least an 8GB RAM machine
 # - remove "!" removal from final ooi/balanced file
 # - core genome dump (ask bjoern)
 # - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
