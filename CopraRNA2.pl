@@ -35,6 +35,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
  #    Rolf Backofen
  #    Steffen C. Lott
  #    Andreas S. Richter 
+ #    Florian Eggenhofer
  #    Robert Kleinkauf
  #    Dragos A. Sorescu
  #    Wolfgang R. Hess
@@ -210,13 +211,14 @@ print "\nCopraRNA 2.0.6\n\n",
 "database (i.e. it should have exactly this NZ_* or this NC_XXXXXX format where * stands\n",
 "for any character and X stands for a digit between 0 and 9). Depending on sequence length\n",
 "(target and sRNA), amount of input organisms and genome sizes, CopraRNA can take up to 24h\n",
-"or longer to compute. In most cases it is significantly faster. The central result table\n",
-"is CopraRNA_result.csv. Further explanations concerning the files in the run directory\n", 
-"can be found in README.txt.\n\n",
-
-"CopraRNA produces a lot of file I/O.\n", 
-"It is suggested to run CopraRNA in a dedicated\n",
+"or longer to compute. In most cases it is significantly faster. It is suggested to run CopraRNA\n", 
+"on a machine with at least 8 GB of memory.\n\n",
+ 
+"CopraRNA produces a lot of file I/O. It is suggested to run CopraRNA in a dedicated\n",
 "empty directory to avoid unexpected behavior.\n\n",
+
+"The central result table is CopraRNA_result.csv. Further explanations concerning the files\n",
+"in the run directory can be found in README.txt.\n\n",
 
 "The following options are available:\n\n",
 " --help                    this help\n\n",
