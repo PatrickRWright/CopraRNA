@@ -1,7 +1,8 @@
 
-#R --slave -f  final_copraRNA2_heatmap.r --args inputfile=CopraRNA2_final_all_ooi.csv num=25 consensus=overall select=FALSE clustering=sRNA sel=genelist.txt coprarna_reference_file=copra_refseq_positivelist.txt int_p_thres=0.3 prefix=sRNA
+#R --slave -f  final_copraRNA2_heatmap.r --args inputfile=CopraRNA2_final_all_ooi.csv num=25 consensus=overall select=FALSE clustering=sRNA sel=genelist.txt coprarna_reference_file=CopraRNA_available_organisms.txt int_p_thres=0.3 prefix=sRNA
 
-
+# R --slave -f  final_copraRNA2_heatmap.R --args consensus=overall
+# R --slave -f  final_copraRNA2_heatmap.R --args consensus=ooi
 
 #Arguments
 # clustering: ordering of columns. "default" by kmeans clustering based on the heatmap table, "ribosomal" by 16S rRNA tree and "sRNA" by sRNA tree. 
@@ -13,16 +14,21 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 
-sel="genelist.txt"
-inputfile="CopraRNA2_final_all_ooi.csv"
+# get consensus mode
+options <- read.table("CopraRNA_option_file.txt", sep=":")
+cons <- as.numeric(as.character(options$V2[17]))
+
+sel="genelist.txt" # case sensitve list of locus tags
+inputfile="CopraRNA_result_all.csv"
 num=25
-consensus="overall"
-select=FALSE
-clustering="sRNA"
-coprarna_reference_file="copra_refseq_positivelist.txt"
-int_p_thres=0.3
+consensus="overall" # alternative: "ooi"
+select=FALSE 
+clustering="sRNA" # alternative: "ribosomal", "default"
+coprarna_reference_file="CopraRNA_available_organisms.txt"
+int_p_thres=0.3 # intarna pvalues greater than this are considered as not interacting
 prefix="sRNA"
 
+if (length(args)>0) {
  for(i in 1:length(args)){
 	temp<-strsplit(args[i],"=")
 	temp<-temp[[1]]
@@ -30,7 +36,11 @@ prefix="sRNA"
 	temp2<-temp[2]
 	assign(as.character(temp1),temp2)
  }
+}
 
+if (cons == 1) {
+    consensus="ooi"
+}
 
 num<-as.numeric(num)
 select<-as.logical(select)
@@ -39,7 +49,7 @@ int_p_thres<-as.numeric(int_p_thres)
 
 
 
-selected_heatmap<-function(int_p_thres=0.3, sel="genelist.txt", select=T, clustering="ribosomal", consensus="overall", inputfile="CopraRNA2_final_all_ooi.csv", num=25,coprarna_reference_file="copra_refseq_positivelist.txt", prefix="sRNA"){
+selected_heatmap<-function(int_p_thres=0.3, sel="genelist.txt", select=T, clustering="ribosomal", consensus="overall", inputfile="CopraRNA2_final_all_ooi.csv", num=25,coprarna_reference_file="CopraRNA_available_organisms.txt", prefix="sRNA"){
 clus=TRUE
 evo_analysis<-read.csv(inputfile,sep=",", header=T) 
 selection<-evo_analysis[1:num,"initial_sorting"]

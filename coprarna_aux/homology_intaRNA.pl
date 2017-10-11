@@ -341,7 +341,6 @@ system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; ##
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args $ooi_refseq_id"; ## edit 2.0.6
 # perform actual CopraRNA 2 p-value combination
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus"; ## edit 2.0.6
-system "rm CopraRNA_available_organisms.txt"; ## edit 2.0.6
 
 # truncate final output // ## edit 2.0.5.1
 system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); ## edit 2.0.6
@@ -371,6 +370,11 @@ if ($cop1) { # CopraRNA 1 is the primary requested result
     system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";
 }
+
+# plot CopraRNA 2 evo heatmap
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "evo_heatmap.R"; ## edit 2.0.6
+
+system "rm CopraRNA_available_organisms.txt"; ## edit 2.0.6
 
 # check for run fail CopraRNA
 open(MYDATA, "CopraRNA_result.csv") or die("\nError: cannot open file CopraRNA_result.csv at homology_intaRNA.pl\n\n");
