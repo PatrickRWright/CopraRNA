@@ -5,6 +5,13 @@
 # sRNA : only the interaction regions in the mRNA are considered (default). If sRNA is an argument also the interaction regions in the sRNA are considered
 # script by Jens Georg
 
+# call no consensus
+# R --slave -f ../fast_pvalue5.r --args NC_000913
+# consensus using interaction site in organism of interest
+# R --slave -f ../fast_pvalue5.r --args NC_000913 ooi_consensus
+# consensus using overall consensus
+# R --slave -f ../fast_pvalue5.r --args NC_000913 overall_consensus
+# to predict with both consensus modes
 # R --slave -f ../fast_pvalue5.r --args NC_000913 ooi_consensus overall_consensus
 
 ooi_consensus<-FALSE
@@ -303,7 +310,7 @@ for(i in 1:nrow(evo_ooi_pvalue)){
 Rank_p_value<-rank_list2
 Rank_p_value<-Rank_p_value[,2]
 evo_analysis<-cbind(Rank_p_value,evo_ooi_rank_result,evo_ooi_p_result,evo_int_p_result,evo_anno,evo_ooi_rank,evo_ooi_pvalue,evo_int_pvalue,initial_sorting)
-write.table(evo_analysis, file="CopraRNA2_final_all_evo_table2.csv", sep="\t", row.names=F)
+write.table(evo_analysis, file="CopraRNA2_final_all_evo.csv", sep="\t", row.names=F)
 
 evo_int_pvalue<-matrix(as.numeric(evo_int_pvalue),nrow(evo_int_pvalue),ncol(evo_int_pvalue))
 evo_int_pvalue_scored<-matrix(as.numeric(evo_int_pvalue_scored),nrow(evo_int_pvalue_scored),ncol(evo_int_pvalue_scored))

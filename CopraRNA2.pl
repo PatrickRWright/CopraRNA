@@ -61,6 +61,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
 # DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
+# clustalo 1.2.3                                                       // conda install clustalo
 
 ### Perl (5.22.0) Module(s):                                           // conda install perl
 
@@ -154,7 +155,8 @@ my $core_count = 1; # how many parallel processes are allowed
 my $winsize = 150; # IntaRNA window size
 my $maxbpdist = 100; # IntaRNA maximum base pair distance 
 my $cop1 = 0;
-my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 evo else ooi ## edit 2.0.6
+my $cons = 0; ## edit 2.0.6
+my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 balanced else ooi ## edit 2.0.6
 my $verbose = 0; ## edit 2.0.5.1
 my $noclean = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
@@ -189,10 +191,14 @@ GetOptions ( ## edit 2.0.4
     'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
+    'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons ## edit 2.0.6
 );
 
 # TODO:
 
+# - check that weberv output is built correctly
+# - make a predall directory in the clean output which then contains all type of c2 outputs
+# - make no heatmap exception for cop1 prediction mode
 # - remove "!" removal from final ooi/balanced file
 # - core genome dump (ask bjoern)
 # - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
@@ -234,6 +240,10 @@ print "\nCopraRNA 2.0.6\n\n",
 " --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",                                 ## edit 2.0.5.1
 " --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)\n",
 " --cop1                    switch for CopraRNA1 prediction (def:off)\n",  ## edit 2.0.6
+" --cons                    controls consensus prediction (def:0)\n", ## edit 2.0.6
+"                           '0' for off\n", ## edit 2.0.6
+"                           '1' for organism of interest based consensus\n", ## edit 2.0.6
+"                           '2' for overall consensus based prediction\n", ## edit 2.0.6
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
 " --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",  ## edit 2.0.5.1
@@ -270,6 +280,15 @@ if ($core_count <= 1) {
 
 # check region parameter ## edit 2.0.4
 die ("\nError: -region parameter must be one of 5utr, 3utr or cds. You set '$region'.\n\n") unless ($region eq "5utr" or $region eq "3utr" or $region eq "cds");
+
+# check cons paramter ## edit 2.0.6
+die ("\nError: -cons parameter must be one of 0, 1 or 2. You set '$cons'.\n\n") unless ($cons eq 2 or $cons eq 1 or $cons eq 0);
+
+# disallow nooi=1 and cons=1 combination
+die ("\nError: -cons 1 can not be combined with -nooi 1. Set -cons to 0 or 2.\n\n") if ( ($cons eq 1) and $nooi );
+
+# disallow consensus predictions with coprarna 1
+die ("\nError: -cons must be 0 for -cop1 prediction. You set '$cons'.\n\n") if ( ( ($cons eq 1) and $cop1 ) or ( ($cons eq 2) and $cop1 ) );
 
 # check for gaps
 system "grep '-' $sRNAs_fasta > find_gaps.txt"; ## edit 2.0.2
@@ -321,6 +340,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
+    print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
     print WRITETOOPTIONS "version:CopraRNA 2.0.6\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
