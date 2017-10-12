@@ -52,6 +52,7 @@ The following topics are covered by this documentation:
 - ncbiblast-2.2.22                                                     // conda install blast-legacy
 - DomClust 1.2.8a                                                      // conda install domclust
 - MAFFT 7.310                                                          // conda install mafft
+- clustalo 1.2.3                                                       // conda install clustalo
 
 - Perl (5.22.0) Module(s):                                             // conda install perl
 
