@@ -492,6 +492,9 @@ unless ($noclean) {
     system "mv all_predictions/CopraRNA_result_all.csv .";
     system "mv all_predictions/CopraRNA_result.csv .";
     system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
+
+    # remove weights.warning if its empty
+    system "rm weights.warning" if (-z "weights.warning");
    
 }
 
