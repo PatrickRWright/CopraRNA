@@ -442,13 +442,6 @@ unless ($noclean) {
     system "rm fasta_temp_file fasta_temp_file_out";
     system "rm conservation_table.Rdata";
 
-    # all predictions types archive
-    system "mkdir all_predictions";
-    system "mv *csv all_predictions";
-    system "mv all_predictions/CopraRNA_result_all.csv .";
-    system "mv all_predictions/CopraRNA_result.csv .";
-    system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
-
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
     if ($temp_fasta_check) {
@@ -492,5 +485,13 @@ unless ($noclean) {
         system "mv org_of_interest_aux_enrichment.txt Enrichment";
         system "mv aux_table.csv Enrichment";
     }
+
+    # all predictions types archive
+    system "mkdir all_predictions";
+    system "mv *csv all_predictions";
+    system "mv all_predictions/CopraRNA_result_all.csv .";
+    system "mv all_predictions/CopraRNA_result.csv .";
+    system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
+   
 }
 
