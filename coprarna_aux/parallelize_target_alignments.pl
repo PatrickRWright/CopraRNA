@@ -70,7 +70,7 @@ my @target_fasta_files = <target_alignments/*fa>;
 my $pm = new Parallel::ForkManager($cores);
 
 foreach(@target_fasta_files) {
-    print $_ . "\n";
+    #print $_ . "\n";
     my @split = split(/\./, $_);
     my $mafft_out = $split[0] . ".aln";
 
