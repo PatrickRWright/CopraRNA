@@ -4,17 +4,10 @@
 
 # dependency: CopraRNA_available_organisms.txt
 
-
 # R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi_fast3.r --args NC_000913
-
-#require(data.table)
 
 args <- commandArgs(trailingOnly = TRUE) 
 ooi2 <- args[1] 
-
-
-
-
 
 peakFind<-function(interaction_site_distr, thres=0.4){
 	m<-max(interaction_site_distr)
@@ -42,17 +35,12 @@ peakFind<-function(interaction_site_distr, thres=0.4){
 	peak<-c(s,e)
 	}
 
-
-	
-	
-
 peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	sorted<-sort(unique(interaction_site_distr), decreasing=T)
 	s1<-sorted[1]
 	s2<-sorted[2]
 	eq<-s2/s1
 	
-	#m<-max(interaction_site_distr)
 	th<-thres*s1
 	th2<-thres*s2
 	mea<-which(interaction_site_distr==s1)
@@ -103,9 +91,6 @@ peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	peak
 	}	
 	
-	
-	
-	
 overlap<-function(peak, start_interaction, end_interaction, thres=0.7){
 	out<-rep(FALSE,length(start_interaction))
 	if(length(peak)>0){
@@ -122,17 +107,9 @@ overlap<-function(peak, start_interaction, end_interaction, thres=0.7){
 	out
 }	
 	
-
-
-
-
-	
-
 build_anno<-function(ooi="NC_000911"){
 	
 	require(seqinr)
-	#fastutr<-read.fasta("utr_seqs.fa")
-	#fastnames<-tolower(names(fastutr))
 	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
 	system(input)
 	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
@@ -143,9 +120,6 @@ build_anno<-function(ooi="NC_000911"){
 	d2<-dir()
 	f<-grep("tags.clustered$", d2)
 	opt<-read.csv(d2[f], sep=";")
-	#dat<-read.csv("CopraRNA2_final_all_evo_table2.csv", sep="\t",header=T)
-	#dat<-dat[seq(1,num),]
-	#dat<-as.matrix(dat)
 	dat<-read.csv("CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv")
 	dat<-as.matrix(dat)
 	subopt1<-grep("_subopt.intarna.csv",d2)
@@ -158,7 +132,6 @@ build_anno<-function(ooi="NC_000911"){
 	copref<-read.delim("CopraRNA_available_organisms.txt", sep="\t", header=T,comment.char = "#")	
 	
 	e<-grep("Annotation", colnames(dat))
-		#temp<-dat[i,5:(e-1)]
 		temp_dat<-dat[,3:(e-1)]
 	nam<-c()
 	for(i in 1:ncol(temp_dat)){
@@ -179,32 +152,19 @@ build_anno<-function(ooi="NC_000911"){
 	conservation_table<-dat[,3:(e-1)]
 	colnames(conservation_table)<-colnames(dat)[3:(e-1)]
 	conservation_table[]<-NA
-	#p_table<-conservation_table
-	#p_table_sub<-p_table
 	conservation_table_sub<-conservation_table
 	conservation_table_ooi<-conservation_table
 	conservation_table_sub_ooi<-conservation_table
 	
 	for(i in 1:nrow(dat)){
 		
-		print(i)
-		
-		
+		#print(i)
 		
 		e<-grep("Annotation", colnames(dat))
-		#temp<-dat[i,5:(e-1)]
 		temp<-dat[i,3:(e-1)]
 		temp<-temp[which(temp!="")]
 		orgs<-names(temp)
 		if(length(temp)>1){
-		#tab<-matrix(,length(temp),12)
-		
-		#c("darkolivegreen1","olivedrab1","olivedrab2","olivedrab3","olivedrab4","orangered1")
-		#tabsub<-matrix(,length(temp),12)
-		#tabsub[]<-NA
-		#colnames(tabsub)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs")
-		#tab[,12]<-orgs
-		#tabsub[,12]<-orgs
 		poslist<-c()
 		query_list<-c()
 		exist<-na.omit(match(ooi,orgs))
@@ -232,13 +192,7 @@ build_anno<-function(ooi="NC_000911"){
 		}
 	
 		tabsub<-na.omit(tabsub)
-		#temp2<-na.omit(match(tolower(tab[,10]), fastnames))
-		#write.fasta(fastutr[temp2],file="test.fa" ,names=orgs)
-		#input<-paste("mafft --maxiterate 1000 --localpair --quiet"," --localpair",  " --quiet test.fa > test2.fa", sep="")
-		#system(input)
 		pos<-as.numeric(names(sort(table(poslist), decreasing=T))[1])
-		#print(pos)
-		#alignment<-read.fasta(paste(wd,"/target_alignments/",i, ".aln", sep=""))
 		alignment<-read.fasta(paste(wd,"/target_alignments/",i, ".aln", sep=""))
 		unlink("test2.fa")
 		unlink("test.fa")
@@ -248,25 +202,18 @@ build_anno<-function(ooi="NC_000911"){
 		sRNA_alignment2<-sRNA_alignment[s_names2]
 		write.fasta(sRNA_alignment2, paste(nam2[s_names2],(orgs),tab[,10],sep="_"), file.out=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA.fasta", sep=""))
 		write.fasta(alignment, paste(nam2[m_names],(orgs),tab[,10],sep="_"), file.out=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA.fasta", sep=""))
-		#file.copy(paste(wd,"/alignments/", pos, "_linsi", sep=""),paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA.fasta", sep=""))
 		tab_aligned<-tab
 		tabsub_aligned<-tabsub
 		 if(nrow(tabsub)>0){
 		 for(j in 1:nrow(tabsub)){
-		  #print(paste("align",j))
 			align_num_sRNA<-which(names(sRNA_alignment2)==tabsub[j,"orgs"])
 			align_num<-which(names(alignment)==tabsub[j,"name2"])
 			 nogaps<-which(alignment[[align_num]]!="-")
 			 nogaps2<-which(sRNA_alignment2[[align_num_sRNA]]!="-")
 			 tabsub_aligned[j,1]<-nogaps[as.numeric(tabsub[j,1])]
 			 tabsub_aligned[j,2]<-nogaps[as.numeric(tabsub[j,2])]
-			 #tabsub_aligned[j,3]<-nogaps[as.numeric(tabsub[j,3])]
-			# tabsub_aligned[j,4]<-nogaps[as.numeric(tabsub[j,4])]
 			 tabsub_aligned[j,5]<-nogaps2[as.numeric(tabsub[j,5])]
 			 tabsub_aligned[j,6]<-nogaps2[as.numeric(tabsub[j,6])]
-			 #tabsub_aligned[j,7]<-nogaps2[as.numeric(tabsub[j,7])]
-			 #tabsub_aligned[j,8]<-nogaps2[as.numeric(tabsub[j,8])]
-			 
 			 }
 			
 			a1<-which(as.numeric(tabsub[,11])<=0.001)
@@ -319,19 +266,14 @@ build_anno<-function(ooi="NC_000911"){
 		 }
 		 
 		 for(j in 1:nrow(tab)){
-		#print(paste("align2",j))
 			align_num_sRNA<-which(names(sRNA_alignment2)==tab[j,"orgs"])
 			align_num<-which(names(alignment)==tab[j,"name2"])
 			 nogaps<-which(alignment[[align_num]]!="-")
 			 nogaps2<-which(sRNA_alignment2[[align_num_sRNA]]!="-")
 			 tab_aligned[j,1]<-nogaps[as.numeric(tab[j,1])]
 			 tab_aligned[j,2]<-nogaps[as.numeric(tab[j,2])]
-			 #tab_aligned[j,3]<-nogaps[as.numeric(tab[j,3])]
-			#tab_aligned[j,4]<-nogaps[as.numeric(tab[j,4])]
 			 tab_aligned[j,5]<-nogaps2[as.numeric(tab[j,5])]
 			 tab_aligned[j,6]<-nogaps2[as.numeric(tab[j,6])]
-			 #tab_aligned[j,7]<-nogaps2[as.numeric(tab[j,7])]
-			 #tab_aligned[j,8]<-nogaps2[as.numeric(tab[j,8])]
 			 
 			}
 			
@@ -381,30 +323,6 @@ build_anno<-function(ooi="NC_000911"){
 				anno_sRNA<-c(anno_sRNA, s)
 			}
 			
-			
-			# seed<-seq(as.numeric(tab[j,3]),as.numeric(tab[j,4]))
-			# site<-seq(as.numeric(tab[j,1]),as.numeric(tab[j,2]))
-			
-			# ma<-match(seed, site)[c(1,length(seed))]
-			# ms<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", tab[j,3], "\t", tab[j,4] ,"\tseed", sep="")
-			
-			# m1<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", tab[j,1], "\t", site[ma[1]]-1 ,"\topt", sep="")
-			# m2<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", site[ma[2]]+1, "\t", tab[j,2] ,"\topt", sep="")
-			
-			
-			# seed<-seq(as.numeric(tab[j,7]),as.numeric(tab[j,8]))
-			# site<-seq(as.numeric(tab[j,5]),as.numeric(tab[j,6]))
-			# ma<-match(seed, site)[c(1,length(seed))]
-			
-			# ms_s<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", tab[j,7], "\t", tab[j,8] ,"\tseed", sep="")
-			# m_s1<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", tab[j,5], "\t", site[ma[1]]-1 ,"\topt", sep="")
-			# m_s2<-paste("Binding site\t", paste((orgs)[j],tab[j,10],sep="_"), "\t-1\t", site[ma[2]]+1, "\t", tab[j,6] ,"\topt", sep="")
-			
-			# anno_mRNA<-c(anno_mRNA, m1,m2, ms)
-			# anno_sRNA<-c(anno_sRNA, m_s1,m_s2, ms_s)
-			
-		 #}
-		 
 		 tab_aligned[,11]<-1-as.numeric(tab_aligned[,11])
 		tab<-as.matrix(tab)
 		 
@@ -414,26 +332,18 @@ build_anno<-function(ooi="NC_000911"){
 		 align_table_mRNA[]<-0
 		 align_table_sRNA[]<-0
 		 for(j in 1:nrow(tab_aligned)){
-		# print(paste("distri",j))
-			#m1<-seq(as.numeric(tab_aligned[j,1]),as.numeric(tab_aligned[j,2]))
 			align_table_mRNA[as.numeric(tab_aligned[j,1]):as.numeric(tab_aligned[j,2]),j]<-as.numeric(tab_aligned[j,11])
-			#m1<-seq(as.numeric(tab_aligned[j,5]),as.numeric(tab_aligned[j,6]))
 			align_table_sRNA[as.numeric(tab_aligned[j,5]):as.numeric(tab_aligned[j,6]),j]<-as.numeric(tab_aligned[j,11])
-			
 			
 		 }
 		 if(nrow(tabsub_aligned)>0){
 		 tabsub_aligned[,11]<-1-as.numeric(tabsub_aligned[,11])
 		tabsub<-as.matrix(tabsub)
 		 for(j in 1:nrow(tabsub_aligned)){
-		 #print(j)
 			
 			count<-nrow(tab_aligned)
-			#m1<-seq(as.numeric(tabsub_aligned[j,1]),as.numeric(tabsub_aligned[j,2]))
 			align_table_mRNA[as.numeric(tabsub_aligned[j,1]):as.numeric(tabsub_aligned[j,2]),j+count]<-as.numeric(tabsub_aligned[j,11])
-			#m1<-seq(as.numeric(tabsub_aligned[j,5]),as.numeric(tabsub_aligned[j,6]))
 			align_table_sRNA[as.numeric(tabsub_aligned[j,5]):as.numeric(tabsub_aligned[j,6]),j+count]<-as.numeric(tabsub_aligned[j,11])
-			
 			
 		 }
 		 }
@@ -466,7 +376,6 @@ build_anno<-function(ooi="NC_000911"){
 			cons_sRNA_sub2[ov]<-cons_sRNAsu2
 			cons_mRNA_sub[ov]<-cons_mRNAsu
 			res<-cbind(res,p_sub,cons_mRNA_sub,cons_sRNA_sub,cons_sRNA_sub2)
-			
 			
 		}
 		 
@@ -511,74 +420,6 @@ build_anno<-function(ooi="NC_000911"){
 		 write.table(align_anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_annotation.txt", sep=""), quote=F, row.names=F, col.names=F)
 		
 		###############
-	
-	# #cons_res<-rep(NA,nrow(res))
-	# #p_res<-rep(NA,nrow(res))
-	
-	
-	# #cons_res_sub<-rep(NA,nrow(res))
-	# #p_res_sub<-rep(NA,nrow(res))
-	# for(j in 1:nrow(res)){
-	# #print(paste("table",j))
-		# #print(j)
-		
-		# m_opt<-"FALSE"
-		# s1_opt<-"FALSE"
-		# s2_opt<-"FALSE"
-		
-		# m_opt_sub<-"FALSE"
-		# s1_opt_sub<-"FALSE"
-		# s2_opt_sub<-"FALSE"
-		# p1<-as.numeric(res[j,"pvalue"])
-		
-		
-		
-		# #if(as.numeric(res[j,"pvalue"])<=0.3){
-		# #	tem<-tem+1
-		# #}
-		
-		# if((res[j,"cons_mRNA"])=="TRUE"){
-		
-			
-			# m_opt<-"TRUE"
-		# }
-		 # if((res[j,"cons_sRNA"])=="TRUE"){
-			 # s1_opt<-"TRUE"
-		 # }
-		 # if((res[j,"cons_sRNA2"])=="TRUE"){
-			 # s2_opt<-"TRUE"
-		 # }
-		 
-		 
-		# if(is.na(res[j,"p_sub"])==F){
-		# #if(as.numeric(res[j,"p_sub"])<=0.3){
-		# #	tem2<-tem2+1
-		
-		# p2<-as.numeric(res[j,"p_sub"])
-		# #p_res_sub[j]<-p2
-		# if((res[j,"cons_mRNA_sub"])=="TRUE"){
-			# m_opt_sub<-"TRUE"
-		# }
-		# if((res[j,"cons_sRNA_sub"])=="TRUE"){
-			 # s1_opt_sub<-"TRUE"
-		 # }
-		 # if((res[j,"cons_sRNA_sub2"])=="TRUE"){
-			 # s2_opt_sub<-"TRUE"
-		 # }
-		 
-		 # sub_temp<-paste(p2,m_opt_sub ,s1_opt_sub,s2_opt_sub, sep="|")
-		 # cons_res_sub[j]<-sub_temp
-		# }
-		
-		# #p_res[j]<-p1
-		
-		# opt_temp<-paste(p1,m_opt ,s1_opt,s2_opt, sep="|")
-		
-		
-		# cons_res[j]<-opt_temp
-		
-		
-	# }
 	cons_res<-paste(res[,"pvalue"],res[,"cons_mRNA"],res[,"cons_sRNA"],res[,"cons_sRNA2"], sep="|")
 	
 	res2<-na.omit(res)
@@ -589,9 +430,6 @@ build_anno<-function(ooi="NC_000911"){
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
-	
-	#p_table[i,na.omit(match(res[,"orgs"],colnames(p_table)))]<-p_res
-	#p_table_sub[i,na.omit(match(res[,"orgs"],colnames(p_table)))]<-p_res_sub
 	
 	########################################
 	if(length(exist)>0){
@@ -633,75 +471,6 @@ build_anno<-function(ooi="NC_000911"){
 		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
 		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
 	
-	
-	# cons_res_ooi<-rep(NA,nrow(res))
-	# #p_res<-rep(NA,nrow(res))
-	
-	
-	# cons_res_sub_ooi<-rep(NA,nrow(res))
-	# #p_res_sub<-rep(NA,nrow(res))
-	# for(j in 1:nrow(res)){
-		# #print(j)
-		
-		# m_opt<-"FALSE"
-		# s1_opt<-"FALSE"
-		# s2_opt<-"FALSE"
-		
-		# m_opt_sub<-"FALSE"
-		# s1_opt_sub<-"FALSE"
-		# s2_opt_sub<-"FALSE"
-		# p1<-as.numeric(res[j,"pvalue"])
-		
-		
-		
-		# #if(as.numeric(res[j,"pvalue"])<=0.3){
-		# #	tem<-tem+1
-		# #}
-		
-		# if((res[j,"cons_mRNA"])=="TRUE"){
-		
-			
-			# m_opt<-"TRUE"
-		# }
-		 # if((res[j,"cons_sRNA"])=="TRUE"){
-			 # s1_opt<-"TRUE"
-		 # }
-		 # if((res[j,"cons_sRNA2"])=="TRUE"){
-			 # s2_opt<-"TRUE"
-		 # }
-		 
-		 
-		# if(is.na(res[j,"p_sub"])==F){
-		# #if(as.numeric(res[j,"p_sub"])<=0.3){
-		# #	tem2<-tem2+1
-		
-		# p2<-as.numeric(res[j,"p_sub"])
-		# #p_res_sub[j]<-p2
-		# if((res[j,"cons_mRNA_sub"])=="TRUE"){
-			# m_opt_sub<-"TRUE"
-		# }
-		# if((res[j,"cons_sRNA_sub"])=="TRUE"){
-			 # s1_opt_sub<-"TRUE"
-		 # }
-		 # if((res[j,"cons_sRNA_sub2"])=="TRUE"){
-			 # s2_opt_sub<-"TRUE"
-		 # }
-		 
-		 # sub_temp<-paste(p2,m_opt_sub ,s1_opt_sub,s2_opt_sub, sep="|")
-		 # cons_res_sub_ooi[j]<-sub_temp
-		# }
-		
-		# #p_res[j]<-p1
-		
-		# opt_temp<-paste(p1,m_opt ,s1_opt,s2_opt, sep="|")
-		
-		
-		# cons_res_ooi[j]<-opt_temp
-		
-		
-	# }
-	
-	
 	cons_res<-paste(res[,"pvalue"],res[,"cons_mRNA"],res[,"cons_sRNA"],res[,"cons_sRNA2"], sep="|")
 	
 	res2<-na.omit(res)
@@ -713,10 +482,6 @@ build_anno<-function(ooi="NC_000911"){
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table_ooi[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
 	
-	#write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
-	# conservation_table_ooi[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res_ooi
-	# conservation_table_sub_ooi[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res_sub_ooi
-		
 	}
 	###########################
 	}
@@ -728,27 +493,5 @@ build_anno<-function(ooi="NC_000911"){
 conservation_table<-build_anno(ooi=ooi2)
 save(conservation_table, file="conservation_table.Rdata")
 #################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

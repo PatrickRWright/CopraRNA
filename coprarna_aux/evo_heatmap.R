@@ -1,10 +1,11 @@
+# script by Jens Georg
 
-#R --slave -f  final_copraRNA2_heatmap.r --args inputfile=CopraRNA2_final_all_ooi.csv num=25 consensus=overall select=FALSE clustering=sRNA sel=genelist.txt coprarna_reference_file=CopraRNA_available_organisms.txt int_p_thres=0.3 prefix=sRNA
+# R --slave -f  final_copraRNA2_heatmap.r --args inputfile=CopraRNA2_final_all_ooi.csv num=25 consensus=overall select=FALSE clustering=sRNA sel=genelist.txt coprarna_reference_file=CopraRNA_available_organisms.txt int_p_thres=0.3 prefix=sRNA
 
 # R --slave -f  final_copraRNA2_heatmap.R --args consensus=overall
 # R --slave -f  final_copraRNA2_heatmap.R --args consensus=ooi
 
-#Arguments
+# Arguments
 # clustering: ordering of columns. "default" by kmeans clustering based on the heatmap table, "ribosomal" by 16S rRNA tree and "sRNA" by sRNA tree. 
 # consensus: "overall" or "ooi"
 # select: If TRUE the genes supplied in the file specified by the parameter "sel" (default: "genelist.txt", one gene per row, identifier locustag or genename, case sensitive) are visualized. If "FALSE" the top "num" (default: num=25) genes from the CopraRNA_2.0 result specified by the "inputfile" parameter are visualized (default: "CopraRNA2_final_all_ooi.csv")
@@ -142,7 +143,7 @@ evo_int_pvalue<-c()
 con_table<-con_table[selection,]
 con_table_sub<-con_table_sub[selection,]
 for(i in 1:nrow(con_table)){
-	print(i)
+	#print(i)
 	opt<-strsplit(con_table[i,], "\\|")
 	subopt<-strsplit(con_table_sub[i,], "\\|")
 	p_opt<-as.numeric(unlist(lapply(opt,pfun)))
@@ -155,7 +156,6 @@ for(i in 1:nrow(con_table)){
 	heat_table<-rbind(heat_table,opt)
 	
 	for(j in 1:length(p_opt)){
-	#print(j)
 		if(is.na(opt[j])==F){
 		if(opt[j] == 4 | opt[j] ==5 ){
 			p_opt[j]<-p_subopt[j]
@@ -171,10 +171,6 @@ for(i in 1:nrow(con_table)){
 
 
 ee<-grep("Annotation", colnames(evo_analysis))-1
-#e<-grep("Annotation", colnames(evo_analysis))-3
-#s<-grep("Annotation", colnames(evo_analysis))+2
-#e<-s+e-1
-#evo_int_pvalue1<-as.matrix(evo_analysis[,s:e])
 colnames(evo_int_pvalue)<-colnames(evo_analysis)[3:ee]
 copref<-read.delim(coprarna_reference_file, sep="\t", header=T,comment.char = "#")	
 nam<-c()
@@ -184,12 +180,6 @@ for(i in 1:ncol(evo_int_pvalue)){
 	
 	
 }
-
-
-#evo_int_pvalue<-evo_int_pvalue[selection,]
-
-
-
 
 nam2<-c()
 for(i in 1:length(nam)){
@@ -202,7 +192,6 @@ for(i in 1:length(nam)){
 	nam2<-c(nam2,temp)
 }
 nam2<-paste(nam2, colnames(evo_int_pvalue), sep="_")
-#colnames(evo_int_pvalue)<-nam2
 
 evo_int_pvalue_scored<-evo_int_pvalue
 evo_int_pvalue_scored[]<-0
@@ -270,7 +259,6 @@ while(len>0){
 row.names(evo_int_pvalue_scored)<-gene_anno
 row.names(evo_int_pvalue)<-gene_anno
 row.names(heat_table)<-gene_anno
-#evo_int_pvalue_log<--log10(evo_int_pvalue)
 
 if(clustering=="sRNA"){
 command<-paste("clustalo -i ", "input_sRNA.fa", " --distmat-out=distmatout1.txt --full --use-kimura --output-order=input-order --force --max-hmm-iterations=-1", sep="")
@@ -290,8 +278,6 @@ ord2<-match(ord, gsub("\\..*","",colnames(evo_int_pvalue_scored)))
 
 evo_int_pvalue_scored<-evo_int_pvalue_scored[,ord2]
 heat_table<-heat_table[,ord2]
-#nam3<-nam2[ord2]
-#clus2<-as.dendrogram(clus)
 
 clus$label<-nam2
 }
@@ -309,14 +295,10 @@ ord2<-match(ord, gsub("\\..*","",colnames(evo_int_pvalue_scored)))
 
 evo_int_pvalue_scored<-evo_int_pvalue_scored[,ord2]
 heat_table<-heat_table[,ord2]
-#nam3<-nam2[ord2]
-#clus2<-as.dendrogram(clus)
 
 clus$label<-nam2
  
-
 }
-#require(gplots)
 require(pheatmap)
 my_palette<-colorRampPalette(c("darkolivegreen1","olivedrab1","olivedrab2","olivedrab3","olivedrab4","orangered1"))(n=6)
 

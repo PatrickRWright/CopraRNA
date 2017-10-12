@@ -93,7 +93,6 @@ vari<-rep(NA,10^7)
 count<-0
 for(i in 1:nrow(int_table)){
 	temp<-order(int_table[i,], na.last=NA)
-	#print(i)
 	if(length(temp)>2){               
 		for(j in 1:(length(temp)-2)){
 			count<-count+1
@@ -127,7 +126,6 @@ spal<-c(spal,rest)
 }
 
 out2<-rep((list(rep(NA,nrow(int_table)))), spa)
-#ooilist<-rep(rep((list(rep(NA,nrow(int_table)))),spa), ncol(int_table))
 
 ooilist<-rep(list(rep((list(rep(NA,nrow(int_table)))), spa)),ncol(int_table))
 
@@ -143,7 +141,7 @@ for(i in count:(count+spal[jj]-1)){
 	temp<-na.omit(int_table[,temp1])
 	wtemp<-weight[temp1,2]
 	position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	print(i)
+	#print(i)
 	dat2<-qtrans(temp)
     a<-rowSums(t(t(dat2)*wtemp))
     b<-sum(wtemp)^2
@@ -159,17 +157,14 @@ for(i in count:(count+spal[jj]-1)){
 }
 
 for(i in 1:length(ooilist)){
-	print(i)
+	#print(i)
 	temp<-grep(paste("_",i,"_",sep=""), na[count:(count+spal[jj]-1)])
-	#print(temp)
 	if(length(temp)>0){
 		ooilist[[i]][[jj]]<-do.call(pmin, c(out[temp],list(na.rm=T)))
-		#out_ooi[,i]<-do.call(pmin, c(out[temp],list(na.rm=T)))
 	}
 }
 
 count<-count+spal[jj]
-#print(count)
 out2[[jj]]<-do.call(pmin, c(out,list(na.rm=T)))
 
 }
@@ -192,16 +187,10 @@ out_ooi<-int_table
 out_ooi[]<-NA
 
 for(i in 1:ncol(out_ooi)){
-	#print(i)
-	#temp<-grep(paste("_",i,"_",sep=""), na)
-	#out_ooi[,i]<-do.call(pmin, c(out[temp],list(na.rm=T)))
 	out_ooi[,i]<-do.call(pmin, c(ooilist[[i]],list(na.rm=T)))
 }
 
 ooi_pos<-grep(ooi, colnames(int_table))
-
-
-
 
 out_ooi_res<-out_ooi[,ooi_pos]
 out_ooi_fdr<-p.adjust(out_ooi_res, method="BH")
@@ -227,7 +216,6 @@ rank_thres<-200
 anno<-da
 
  for(i in 1:ncol(out_evo_rank)){
-# print(i)
 	 out_evo_rank[,i]<-rank(as.numeric(out_rho_evo[,i]), na.last="keep" ,ties.method="first")
 	 temp<-which(as.numeric(out_evo_rank[,i])<=rank_thres)
 	 top<-c(top, temp)
@@ -247,11 +235,10 @@ for(i in 1:ncol(evo_ooi_rank)){
 	temp<-evo_ooi_rank[,i]
 	names(temp)<-seq(1,nrow(evo_ooi_rank))
 	temp<-names(sort(temp,na.last=NA))
-	print(length(temp))
+	#print(length(temp))
 	rank_list[[i]]<-temp
 
 }
-
 
 require(RobustRankAggreg)
 rank_list2<-aggregateRanks(rank_list,method = "RRA")
@@ -292,7 +279,6 @@ evo_ooi_rank_result<-c()
 evo_int_p_result<-c()
 
 for(i in 1:nrow(evo_ooi_pvalue)){
-	#print(i)
 	temp<-sum(as.numeric(evo_ooi_pvalue_scored[i,]))
 	temp<-temp/ncol(evo_ooi_pvalue_scored)
 	evo_ooi_p_result<-c(evo_ooi_p_result, temp)
@@ -306,7 +292,6 @@ for(i in 1:nrow(evo_ooi_pvalue)){
 	evo_int_p_result<-c(evo_int_p_result, temp)	
 }
 
-
 Rank_p_value<-rank_list2
 Rank_p_value<-Rank_p_value[,2]
 evo_analysis<-cbind(Rank_p_value,evo_ooi_rank_result,evo_ooi_p_result,evo_int_p_result,evo_anno,evo_ooi_rank,evo_ooi_pvalue,evo_int_pvalue,initial_sorting)
@@ -315,14 +300,11 @@ write.table(evo_analysis, file="CopraRNA2_final_all_evo.csv", sep="\t", row.name
 evo_int_pvalue<-matrix(as.numeric(evo_int_pvalue),nrow(evo_int_pvalue),ncol(evo_int_pvalue))
 evo_int_pvalue_scored<-matrix(as.numeric(evo_int_pvalue_scored),nrow(evo_int_pvalue_scored),ncol(evo_int_pvalue_scored))
 
-
-
 ################## ooi based consensus dependent pValue combination ################
 
 if(overall_consensus==TRUE){
 
 load("conservation_table.Rdata")
-
 
 con_table<-conservation_table[[1]]
 con_table_sub<-conservation_table[[2]]
@@ -399,8 +381,7 @@ vari<-rep(NA,10^7)
 count<-0
 for(i in 1:nrow(p_table)){
 	temp<-order(p_table[i,], na.last=NA)
-	#print(i)
-	if(length(temp)>2){               ##############<----hier 2 auf 3
+	if(length(temp)>2){ 
 		for(j in 1:(length(temp)-2)){
 			count<-count+1
 			vari[count]<-paste(sort(temp[1:(j+2)]), collapse="_")
@@ -422,39 +403,6 @@ for(i in 1:length(dups)){
 posvec2<-posvec2[-dups]
 vari<-unique(vari)
 
-# out<-rep((list(rep(NA,nrow(p_table)))), length(vari))
-
-# for(i in 1:length(vari)){
-	
-	# temp1<-as.numeric(strsplit(vari[i],"_")[[1]])
-	# temp<-na.omit(int_table[,temp1])
-	# wtemp<-weight[temp1,2]
-	# position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	# print(i)
-	# dat2<-qtrans(temp)
-    # a<-rowSums(t(t(dat2)*wtemp))
-    # b<-sum(wtemp)^2
-    # d<-sum(wtemp^2)
-	# l<-length(a)
-    # k<-1/l
-	# y<-k * seq(1,l)
-    # dat3<-data.frame(y,a,d,b)
-    
-	# rhotemp<-coef(nls(y~sort(pnorm(a/sqrt((1-rho)*d+rho*b), lower.tail=F)), data=dat3, start=list(rho=0), control=list(minFactor = 1/128, tol = 1e-05, warnOnly = TRUE)))
-	
-	# temp<-na.omit(p_table[position,temp1])
-	# wtemp<-weight[temp1,2]
-	# position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	
-	# dat2<-qtrans(temp)
-    # a<-rowSums(t(t(dat2)*wtemp))
-    # b<-sum(wtemp)^2
-    # d<-sum(wtemp^2)
-	
-	# out[[i]][position]<-pnorm(a/sqrt((1-rhotemp)*d+rhotemp*b),lower.tail=F)
-
-# }
-
 ################################
 
 spa<-floor(length(vari)/mnum)
@@ -467,7 +415,6 @@ spal<-c(spal,rest)
 }
 
 out2<-rep((list(rep(NA,nrow(int_table)))), spa)
-#ooilist<-rep(rep((list(rep(NA,nrow(int_table)))),spa), ncol(int_table))
 
 ooilist<-rep((list(rep(NA,nrow(int_table)))), spa)
 
@@ -484,7 +431,7 @@ for(i in count:(count+spal[jj]-1)){
 	temp<-na.omit(int_table[,temp1])
 	wtemp<-weight[temp1,2]
 	position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	print(i)
+	#print(i)
 	dat2<-qtrans(temp)
     a<-rowSums(t(t(dat2)*wtemp))
     b<-sum(wtemp)^2
@@ -510,28 +457,18 @@ for(i in count:(count+spal[jj]-1)){
 	
 }
 
-#for(i in 1:length(ooilist)){
-	#print(i)
-	
 	temp<-grep(paste("_",ooi_pos,"_",sep=""), na[count:(count+spal[jj]-1)])
-	#print(temp)
 	if(length(temp)>0){
 	ooilist[[jj]]<-do.call(pmin, c(out[temp],list(na.rm=T)))
-	#out_ooi[,i]<-do.call(pmin, c(out[temp],list(na.rm=T)))
 	}
-#}
 
 count<-count+spal[jj]
-#print(count)
 out2[[jj]]<-do.call(pmin, c(out,list(na.rm=T)))
 
 }
 out<-out2
 
 ################################
-
-
-
 
 out_evo<-do.call(pmin, c(out,list(na.rm=T)))
 out_fdr<-p.adjust(out_evo, method="BH")
@@ -544,10 +481,6 @@ out_evo<-cbind(out_evo, initial_sorting)
 out_evo<-out_evo[order(as.numeric(out_evo[,2])),]
 
 
-
-#ooi_pos<-grep(ooi, colnames(p_table))
-#na<-paste("_",vari,"_",sep="")
-#temp<-grep(paste("_",ooi_pos,"_",sep=""), na)
 out_ooi<-do.call(pmin, c(ooilist,list(na.rm=T)))
 out_ooi_fdr<-p.adjust(out_ooi, method="BH")
 out_ooi<-cbind(out_ooi_fdr,out_ooi)
@@ -681,9 +614,6 @@ spa<-spa+1
 spal<-c(spal,rest)
 }
 
-#out2<-rep((list(rep(NA,nrow(int_table)))), spa)
-#ooilist<-rep(rep((list(rep(NA,nrow(int_table)))),spa), ncol(int_table))
-
 ooilist<-rep((list(rep(NA,nrow(int_table)))), spa)
 
 na<-paste("_",vari,"_",sep="")
@@ -699,7 +629,7 @@ for(i in count:(count+spal[jj]-1)){
 	temp<-na.omit(int_table[,temp1])
 	wtemp<-weight[temp1,2]
 	position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	print(i)
+	#print(i)
 	dat2<-qtrans(temp)
     a<-rowSums(t(t(dat2)*wtemp))
     b<-sum(wtemp)^2
@@ -725,86 +655,18 @@ for(i in count:(count+spal[jj]-1)){
 	
 }
 
-#for(i in 1:length(ooilist)){
-	#print(i)
-	
 	temp<-grep(paste("_",ooi_pos,"_",sep=""), na[count:(count+spal[jj]-1)])
-	#print(temp)
 	if(length(temp)>0){
 	ooilist[[jj]]<-do.call(pmin, c(out[temp],list(na.rm=T)))
-	#out_ooi[,i]<-do.call(pmin, c(out[temp],list(na.rm=T)))
 	}
-#}
 
 count<-count+spal[jj]
-#print(count)
-#out2[[jj]]<-do.call(pmin, c(out,list(na.rm=T)))
 
 }
-#out<-out2
-
 ################################
 
-
-
-
-# out_evo<-do.call(pmin, c(out,list(na.rm=T)))
-# out_fdr<-p.adjust(out_evo, method="BH")
-# out_evo<-cbind(out_fdr,out_evo)
-# colnames(out_evo)<-c("fdr","p-value")
-# out_evo<-cbind(out_evo, da[,3:ncol(da)])
-
-# initial_sorting<-seq(1,nrow(p_table))
-# out_evo<-cbind(out_evo, initial_sorting)
-# out_evo<-out_evo[order(as.numeric(out_evo[,2])),]
-
-
-
-#ooi_pos<-grep(ooi, colnames(p_table))
-#na<-paste("_",vari,"_",sep="")
-#temp<-grep(paste("_",ooi_pos,"_",sep=""), na)
 out_ooi<-do.call(pmin, c(ooilist,list(na.rm=T)))
 
-# out<-rep((list(rep(NA,nrow(p_table)))), length(vari))
-
-
-
-# for(i in 1:length(vari)){
-	
-	# temp1<-as.numeric(strsplit(vari[i],"_")[[1]])
-	# temp<-na.omit(int_table[,temp1])
-	# wtemp<-weight[temp1,2]
-	# position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	# print(i)
-	# dat2<-qtrans(temp)
-    # a<-rowSums(t(t(dat2)*wtemp))
-    # b<-sum(wtemp)^2
-    # d<-sum(wtemp^2)
-	# l<-length(a)
-    # k<-1/l
-	# y<-k * seq(1,l)
-    # dat3<-data.frame(y,a,d,b)
-    
-	# rhotemp<-coef(nls(y~sort(pnorm(a/sqrt((1-rho)*d+rho*b), lower.tail=F)), data=dat3, start=list(rho=0), control=list(minFactor = 1/128, tol = 1e-05, warnOnly = TRUE)))
-	
-	# temp<-na.omit(p_table[position,temp1])
-	
-	# wtemp<-weight[temp1,2]
-	# position<-as.numeric(strsplit(posvec2[i],"_")[[1]])
-	
-	# dat2<-qtrans(temp)
-    # a<-rowSums(t(t(dat2)*wtemp))
-    # b<-sum(wtemp)^2
-    # d<-sum(wtemp^2)
-	
-	# out[[i]][position]<-pnorm(a/sqrt((1-rhotemp)*d+rhotemp*b),lower.tail=F)
-
-# }
-
-# ooi_pos<-grep(ooi, colnames(p_table))
-# na<-paste("_",vari,"_",sep="")
-# temp<-grep(paste("_",ooi_pos,"_",sep=""), na)
-# out_ooi<-do.call(pmin, c(out[temp],list(na.rm=T)))
 out_ooi_fdr<-p.adjust(out_ooi, method="BH")
 out_ooi<-cbind(out_ooi_fdr,out_ooi)
 colnames(out_ooi)<-c("fdr","p-value")
