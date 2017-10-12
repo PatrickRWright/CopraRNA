@@ -196,7 +196,6 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - check that weberv output is built correctly
 # - make a predall directory in the clean output which then contains all type of c2 outputs
 # - core genome dump (ask bjoern)
 # - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
