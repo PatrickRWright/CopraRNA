@@ -196,7 +196,6 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - make a predall directory in the clean output which then contains all type of c2 outputs
 # - core genome dump (ask bjoern)
 # - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
 # - check print archive README for new output
@@ -441,6 +440,14 @@ unless ($noclean) {
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
     system "rm fasta_temp_file fasta_temp_file_out";
+    system "rm conservation_table.Rdata";
+
+    # all predictions types archive
+    system "mkdir all_predictions";
+    system "mv *csv all_predictions";
+    system "mv all_predictions/CopraRNA_result_all.csv .";
+    system "mv all_predictions/CopraRNA_result.csv .";
+    system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
