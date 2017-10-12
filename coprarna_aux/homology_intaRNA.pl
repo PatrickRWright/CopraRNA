@@ -398,7 +398,7 @@ if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5
     my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
 
     # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ',' | sed 's/!//g'`; ## edit 2.0.6 switched to generic output file and added sed at the end
+    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; ## edit 2.0.6 switched to generic output file
 
     # split
     my @split = split(/,/, $top_predictons_locus_tags);

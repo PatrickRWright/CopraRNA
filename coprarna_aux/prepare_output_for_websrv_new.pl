@@ -47,7 +47,6 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         my @split_ooi = split(/[\(,|]/, $split[2]); ## edit 2.0.6 changed var name to split_ooi
         # locus tag
         my $ltag = $split_ooi[0]; ## edit 2.0.6
-        $ltag =~ s/\!//g; ## edit 2.0.6 // remove flagging for webserver
         print WRITEINTERNAL $ltag . ",";
         # gene name
         print WRITEINTERNAL $split_ooi[1] . ",";
