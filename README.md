@@ -46,7 +46,7 @@ The following topics are covered by this documentation:
 - sed 4.2.2.165-6e76-dirty                                             // conda install sed
 - grep 2.14                                                            // conda install grep
 - GNU coreutils 8.25                                                   // conda install coreutils 
-- IntaRNA 2.0.4                                                        // conda install intarna
+- IntaRNA 2.1.0                                                        // conda install intarna
 - EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 - embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
 - ncbiblast-2.2.22                                                     // conda install blast-legacy
