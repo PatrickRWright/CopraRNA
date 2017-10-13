@@ -448,11 +448,10 @@ if ($enrich) { ## edit 2.0.5.1 // ## edit 2.0.6 changes in file names
     system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; ## edit 1.2.5
     system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; ## edit 1.2.5
     system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; ## edit 1.2.6
-    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 1.2.5
-    system $PATH_COPRA_SUBSCRIPTS . "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 1.2.6
+    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 2.0.6 // phantomjs now via conda and in path
+    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 2.0.6
     system "rm index-thumb.html"; ## edit 1.2.5
     system "rm index-pdf.html"; ## edit 1.2.6
-
     ## end add enrichment vis
 }
 

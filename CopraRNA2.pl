@@ -56,12 +56,14 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 ### Bio Software
 
 # IntaRNA 2.1.0                                                        // conda install intarna
-# EMOBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
+# EMBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
 # embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
 # DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
 # clustalo 1.2.3                                                       // conda install clustalo
+# phantomjs 2.1.1                                                      // conda install phantomjs
+# icu 56.1                                                             // conda install icu=56.1
 
 ### Perl (5.22.0) Module(s):                                           // conda install perl
 
@@ -104,6 +106,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 #            added extended regions plots
 #            aux enrichment now also done for count specified by $enrich
 #            adding consensus prediction
+#            removed phantomjs bin // now installing it via conda
 #
 # v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
 #            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
