@@ -165,7 +165,11 @@ while($consistencyswitch) {
              $limitloops++;
              $consistencyswitch = 1;
  
-             if($limitloops > 100) { $consistencyswitch = 0; }
+             if($limitloops > 100) { 
+                 $consistencyswitch = 0;
+                 print ERRORLOG "Not all RefSeq *gb files downloaded correctly. Restart your job.\n"; 
+                 last;
+             }
              my $accNr = $_;
              chop $accNr;
              chop $accNr;
