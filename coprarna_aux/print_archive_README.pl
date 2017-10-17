@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 print "
-CopraRNA - v.2.0.6  - archive README
+CopraRNA - v.2.1.0  - archive README
 
 License: MIT
 
@@ -26,14 +26,14 @@ rna\@informatik.uni-freiburg.de
 
 -- Archive file explanations
 
-CopraRNA_final.csv:
+CopraRNA_result.csv:
 This is the final result table of your CopraRNA run.
 It contains the the amount of predictions specified by the
-topcount parameter (def: 100). If less than this amount
+topcount parameter (def: 200). If less than this amount
 of predictions is returned then the the file contains
 all possible predictions.
 
-CopraRNA_final_all.csv:
+CopraRNA_result_all.csv:
 This is the non truncated version of the CopraRNA result.
 It contains all possible CopraRNA predictions.
 
@@ -85,14 +85,14 @@ This FASTA contains the putative target sequences extracted from the
 organism of interest's genome. It is a copy of one of the
 *_upfromstartpos_*_down_*.fa files. 
 
-*_websrv_table.csv: (only if -websrv was set)
-These are csv tables for the Freiburg RNA tools webserver frontend.
+coprarna_websrv_table.csv: (only if -websrv was set)
+This csv table contains the data for the Freiburg RNA tools webserver frontend.
 
 termClusterReport.txt: (only if -enrich was specified // in Enrichment)
 This file contains the DAVID functional enrichment for the amount of
-CopraRNA1 candidates specified in the -enrich parameter.
+candidates specified in the -enrich parameter.
 
-org_of_interest_aux_enrichment.txt: (in Enrichment)
+aux_table.csv: (in Enrichment)
 This is the auxilliary enrichment file for the organism of interest.
 
 copra_heatmap.html/copraRNA.json: (in Enrichment)
@@ -102,6 +102,13 @@ display of copra_heatmap.html.
 
 enriched_heatmap_big.*: (in Enrichment)
 pdf and png files for the functional enrichment heatmap.
+
+sRNA_conservation_heatmap.pdf:
+This file shows the interaction conservation of the top 25 predictions.
+
+evo_alignments:
+This directory contains the alignments of the clusters of putative target
+sequences.
 
 README.txt:
 This file.

@@ -3,9 +3,9 @@
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
 
-Please note: Version 2.0.6 is currently experimental and changes are actively being pushed.
+Please note: Version 2.1.0 is currently experimental and changes are actively being pushed.
 
-For testing or ad hoc use of IntaRNA, you can use its webinterface at the
+For testing or ad hoc use of CopraRNA, you can use its webinterface at the
 
 **==> [Freiburg RNA tools CopraRNA webserver](http://rna.informatik.uni-freiburg.de/CopraRNA/) <==**
 
@@ -28,7 +28,7 @@ The following topics are covered by this documentation:
 
 - [Installation](#install)
   - [Dependencies](#deps)
-  - [IntaRNA via conda](#instconda)
+  - [CopraRNA via conda](#instconda)
   - [Cloning from github](#instgithub)
 - [Usage and Parameters](#usage)
 
@@ -53,8 +53,7 @@ The following topics are covered by this documentation:
 - DomClust 1.2.8a                                                      // conda install domclust
 - MAFFT 7.310                                                          // conda install mafft
 - clustalo 1.2.3                                                       // conda install clustalo
-- phantomjs 2.1.1                                                      // conda install phantomjs
-- icu 56.1                                                             // conda install icu=56.1
+- phantomjs 2.1.1-0                                                    // conda install phantomjs
 
 - Perl (5.22.0) Module(s):                                             // conda install perl
 

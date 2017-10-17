@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.0.6
+# CopraRNA 2.1.0
 
  # License: MIT
 
@@ -31,7 +31,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
  #
  #    Patrick R. Wright              
  #    Jens Georg
- #    Martin Mann
+ #    Martin Raden, nee Mann
  #    Rolf Backofen
  #    Steffen C. Lott
  #    Andreas S. Richter 
@@ -62,8 +62,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # DomClust 1.2.8a                                                      // conda install domclust
 # MAFFT 7.310                                                          // conda install mafft
 # clustalo 1.2.3                                                       // conda install clustalo
-# phantomjs 2.1.1                                                      // conda install phantomjs
-# icu 56.1                                                             // conda install icu=56.1
+# phantomjs 2.1.1-0                                                    // conda install phantomjs
 
 ### Perl (5.22.0) Module(s):                                           // conda install perl
 
@@ -96,6 +95,9 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.1.0   : topcount default 200
+#            stopped tracking edits manually
+#
 # v2.0.6   : new p-value combination (no hard cutoff anymore // switching to integrated superior method) 
 #            standard root function for weights is now 1 instead of 2.5 (no more weight reduction)
 #            added phylogeny output directory in clean output
@@ -164,7 +166,7 @@ my $verbose = 0; ## edit 2.0.5.1
 my $noclean = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
-my $topcount = 100; # amount of top predictions // ## edit 2.0.5.1
+my $topcount = 200; # amount of top predictions // ## edit 2.0.5.1
 my $root = 1; # root function to apply to the weights // ## edit 2.0.5.1
 my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on 
                 ##              // this option also allows to specify how many top predictions to use for the enrichment
@@ -199,14 +201,13 @@ GetOptions ( ## edit 2.0.4
 
 # TODO:
 
-# - core genome dump (ask bjoern)
+# - core genome dump -> Egg
 # - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
-# - check print archive README for new output
 # - check cds option
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
-print "\nCopraRNA 2.0.6\n\n",
+print "\nCopraRNA 2.1.0\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
 "by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
@@ -249,7 +250,7 @@ print "\nCopraRNA 2.0.6\n\n",
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
 " --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",  ## edit 2.0.6
 " --root                    specifies root function to apply to the weights (def:1)\n",
-" --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:100)\n\n", ## edit 2.0.6
+" --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n\n", ## edit 2.0.6
 
 "Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -340,7 +341,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
-    print WRITETOOPTIONS "version:CopraRNA 2.0.6\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "version:CopraRNA 2.1.0\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
 
@@ -473,6 +474,7 @@ unless ($noclean) {
     system "mv 16s_sequences.* Phylogeny";
 
     system "mkdir FASTA";
+    system "rm aligned_sRNA.fa ncrna_aligned.fa";
     system "mv *.fa FASTA";
 
     system "mkdir Regions_plots";
@@ -498,6 +500,8 @@ unless ($noclean) {
 
     # remove weights.warning if its empty
     system "rm weights.warning" if (-z "weights.warning");
+    # remove target_alignments
+    system "rm -r target_alignments";
    
 }
 

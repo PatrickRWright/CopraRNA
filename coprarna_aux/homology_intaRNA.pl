@@ -375,7 +375,7 @@ if ($cop1) { # CopraRNA 1 is the primary requested result
 
 # plot CopraRNA 2 evo heatmap
 unless ($cop1) {
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "evo_heatmap.R"; ## edit 2.0.6
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "evo_heatmap.R 2> /dev/null > /dev/null"; ## edit 2.0.6
     system "rm CopraRNA_available_organisms.txt"; ## edit 2.0.6
 }
 
