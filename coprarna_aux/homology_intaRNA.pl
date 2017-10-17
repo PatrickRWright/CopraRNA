@@ -343,9 +343,9 @@ unless ($cop1) {
     system $PATH_COPRA_SUBSCRIPTS . "parallelize_target_alignments.pl CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv";
     # run position script
     system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; ## edit 2.0.6
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args $ooi_refseq_id"; ## edit 2.0.6
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args $ooi_refseq_id 2> /dev/null > /dev/null"; ## edit 2.0.6
     # perform actual CopraRNA 2 p-value combination
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus"; ## edit 2.0.6
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus 2> /dev/null > /dev/null"; ## edit 2.0.6
 }
 
 # truncate final output // ## edit 2.0.5.1
