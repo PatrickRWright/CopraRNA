@@ -108,7 +108,8 @@ This file shows the interaction conservation of the top 25 predictions.
 
 evo_alignments:
 This directory contains the alignments of the clusters of putative target
-sequences.
+sequences with an annotation to visualize the interaction sites and consensus
+interaction regions in Jalview.
 
 README.txt:
 This file.
