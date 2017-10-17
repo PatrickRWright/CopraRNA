@@ -165,7 +165,6 @@ while($consistencyswitch) {
              $consistencyswitch = 1;
  
              if($limitloops > 50) { $consistencyswitch = 0; }
-             my $refOut = $_;
              my $accNr = $_;
              chop $accNr;
              chop $accNr;
