@@ -159,7 +159,8 @@ while($consistencyswitch) {
     foreach(@totalrefseqFiles) {
         chomp $_;
         my $value = $_;
-        if(grep( /^$value$/, @files )) { $consistencyswitch = 0;
+        if(grep( /^$value$/, @files )) { 
+            $consistencyswitch = 0;
         } else {
              $limitloops++;
              $consistencyswitch = 1;
