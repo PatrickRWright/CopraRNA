@@ -116,7 +116,9 @@ git clone https://github.com/PatrickRWright/CopraRNA
 # Usage and parameters
 
 Example call:
+```bash
 CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4
+```
 
 The following options are available:
 
