@@ -125,9 +125,9 @@ The following options are available:
 - `--help` : help
 - `--srnaseq` : FASTA file with small RNA sequences (def:input_sRNA.fa)
 - `--region` : region to scan in whole genome target prediction (def:5utr)
-               '5utr' for start codon
-               '3utr' for stop codon
-               'cds' for entire transcript
+    - '5utr' for start codon
+    - '3utr' for stop codon
+    - 'cds' for entire transcript
 - `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
 
 - --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)
