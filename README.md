@@ -49,7 +49,7 @@ The following topics are covered by this documentation:
 In order to use CopraRNA you can either install it directly via conda or
 clone this github repository and install the dependencies individually.
 
-<br />
+<br /><br />
 <a name="deps" />
 ## Dependencies
 
