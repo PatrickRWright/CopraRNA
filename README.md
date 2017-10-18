@@ -129,38 +129,24 @@ The following options are available:
     - '3utr' for stop codon
     - 'cds' for entire transcript
 - `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
-
 - `--ntdown` : amount of nucleotides downstream of '--region' to parse for targeting (def:100)
-
 - `--cores` : amount of cores to use for parallel computation (def:1)
-
 - `--rcsize` : minimum amount (%) of putative target homologs that need to be available for a target cluster 
                to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
-
 - `--winsize`                 IntaRNA target (--tAccW) window size parameter (def:150)
-
 - `--maxbpdist`               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
-
 - `--cop1`                    switch for CopraRNA1 prediction (def:off)
-
 - `--cons`                    controls consensus prediction (def:0)
-                           '0' for off
-                           '1' for organism of interest based consensus
-                           '2' for overall consensus based prediction
-
-- --verbose                 switch to print verbose output to terminal during computation (def:off)
-
-- --websrv                  switch to provide webserver output files (def:off)
-
-- --noclean                 switch to prevent removal of temporary files (def:off)
-
-- --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
-
-- --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
-
-- --root                    specifies root function to apply to the weights (def:1)
-
-- --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+    - '0' for off
+    - '1' for organism of interest based consensus
+    - '2' for overall consensus based prediction
+- `--verbose` : switch to print verbose output to terminal during computation (def:off)
+- `--websrv` : switch to provide webserver output files (def:off)
+- `--noclean` : switch to prevent removal of temporary files (def:off)
+- `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
+- `--nooi` : if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
+- `--root` : specifies root function to apply to the weights (def:1)
+- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
 
 <br /><br /><br /><br />
 <a name="updateava" />
