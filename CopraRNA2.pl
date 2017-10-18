@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.1.0
+# CopraRNA 2.1.1
 
  # License: MIT
 
@@ -95,6 +95,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.1.1   :
+#
 # v2.1.0   : topcount default 200
 #            stopped tracking edits manually
 #
@@ -202,7 +204,7 @@ GetOptions ( ## edit 2.0.4
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
-print "\nCopraRNA 2.1.0\n\n",
+print "\nCopraRNA 2.1.1\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
 "by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
@@ -336,7 +338,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
-    print WRITETOOPTIONS "version:CopraRNA 2.1.0\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "version:CopraRNA 2.1.1\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
 
