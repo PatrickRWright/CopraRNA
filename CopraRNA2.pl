@@ -199,11 +199,6 @@ GetOptions ( ## edit 2.0.4
     'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons ## edit 2.0.6
 );
 
-# TODO:
-
-# - core genome dump -> Egg
-# - do manual testing (also IsaR1, FsrA, LhrA2, PrrF1, SR1, IhtA)
-# - check cds option
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
