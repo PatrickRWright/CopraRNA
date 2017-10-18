@@ -95,15 +95,22 @@ clone this github repository and install the dependencies individually.
 <br /><br />
 <a name="instconda" />
 ## CopraRNA via conda (bioconda channel)
-
+The most easy way to locally install CopraRNA is via conda using the 
+[bioconda](https://bioconda.github.io/) 
+channel (linux only). This way, you will install CopraRNA along
+with all dependencies.
+Follow
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/intarna/README.html)
+to get detailed information or run
+```bash
 conda install coprarna
-
+```
 <br /><br />
 <a name="instgithub" />
 ## Cloning *Source code* from github (or downloading ZIP-file)
-
+```bash
 git clone https://github.com/PatrickRWright/CopraRNA
-
+```
 <br /><br /><br /><br />
 <a name="usage" />
 # Usage and parameters
