@@ -130,20 +130,20 @@ The following options are available:
     - 'cds' for entire transcript
 - `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
 
-- --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)
+- `--ntdown` : amount of nucleotides downstream of '--region' to parse for targeting (def:100)
 
-- --cores                   amount of cores to use for parallel computation (def:1)
+- `--cores` : amount of cores to use for parallel computation (def:1)
 
-- --rcsize                  minimum amount (%) of putative target homologs that need to be available 
-                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
+- `--rcsize` : minimum amount (%) of putative target homologs that need to be available for a target cluster 
+               to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
 
-- --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)
+- `--winsize`                 IntaRNA target (--tAccW) window size parameter (def:150)
 
-- --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
+- `--maxbpdist`               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
 
-- --cop1                    switch for CopraRNA1 prediction (def:off)
+- `--cop1`                    switch for CopraRNA1 prediction (def:off)
 
-- --cons                    controls consensus prediction (def:0)
+- `--cons`                    controls consensus prediction (def:0)
                            '0' for off
                            '1' for organism of interest based consensus
                            '2' for overall consensus based prediction
