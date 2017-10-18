@@ -114,7 +114,7 @@ conda install coprarna
 ```bash
 git clone https://github.com/PatrickRWright/CopraRNA
 ```
-<br /><br /><br /><br />
+<br />
 <a name="usage" />
 # Usage and parameters
 
@@ -151,7 +151,7 @@ The following options are available:
 - `--root` : specifies root function to apply to the weights (def:1)
 - `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
 
-<br /><br />
+<br />
 <a name="updateava" />
 # Update CopraRNA available organisms
 
