@@ -3,8 +3,6 @@
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
 
-Please note: Version 2.1.0 is currently experimental and changes are actively being pushed.
-
 For testing or ad hoc use of CopraRNA, you can use its webinterface at the
 
 **==> [Freiburg RNA tools CopraRNA webserver](http://rna.informatik.uni-freiburg.de/CopraRNA/) <==**
