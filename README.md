@@ -41,8 +41,9 @@ The following topics are covered by this documentation:
   - [CopraRNA via conda](#instconda)
   - [Cloning from github](#instgithub)
 - [Usage and Parameters](#usage)
+- [Update CopraRNA available organisms](#updateava)
 
-<br /><br /><br /><br />
+<br /><br /><br />
 <a name="install" />
 # Installation
 
@@ -52,6 +53,8 @@ clone this github repository and install the dependencies individually.
 <br /><br />
 <a name="deps" />
 ## Dependencies
+
+The specified versions are tested and functional.
 
 - bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
 - gawk 4.1.3                                                           // conda install gawk
