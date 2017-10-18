@@ -125,11 +125,8 @@ The following options are available:
  --srnaseq                 FASTA file with small RNA sequences (def:input_sRNA.fa)
 
  --region                  region to scan in whole genome target prediction (def:5utr)
-
                            '5utr' for start codon
-
                            '3utr' for stop codon
-
                            'cds' for entire transcript
 
  --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)
@@ -139,7 +136,6 @@ The following options are available:
  --cores                   amount of cores to use for parallel computation (def:1)
 
  --rcsize                  minimum amount (%) of putative target homologs that need to be available 
-
                            for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
 
  --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)
@@ -149,11 +145,8 @@ The following options are available:
  --cop1                    switch for CopraRNA1 prediction (def:off)
 
  --cons                    controls consensus prediction (def:0)
-
                            '0' for off
-
                            '1' for organism of interest based consensus
-
                            '2' for overall consensus based prediction
 
  --verbose                 switch to print verbose output to terminal during computation (def:off)
