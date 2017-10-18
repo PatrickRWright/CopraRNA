@@ -304,7 +304,7 @@ my_palette<-colorRampPalette(c("darkolivegreen1","olivedrab1","olivedrab2","oliv
 
 nam<-paste(prefix,"conservation_heatmap.pdf", sep="_" )
 
-pdf(nam,paper = "a4r", width = 0, height = 0) 
+pdf(nam,paper = "a4r", width = 0, height = 0, onefile=FALSE) ## edit prw // onefile=FALSE fix for two page pdf
  heat_table2<-ifelse(heat_table == 3 , "+/+" ,ifelse(heat_table == 2 , "-/+" , ifelse(heat_table == 1 , "+/-" , ifelse(heat_table == 0 , "-/-" , ifelse(heat_table == 4 ,"2+/-" ,ifelse(heat_table == 5 ,"2+/+" ,""))))))
  nan<-is.na(heat_table2)
  heat_table2[nan]<-""
