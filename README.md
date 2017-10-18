@@ -122,48 +122,45 @@ CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -t
 
 The following options are available:
 
- --help                    help
+- `--help` : help
+- `--srnaseq` : FASTA file with small RNA sequences (def:input_sRNA.fa)
+- `--region` : region to scan in whole genome target prediction (def:5utr)
+               '5utr' for start codon
+               '3utr' for stop codon
+               'cds' for entire transcript
+- `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
 
- --srnaseq                 FASTA file with small RNA sequences (def:input_sRNA.fa)
+- --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)
 
- --region                  region to scan in whole genome target prediction (def:5utr)
-                           '5utr' for start codon
-                           '3utr' for stop codon
-                           'cds' for entire transcript
+- --cores                   amount of cores to use for parallel computation (def:1)
 
- --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)
-
- --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)
-
- --cores                   amount of cores to use for parallel computation (def:1)
-
- --rcsize                  minimum amount (%) of putative target homologs that need to be available 
+- --rcsize                  minimum amount (%) of putative target homologs that need to be available 
                            for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
 
- --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)
+- --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)
 
- --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
+- --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
 
- --cop1                    switch for CopraRNA1 prediction (def:off)
+- --cop1                    switch for CopraRNA1 prediction (def:off)
 
- --cons                    controls consensus prediction (def:0)
+- --cons                    controls consensus prediction (def:0)
                            '0' for off
                            '1' for organism of interest based consensus
                            '2' for overall consensus based prediction
 
- --verbose                 switch to print verbose output to terminal during computation (def:off)
+- --verbose                 switch to print verbose output to terminal during computation (def:off)
 
- --websrv                  switch to provide webserver output files (def:off)
+- --websrv                  switch to provide webserver output files (def:off)
 
- --noclean                 switch to prevent removal of temporary files (def:off)
+- --noclean                 switch to prevent removal of temporary files (def:off)
 
- --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
+- --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
 
- --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
+- --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
 
- --root                    specifies root function to apply to the weights (def:1)
+- --root                    specifies root function to apply to the weights (def:1)
 
- --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+- --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)
 
 <br /><br /><br /><br />
 <a name="updateava" />
