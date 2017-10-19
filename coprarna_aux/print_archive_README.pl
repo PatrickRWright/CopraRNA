@@ -111,6 +111,9 @@ This directory contains the alignments of the clusters of putative target
 sequences with an annotation to visualize the interaction sites and consensus
 interaction regions in Jalview.
 
+all_predictions:
+This directory contains the results for all modes available in CopraRNA 2. 
+
 README.txt:
 This file.
 
