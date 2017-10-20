@@ -249,7 +249,7 @@ print "\nCopraRNA 2.1.1\n\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n\n", ## edit 2.0.6
 
-"Example call: ./CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
+"Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
 "References: \n",
 "1. Wright PR et al., Comparative genomics boosts target prediction for bacterial small RNAs\n   Proc Natl Acad Sci USA, 2013, 110 (37), E3487–E3496\n",
