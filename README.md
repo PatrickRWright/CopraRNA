@@ -106,7 +106,7 @@ Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information or run
 ```bash
-conda install coprarna
+conda install -c conda -c conda-forge coprarna
 ```
 <br /><br />
 <a name="instgithub" />
@@ -114,9 +114,11 @@ conda install coprarna
 ## Usage via biocontainer (docker)
 
 CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type:
-
+```bash
        docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
-
+```
+<br /><br />
+<a name="biocontainer" />
 
 ## Cloning *Source code* from github (or downloading ZIP-file)
 ```bash
