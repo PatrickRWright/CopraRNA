@@ -106,7 +106,7 @@ Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information or run
 ```bash
-conda install -c conda -c conda-forge coprarna
+conda create -n coprarna -c bioconda -c conda-forge coprarna
 ```
 <br /><br />
 <a name="instgithub" />
