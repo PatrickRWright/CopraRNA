@@ -270,6 +270,11 @@ my $check_fa = `grep '>' $sRNAs_fasta`;
 chomp $check_fa;
 die("\nError: The input file ($sRNAs_fasta) supplied does not appear to be a FASTA file!\n\n") unless($check_fa);
 
+# check for sequence count in input being more than 2
+my $count_fa = `grep -c '>' $sRNAs_fasta`;
+chomp $count_fa;
+die("\nError: The input file ($sRNAs_fasta) seems to contain less than 3 sequences!\n\n") unless($count_fa>2);
+
 # create warning for non empty run dir
 my @dir_files = <*>; ## edit 2.0.5.1
 my $file_count = scalar(@dir_files); ## edit 2.0.5.1
