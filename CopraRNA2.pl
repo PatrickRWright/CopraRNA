@@ -265,6 +265,11 @@ unless (-e $sRNAs_fasta) { ## edit 2.0.2
     die("\nError: No input FASTA supplied!\nUse '-h' option for help.\n\n");
 }
 
+# rudimentary check for fasta
+my $check_fa = `grep '>' $sRNAs_fasta`;
+chomp $check_fa;
+die("\nError: The input file ($sRNAs_fasta) supplied does not appear to be a FASTA file!\n\n") unless($check_fa);
+
 # create warning for non empty run dir
 my @dir_files = <*>; ## edit 2.0.5.1
 my $file_count = scalar(@dir_files); ## edit 2.0.5.1
