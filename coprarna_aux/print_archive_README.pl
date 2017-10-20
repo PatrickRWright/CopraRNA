@@ -78,7 +78,7 @@ respective organisms in the prediction.
 *tags.clustered*:
 These files contain the IntaRNA predictions for for the clusters
 of homologous putative targets. _rcsize is the truncated input
-for the CopraRNA1 thread (only if -cop1 was set).
+for the CopraRNA 1 thread (only if -cop1 was set).
 
 target_sequences_orgofint.fa: (only if -websrv was set // in FASTA)
 This FASTA contains the putative target sequences extracted from the
@@ -111,7 +111,7 @@ This directory contains the alignments of the clusters of putative target
 sequences with an annotation to visualize the interaction sites and consensus
 interaction regions in Jalview.
 
-all_predictions:
+all_predictions (not made if -cop1) :
 This directory contains the results for all modes available in CopraRNA 2. 
 
 README.txt:

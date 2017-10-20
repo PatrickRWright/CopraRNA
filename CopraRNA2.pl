@@ -452,7 +452,7 @@ unless ($noclean) {
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
     system "rm fasta_temp_file fasta_temp_file_out";
-    system "rm conservation_table.Rdata";
+    system "rm conservation_table.Rdata" unless ($cop1);
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
@@ -482,7 +482,8 @@ unless ($noclean) {
     system "mv 16s_sequences.* Phylogeny";
 
     system "mkdir FASTA";
-    system "rm aligned_sRNA.fa ncrna_aligned.fa";
+    system "rm aligned_sRNA.fa" unless ($cop1);
+    system "rm ncrna_aligned.fa";
     system "mv *.fa FASTA";
 
     system "mkdir Regions_plots";
@@ -500,16 +501,20 @@ unless ($noclean) {
     }
 
     # all predictions types archive
-    system "mkdir all_predictions";
-    system "mv *csv all_predictions";
-    system "mv all_predictions/CopraRNA_result_all.csv .";
-    system "mv all_predictions/CopraRNA_result.csv .";
-    system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
+    unless ($cop1) {
+        system "mkdir all_predictions";
+        system "mv *csv all_predictions";
+        system "mv all_predictions/CopraRNA_result_all.csv .";
+        system "mv all_predictions/CopraRNA_result.csv .";
+        system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
+    }
 
     # remove weights.warning if its empty
     system "rm weights.warning" if (-z "weights.warning");
     # remove target_alignments
-    system "rm -r target_alignments";
-   
+    system "rm -r target_alignments" unless ($cop1);
+    # remove CopraRNA 1 non generic name
+    system "rm CopraRNA1_final_all.csv CopraRNA1_final.csv" if ($cop1);
+
 }
 

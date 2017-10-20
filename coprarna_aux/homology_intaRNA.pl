@@ -350,11 +350,13 @@ unless ($cop1) {
 
 # truncate final output // ## edit 2.0.5.1
 system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_ooi.csv > CopraRNA2_final_ooi.csv"; ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_balanced.csv > CopraRNA2_final_balanced.csv"; ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
-system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
+unless ($cop1) {
+    system "head -n $topcount CopraRNA2_final_all_ooi.csv > CopraRNA2_final_ooi.csv"; ## edit 2.0.6
+    system "head -n $topcount CopraRNA2_final_all_balanced.csv > CopraRNA2_final_balanced.csv"; ## edit 2.0.6
+    system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
+    system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
+    system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
+}
 
 # figure out which result is the primary result ## edit 2.0.6
 if ($cop1) { # CopraRNA 1 is the primary requested result
