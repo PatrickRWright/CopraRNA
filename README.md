@@ -124,6 +124,8 @@ CopraRNA can be retrieved and used as docker container with all dependencies via
 ```bash
 git clone https://github.com/PatrickRWright/CopraRNA
 ```
+If you installed all dependencies you should be able to directly use the source.
+
 <br /><br />
 <a name="usage" />
 # Usage and parameters
