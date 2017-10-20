@@ -313,7 +313,7 @@ die("\nError: The maximal basepair distance ($maxbpdist) is larger than the give
 # check for ntup + ntdown being >= $winsize because of IntaRNA parameters ## edit 2.0.5.1
 my $sumUpDown = $upstream+$downstream;
 if ($region eq "5utr" or $region eq "3utr") { ## edit 2.0.4.2
-    die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize. Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize ); ## edit 2.0.5.1
+    die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize (--winsize). Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize ); ## edit 2.0.5.1
 }
 
 # check for correct range of 0.5 <= -rcsize <= 1.0 ## edit 2.0.5.1
