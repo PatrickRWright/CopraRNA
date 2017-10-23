@@ -435,6 +435,19 @@ if ($websrv) {
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
+# trim off last column (initial_sorting) if CopraRNA 2 prediction mode
+unless ($cop1) {
+     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
+     system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
+     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
+     system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
+     # change header
+     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
+     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
+     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
+     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
+}
+
 # clean up
 unless ($noclean) {
 
