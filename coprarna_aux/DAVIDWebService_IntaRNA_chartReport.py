@@ -19,12 +19,12 @@ for i in range(1,len(IntaRNA_lines)): # range omits the right boundary
     entrezID = split[37] ## edit 2.0.5.1 // changed to 37 because of new IntaRNA output
     backgroundList.append(entrezID)
 
-backgroundList = map(str,backgroundList)
+backgroundList = list(map(str,backgroundList))
 
-print "background:" + str(len(backgroundList))
+print ("background:" + str(len(backgroundList)))
 
 inputList = backgroundList[0:enrich_count]
-print "input:" + str(len(inputList))
+print ("input:" + str(len(inputList)))
 
 inputIds = ",".join(inputList)
 #print inputIds
@@ -48,7 +48,7 @@ errors = 0
 #logging.getLogger('suds.client').setLevel(logging.DEBUG)
 
 url = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
-print 'url=%s' % url
+print ('url=%s' % url)
 # create a service client using the wsdl.
 client = Client(url)
 ws = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
@@ -58,20 +58,20 @@ exit
 #
 # print the service (introspection)
 #
-print client
+print (client)
 
 #authenticate user email 
-print client.service.authenticate('patrickrw@gmx.net')
+print (client.service.authenticate('patrickrw@gmx.net'))
 
 # add enrich_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'
 listName = 'make_up'
 listType = 0
-print client.service.addList(inputIds, idType, listName, listType)
+print (client.service.addList(inputIds, idType, listName, listType))
 
-print client.service.getDefaultCategoryNames()
+print (client.service.getDefaultCategoryNames())
 
 thd = 1
 ct = 1
-print client.service.getChartReport(thd,ct)
+print (client.service.getChartReport(thd,ct))
 

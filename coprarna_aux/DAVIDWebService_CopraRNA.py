@@ -21,12 +21,12 @@ for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
         entrezID = splitOrgOfInt[1][:-1]
         backgroundList.append(entrezID)
 
-backgroundList = map(str,backgroundList)
+backgroundList = list(map(str,backgroundList))
 
-print "background:" + str(len(backgroundList))
+print ("background:" + str(len(backgroundList)))
 
 inputList = backgroundList[0:enrichment_count] ## edit 2.0.5.1 // dynamic list length
-print "input:" + str(len(inputList))
+print ("input:" + str(len(inputList)))
 
 inputIds = ",".join(inputList)
 #print inputIds
@@ -52,7 +52,7 @@ errors = 0
 #logging.getLogger('suds.client').setLevel(logging.DEBUG)
 
 url = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
-print 'url=%s' % url
+print ('url=%s' % url)
 # create a service client using the wsdl.
 client = Client(url)
 ws = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
@@ -62,23 +62,23 @@ exit
 #
 # print the service (introspection)
 #
-print client
+print (client)
 
 #authenticate user email 
-print client.service.authenticate('patrickrw@gmx.net')
+print (client.service.authenticate('patrickrw@gmx.net'))
 
 # add enrichment_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'
 listName = 'make_up'
 listType = 0
-print client.service.addList(inputIds, idType, listName, listType)
+print (client.service.addList(inputIds, idType, listName, listType))
 
 # add background
 listNameBack = 'back'
 listTypeBack = 1
-print client.service.addList(backgroundIds, idType, listNameBack, listTypeBack)
+print (client.service.addList(backgroundIds, idType, listNameBack, listTypeBack))
 
-print client.service.getDefaultCategoryNames()
+print (client.service.getDefaultCategoryNames())
 
 ##getChartReport
 #thd=0.1
@@ -92,6 +92,6 @@ initialSeed = 2
 finalSeed = 2
 linkage = 0.5
 kappa = 85
-print client.service.getTermClusterReport(overlap, initialSeed, finalSeed, linkage, kappa)
+print (client.service.getTermClusterReport(overlap, initialSeed, finalSeed, linkage, kappa))
 
 

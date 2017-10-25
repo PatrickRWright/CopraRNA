@@ -85,15 +85,15 @@ The specified versions are tested and functional.
     - robustrankaggreg 1.1                                                // conda install r-robustrankaggreg
     - pheatmap 1.0.8                                                      // conda install r-pheatmap
 
-- python 2.7.13                                                        // conda install python==2.7.13
+- python                                                              // conda install python
 
-    - sys                                                                  // available from conda python (2.7.13)
-    - logging                                                              // available from conda python (2.7.13)
-    - traceback                                                            // available from conda python (2.7.13) 
+    - sys                                                                  // available from conda python
+    - logging                                                              // available from conda python
+    - traceback                                                            // available from conda python 
     - suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
     - suds         (suds-jurko 0.6)                                        // conda install suds-jurko
     - suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
-    - datetime                                                             // available from conda python (2.7.13)
+    - datetime                                                             // available from conda python
 
 <br /><br />
 <a name="instconda" />
@@ -104,12 +104,14 @@ channel (linux only). This way, you will install CopraRNA along
 with all dependencies.
 Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
-to get detailed information or run
+to get detailed information. We recommend installing into a dedicated environment, to avoid conflicts with
+other installed tools. Following two commands install CopraRNA into the enviroment and activate it:
 ```bash
-conda create -n coprarna -c bioconda -c conda-forge coprarna
+conda create -n coprarnaenv -c bioconda -c conda-forge coprarna
+source activate coprarnaenv
 ```
 <br /><br />
-<a name="instgithub" />
+<a name="biocontainer" />
 
 ## Usage via biocontainer (docker)
 
@@ -118,7 +120,7 @@ CopraRNA can be retrieved and used as docker container with all dependencies via
        docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
 ```
 <br /><br />
-<a name="biocontainer" />
+<a name="instgithub" />
 
 ## Cloning *Source code* from github (or downloading ZIP-file)
 ```bash
