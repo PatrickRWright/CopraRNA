@@ -56,7 +56,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 ### Bio Software
 
 # IntaRNA 2.1.0                                                        // conda install intarna
-# EMBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
+# EMBOSS package 6.5.7 - distmat (creates distance matix from msa)     // conda install emboss
 # embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
 # ncbiblast-2.2.22                                                     // conda install blast-legacy
 # DomClust 1.2.8a                                                      // conda install domclust
@@ -80,22 +80,23 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # robustrankaggreg 1.1                                                 // conda install r-robustrankaggreg
 # pheatmap 1.0.8                                                       // conda install r-pheatmap
 
-### python 2.7.13                                                      // conda install python==2.7.13
+### python 2.7.13                                                      // conda install python
 
 ## packages:
-# sys                                                                  // available from conda python (2.7.13)
-# logging                                                              // available from conda python (2.7.13)
-# traceback                                                            // available from conda python (2.7.13) 
+# sys                                                                  // available from conda python
+# logging                                                              // available from conda python
+# traceback                                                            // available from conda python 
 # suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
 # suds         (suds-jurko 0.6)                                        // conda install suds-jurko
 # suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
-# datetime                                                             // available from conda python (2.7.13)
+# datetime                                                             // available from conda python
 
 #####################################################
 
 #### changelog
 
-# v2.1.1   :
+# v2.1.1   : added input exceptions
+#            DAVID python code now py2 and py3 compatible
 #
 # v2.1.0   : topcount default 200
 #            stopped tracking edits manually
