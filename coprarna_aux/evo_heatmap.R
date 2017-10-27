@@ -7,7 +7,7 @@
 
 # Arguments
 # clustering: ordering of columns. "default" by kmeans clustering based on the heatmap table, "ribosomal" by 16S rRNA tree and "sRNA" by sRNA tree. 
-# consensus: "overall" or "ooi"
+# consensus: "overall" (majoority decision based on all organisms) or "ooi" (consensus defined by the predicted sites in the organism of interest)
 # select: If TRUE the genes supplied in the file specified by the parameter "sel" (default: "genelist.txt", one gene per row, identifier locustag or genename, case sensitive) are visualized. If "FALSE" the top "num" (default: num=25) genes from the CopraRNA_2.0 result specified by the "inputfile" parameter are visualized (default: "CopraRNA2_final_all_ooi.csv")
 # coprarna_reference_file: filename of the .txt file specifying the available organisms for CopraRNA prediction
 # int_p_thres: IntaRNA p-value threshold for a likely non functional interaction which is colored orange in the heatmap (default: int_p_thres=0.3)
@@ -300,12 +300,12 @@ clus$label<-nam2
  
 }
 require(pheatmap)
-my_palette<-colorRampPalette(c("darkolivegreen1","olivedrab1","olivedrab2","olivedrab3","olivedrab4","orangered1"))(n=6)
+my_palette<-colorRampPalette(c("darkolivegreen1","olivedrab1","olivedrab2","olivedrab3","olivedrab4","salmon1"))(n=6)
 
 nam<-paste(prefix,"conservation_heatmap.pdf", sep="_" )
 
 pdf(nam,paper = "a4r", width = 0, height = 0, onefile=FALSE) ## edit prw // onefile=FALSE fix for two page pdf
- heat_table2<-ifelse(heat_table == 3 , "+/+" ,ifelse(heat_table == 2 , "-/+" , ifelse(heat_table == 1 , "+/-" , ifelse(heat_table == 0 , "-/-" , ifelse(heat_table == 4 ,"2+/-" ,ifelse(heat_table == 5 ,"2+/+" ,""))))))
+ heat_table2<-ifelse(heat_table == 3 , "" ,ifelse(heat_table == 2 , "-/+" , ifelse(heat_table == 1 , "+/-" , ifelse(heat_table == 0 , "-/-" , ifelse(heat_table == 4 ,"2+/-" ,ifelse(heat_table == 5 ,"2" ,""))))))
  nan<-is.na(heat_table2)
  heat_table2[nan]<-""
  
@@ -316,7 +316,7 @@ thre2<-paste(">", int_p_thres, sep="")
 
 int_table2<-evo_int_pvalue_scored
 colnames(int_table2)<-nam2
-pheatmap(int_table2,legend_breaks=c(1,2,3,4,5,6),main=paste(consensus, "_consensus_based"), legend_labels=c("<0.001","<0.01","<0.1","<0.2",thre1,thre2), scale="none",display_numbers = heat_table2, cluster_rows=F,cluster_cols=clus, fontsize_number = 6 ,col=my_palette, trace="none", colsep=seq(1,ncol(evo_int_pvalue_scored)), rowsep=seq(1,nrow(int_table2)),cexCol=0.8, cexRow=0.9,na.rm=TRUE,na.color=1,srtCol=45,offsetRow = 0,offsetCol = 0,margins=c(12,8),sepcolor="white")
+pheatmap(int_table2,legend_breaks=c(1,2,3,4,5,6),main=paste(consensus, "_consensus_based"),number_color=2, legend_labels=c("<0.001","<0.01","<0.1","<0.2",thre1,thre2), scale="none",display_numbers = heat_table2, cluster_rows=F,cluster_cols=clus, fontsize_number = 6 ,col=my_palette, trace="none", colsep=seq(1,ncol(evo_int_pvalue_scored)), rowsep=seq(1,nrow(int_table2)),cexCol=0.8, cexRow=0.9,na.rm=TRUE,na.color=1,srtCol=45,offsetRow = 0,offsetCol = 0,margins=c(12,8),sepcolor="white")
 
 dev.off()
 
