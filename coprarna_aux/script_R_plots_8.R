@@ -27,20 +27,8 @@ x<-length(se)
 
 for(i in 1:x){
 
-A<-grep("a", se[[i]], ignore.case=TRUE)
-G<-grep("g", se[[i]], ignore.case=TRUE)
-T<-grep("t", se[[i]], ignore.case=TRUE)
-U<-grep("u", se[[i]], ignore.case=TRUE)
-C<-grep("c", se[[i]], ignore.case=TRUE)
-gap<-grep("-", se[[i]], ignore.case=TRUE)
-all<-c(A,G,C)
-if(length(T) > 0){
-all<-c(all, T)}
-
-if(length(U) > 0){
-all<-c(all, U)}
-
-all<-sort(all)
+all<-which(se[[i]]!="-")
+gap<-which(se[[i]]=="-")
 
 if(length(all)<1){
 	all<-0
