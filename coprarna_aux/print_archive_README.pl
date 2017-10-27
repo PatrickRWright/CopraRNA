@@ -111,8 +111,11 @@ This directory contains the alignments of the clusters of putative target
 sequences with an annotation to visualize the interaction sites and consensus
 interaction regions in Jalview.
 
-all_predictions (not made if -cop1) :
+all_predictions (not made if -cop1):
 This directory contains the results for all modes available in CopraRNA 2. 
+
+conservation_table.Rdata:
+Precomputed R data environment for evolutionary heatmap. 
 
 README.txt:
 This file.

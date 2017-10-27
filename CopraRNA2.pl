@@ -97,6 +97,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 # v2.1.1   : added input exceptions
 #            DAVID python code now py2 and py3 compatible
+#            changed coloring in evolutionary heatmap
+#            fixed issue for regions plots for sequences with non ATGC alphabet
 #
 # v2.1.0   : topcount default 200
 #            stopped tracking edits manually
@@ -436,19 +438,6 @@ if ($websrv) {
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
-# trim off last column (initial_sorting) if CopraRNA 2 prediction mode
-unless ($cop1) {
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
-     system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
-     system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
-     # change header
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
-}
-
 # clean up
 unless ($noclean) {
 
@@ -466,7 +455,7 @@ unless ($noclean) {
     system "rm input_sRNA.fa merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
     system "rm fasta_temp_file fasta_temp_file_out";
-    system "rm conservation_table.Rdata" unless ($cop1);
+    #system "rm conservation_table.Rdata" unless ($cop1);
 
     # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;

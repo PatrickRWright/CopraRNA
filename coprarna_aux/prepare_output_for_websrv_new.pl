@@ -63,21 +63,13 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         my $intncRNA = $split_ooi[6] . " -- " . $split_ooi[7];
         print WRITEINTERNAL $split_ooi[6] . " -- " . $split_ooi[7] . ",";
 
-        if ($cop1) {
-            # annotation
-            print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
-            # additional homologs
-            my $temp = $split[-2]; ## edit 2.0.1
-            chomp $temp;
-            print WRITEINTERNAL $temp . ",";
-        } else { ## edit 2.0.6
-            # annotation
-            print WRITEINTERNAL $split[-2] . ",";
-            # additional homologs
-            my $temp = $split[-1];
-            chomp $temp;
-            print WRITEINTERNAL $temp . ",";
-        }
+        # annotation
+        print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
+        # additional homologs
+        my $temp = $split[-2]; ## edit 2.0.1
+        chomp $temp;
+        print WRITEINTERNAL $temp . ",";
+        
         my $GID = "";
         if ($split_ooi[8] =~ m/GeneID:(\d+)\)/) {
             $GID = $1;

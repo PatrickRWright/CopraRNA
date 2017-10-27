@@ -394,6 +394,20 @@ if (scalar(@CopraRNA_out_lines) <= 1) { ## edit 2.0.6
     print ERRORLOG "Error: No predictions in CopraRNA_result.csv. CopraRNA run failed.\n"; ## edit 2.0.2
 }
 
+# trim off last column (initial_sorting) if CopraRNA 2 prediction mode
+unless ($cop1) {
+     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
+     system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
+     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
+     system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
+     # change header
+     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
+     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
+     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
+     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
+}
+
+
 if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5.1
 
     my $allrefs = $refseqaffiliations{$ARGV[4]};
