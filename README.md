@@ -169,8 +169,19 @@ The following options are available:
 <a name="updateava" />
 # Update CopraRNA available organisms
 
-In the update_kegg2refseq directory you create a new run directory and change into this directory.
-Here you can execute build_kegg2refseq.pl which will download prokaryotes.txt from the
+In the update_kegg2refseq directory you create a new run directory
+```bash
+mkdir run
+```
+and change into this directory
+```bash
+cd run 
+```
+Here you can execute build_kegg2refseq.pl 
+```bash
+./build_kegg2refseq.pl 
+```
+which will download prokaryotes.txt from the
 NCBI and process it into the files CopraRNA_available_organisms.txt and kegg2refseqnew.csv.
 These two files must then be copied into coprarna_aux where they override their older versions.
 
