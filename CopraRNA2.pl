@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.1.1
+# CopraRNA 2.1.2
 
  # License: MIT
 
@@ -95,6 +95,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.1.2   : added R downstream ooi false positive removal
+#
 # v2.1.1   : added input exceptions
 #            DAVID python code now py2 and py3 compatible
 #            changed coloring in evolutionary heatmap
@@ -170,6 +172,7 @@ my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRN
 my $verbose = 0; ## edit 2.0.5.1
 my $noclean = 0; ## edit 2.0.5.1
 my $websrv = 0; ## edit 2.0.5.1
+my $ooi_filt = 0; ## for copraRNA2_ooi_post_filtering.R
 my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
 my $topcount = 200; # amount of top predictions // ## edit 2.0.5.1
 my $root = 1; # root function to apply to the weights // ## edit 2.0.5.1
@@ -202,12 +205,13 @@ GetOptions ( ## edit 2.0.4
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
     'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons ## edit 2.0.6
+    'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
 );
 
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
-print "\nCopraRNA 2.1.1\n\n",
+print "\nCopraRNA 2.1.2\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
 "by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
@@ -249,6 +253,7 @@ print "\nCopraRNA 2.1.1\n\n",
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",  ## edit 2.0.5.1
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
 " --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",  ## edit 2.0.6
+" --ooifilt                 post processing filter for organism of interest p-value 0=off (def:0)\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n\n", ## edit 2.0.6
 
@@ -277,6 +282,9 @@ die("\nError: The input file ($sRNAs_fasta) supplied does not appear to be a FAS
 my $count_fa = `grep -c '>' $sRNAs_fasta`;
 chomp $count_fa;
 die("\nError: The input file ($sRNAs_fasta) seems to contain less than 3 sequences!\n\n") unless($count_fa>2);
+
+# check for ooifilt <=1 and >= 0
+die("\nError: ooifilt needs to be specified between 0 and 1. You set $ooi_filt\n\n") unless ($ooi_filt>=0 and $ooi_filt<=1);
 
 # create warning for non empty run dir
 my @dir_files = <*>; ## edit 2.0.5.1
@@ -351,7 +359,8 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
-    print WRITETOOPTIONS "version:CopraRNA 2.1.1\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
+    print WRITETOOPTIONS "version:CopraRNA 2.1.2\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
 

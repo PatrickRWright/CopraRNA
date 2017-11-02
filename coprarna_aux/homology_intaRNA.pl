@@ -58,6 +58,10 @@ chomp $maxbpdist;
 my $cons = `grep 'cons:' CopraRNA_option_file.txt | sed 's/cons://g'`; ## edit 2.0.6
 chomp $cons;
 
+# get ooifilt
+my $ooi_filt = `grep 'ooifilt:' CopraRNA_option_file.txt | sed 's/ooifilt://g'`;
+chomp $ooi_filt;
+
 open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); ## edit 2.0.2 
 
 my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
@@ -116,7 +120,6 @@ foreach(@split_RefIds) {
         my $refseqoutputfile = $_ . ".gb"; # added .gb
         $GenBankFiles = $GenBankFiles . $refseqoutputfile . ",";
         my $accessionnumber = $_;
-        system "cp /data/db/databases/refseq_gbk_bacteria/04-05-2016/$accessionnumber.gb $accessionnumber.gb" if (-e "/data/db/databases/refseq_gbk_bacteria/04-05-2016/$accessionnumber.gb"); ## edit 2.0.3 ## edit 2.0.3.2 changed .gbk to .gb because ending was changed in local mirror
         print $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb \n" if ($verbose); ## edit 1.2.1 ## edit 2.0.2
         system $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb"; ## edit 1.2.1 ## edit 2.0.2
     }
@@ -346,6 +349,9 @@ unless ($cop1) {
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args $ooi_refseq_id 2> /dev/null > /dev/null"; ## edit 2.0.6
     # perform actual CopraRNA 2 p-value combination
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus 2> /dev/null > /dev/null"; ## edit 2.0.6
+    
+    # post processing filter for organism of interest p-values
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_ooi_post_filtering.R --args ooi=$ooi_refseq_id thres=$ooi_filt 2> /dev/null > /dev/null"; 
 }
 
 # truncate final output // ## edit 2.0.5.1
@@ -356,24 +362,35 @@ unless ($cop1) {
     system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
+    # add system head calls for ooi post filt
+    # TODO
 }
 
 # figure out which result is the primary result ## edit 2.0.6
 if ($cop1) { # CopraRNA 1 is the primary requested result
     system "cp CopraRNA1_final.csv CopraRNA_result.csv";    
     system "cp CopraRNA1_final_all.csv CopraRNA_result_all.csv";    
-} elsif ($nooi) { # CopraRNA 2 with balanced mode is the requested result
+} elsif ($nooi and (not $cons)) { # CopraRNA 2 with balanced mode is the requested result
     system "cp  CopraRNA2_final_balanced.csv CopraRNA_result.csv";
     system "cp  CopraRNA2_final_all_balanced.csv CopraRNA_result_all.csv";
-} elsif ($nooi and ($cons eq 2) ) { # CopraRNA 2 balanced prediction with overall consensus
+} elsif ($nooi and ($cons eq 2)) { # CopraRNA 2 balanced prediction with overall consensus
     system "cp CopraRNA2_final_balanced_consensus.csv CopraRNA_result.csv"; 
     system "cp CopraRNA2_final_all_balanced_consensus.csv CopraRNA_result_all.csv";
-} elsif ($cons eq 1) { # CopraRNA 2 ooi prediction with ooi consensus
+} elsif ($cons eq 1 and (not $ooi_filt)) { # CopraRNA 2 ooi prediction with ooi consensus
     system "cp CopraRNA2_final_ooi_ooiconsensus.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi_ooiconsensus.csv CopraRNA_result_all.csv"; 
-} elsif ($cons eq 2) { # CopraRNA 2 ooi prediction with overall consensus
+} elsif ($cons eq 2 and (not $ooi_filt)) { # CopraRNA 2 ooi prediction with overall consensus
     system "cp CopraRNA2_final_ooi_consensus.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi_consensus.csv CopraRNA_result_all.csv"; 
+#} elsif ($ooi_filt and ($cons eq 1)) { # ooifilt with ooi consensus
+    # insert system calls
+    # TODO
+#} elsif ($ooi_filt and ($cons eq 2)) { # ooifilt with overall consensus
+    # insert system calls
+    # TODO
+#} elsif ($ooi_filt and (not $cons)) { # ooi_filt
+    # insert system calls
+    # TODO
 } else { # CopraRNA 2 with org of interest focus (standard)
     system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";
@@ -396,6 +413,7 @@ if (scalar(@CopraRNA_out_lines) <= 1) { ## edit 2.0.6
 
 # trim off last column (initial_sorting) if CopraRNA 2 prediction mode
 unless ($cop1) {
+     system "awk -F',' '{ print \$NF }' CopraRNA_result.csv > CopraRNA_result.map_evo_align" if ($websrv);
      system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
      system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
      system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
@@ -403,10 +421,11 @@ unless ($cop1) {
      # change header
      system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
      system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
+     system "sed -i 's/p.value/p-value/g' CopraRNA_result.csv";
      system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
      system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
+     system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
 }
-
 
 if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5.1
 
