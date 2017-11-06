@@ -13,8 +13,6 @@ for any character and X stands for a digit between 0 and 9). Depending on sequen
 or longer to compute. In most cases it is significantly faster. It is suggested to run CopraRNA
 on a machine with at least 8 GB of memory.
 
-Please note: Version 2.1.1 is currently experimental and changes are actively being pushed.
-
 For testing or ad hoc use of CopraRNA, you can use its webinterface at the
 
 **==> [Freiburg RNA tools CopraRNA webserver](http://rna.informatik.uni-freiburg.de/CopraRNA/) <==**
