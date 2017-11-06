@@ -47,8 +47,9 @@ The following topics are covered by this documentation:
 <a name="install" />
 # Installation
 
-In order to use CopraRNA you can either install it directly via conda or
-clone this github repository and install the dependencies individually.
+In order to use CopraRNA you can either [install it directly via conda](#instconda) or
+clone this github repository and install the dependencies individually. 
+It is also possible to run CopraRNA [via a provided Docker container](#biocontainer).
 
 <br /><br />
 <a name="deps" />
@@ -115,7 +116,7 @@ source activate coprarnaenv
 
 ## Usage via biocontainer (docker)
 
-CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type:
+CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type (with changed version):
 ```bash
        docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
 ```
@@ -180,7 +181,7 @@ cd run
 ```
 Here you can execute build_kegg2refseq.pl 
 ```bash
-./build_kegg2refseq.pl 
+../build_kegg2refseq.pl 
 ```
 which will download prokaryotes.txt from the
 NCBI and process it into the files CopraRNA_available_organisms.txt and kegg2refseqnew.csv.
