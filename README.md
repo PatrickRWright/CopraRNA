@@ -162,6 +162,7 @@ The following options are available:
 - `--noclean` : switch to prevent removal of temporary files (def:off)
 - `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
 - `--nooi` : if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
+- `--ooifilt` : post processing filter for organism of interest p-value 0=off (def:0)
 - `--root` : specifies root function to apply to the weights (def:1)
 - `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
 
