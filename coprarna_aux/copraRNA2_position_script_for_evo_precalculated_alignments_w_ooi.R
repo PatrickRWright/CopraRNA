@@ -452,9 +452,9 @@ build_anno<-function(ooi="NC_000911"){
 		peak_mRNA<-as.numeric(c(tab_aligned[exist,1], tab_aligned[exist,2]))
 		peak_sRNA<-list(as.numeric(c(tab_aligned[exist,5], tab_aligned[exist,6])),NULL)
 		 
-		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.5)
-		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.5)
-		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.5)
+		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
+		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
+		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.6)
 		res<-cbind(tab,cons_mRNA,cons_sRNA,cons_sRNA2)
 		p_sub<-rep(NA,nrow(tab))
 		cons_sRNA_sub<-rep(NA,nrow(tab))
@@ -462,9 +462,9 @@ build_anno<-function(ooi="NC_000911"){
 		cons_mRNA_sub<-rep(NA,nrow(tab))
 		if(nrow(tabsub_aligned)>0){
 			
-			cons_sRNAsu<-overlap(peak_sRNA[[1]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.5)
-			cons_sRNAsu2<-overlap(peak_sRNA[[2]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.5)
-			cons_mRNAsu<-overlap(peak_mRNA, as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]),thres=0.5)
+			cons_sRNAsu<-overlap(peak_sRNA[[1]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.6)
+			cons_sRNAsu2<-overlap(peak_sRNA[[2]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.6)
+			cons_mRNAsu<-overlap(peak_mRNA, as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]),thres=0.6)
 			tabsub<-cbind(tabsub,cons_mRNAsu,cons_sRNAsu)
 			
 			ov<-na.omit(match(as.character(tabsub[,"name"]),as.character(tab[,"name"])))
