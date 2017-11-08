@@ -1,4 +1,4 @@
-# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/repository/biocontainers/coprarna)
+# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA/releases)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/biocontainers/coprarna)
 ![CopraRNA](https://raw.githubusercontent.com/PatrickRWright/CopraRNA/master/copra_sRNA.jpg "CopraRNA")
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
