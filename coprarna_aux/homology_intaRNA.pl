@@ -350,8 +350,6 @@ unless ($cop1) {
     # perform actual CopraRNA 2 p-value combination
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus 2> /dev/null > /dev/null"; ## edit 2.0.6
     
-    # post processing filter for organism of interest p-values
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_ooi_post_filtering.R --args ooi=$ooi_refseq_id thres=$ooi_filt 2> /dev/null > /dev/null"; 
 }
 
 # truncate final output // ## edit 2.0.5.1
@@ -362,8 +360,6 @@ unless ($cop1) {
     system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
-    # add system head calls for ooi post filt
-    # TODO
 }
 
 # figure out which result is the primary result ## edit 2.0.6
