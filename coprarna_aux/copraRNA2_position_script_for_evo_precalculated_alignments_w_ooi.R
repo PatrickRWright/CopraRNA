@@ -38,15 +38,15 @@ peakFind<-function(interaction_site_distr, thres=0.4){
 peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	sorted<-sort(unique(interaction_site_distr), decreasing=T)
 	s1<-sorted[1]
-	s2<-sorted[2]
-	eq<-s2/s1
+	
+	
 	
 	th<-thres*s1
-	th2<-thres*s2
+	
 	mea<-which(interaction_site_distr==s1)
-	mea2<-which(interaction_site_distr==s2)
+	
 	s<-mea[1]
-	s2<-mea2[1]
+	
 	while(interaction_site_distr[s]>=th & s >= 1){
 	
 		s<-s-1
@@ -66,6 +66,14 @@ peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	
 	peak<-c(s,e)
 	peak2<-c()
+	sorted2<-sort(unique(interaction_site_distr[-seq(s,e)]), decreasing=T)
+	if(length(sorted2)>10){
+	s2<-sorted2[1]
+	th2<-thres*s2
+	eq<-s2/s1
+	mea2<-which(interaction_site_distr==s2)
+	s2<-mea2[1]
+	
 	ov<-intersect(mea2,seq(s,e))
 	
 	if(length(ov)==0){
@@ -86,7 +94,7 @@ peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 		}
 		
 	}
-	
+	}
 	peak<-list(peak,peak2)
 	peak
 	}	
@@ -110,6 +118,8 @@ overlap<-function(peak, start_interaction, end_interaction, thres=0.7){
 build_anno<-function(ooi="NC_000911"){
 	
 	require(seqinr)
+	consensus_mRNA<-list()
+	consensus_sRNA<-list()
 	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
 	system(input)
 	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
@@ -354,6 +364,12 @@ build_anno<-function(ooi="NC_000911"){
 		 peak_mRNA<-peakFind(align_table_mRNA, thres=0.40)
 		 peak_sRNA<-peakFind2(align_table_sRNA, thres=0.40)
 		 
+		consensus_mRNA[[length(consensus_mRNA)+1]]<-peak_mRNA	
+		consensus_sRNA[[length(consensus_sRNA)+1]]<-peak_sRNA
+			
+		names(consensus_mRNA)[length(consensus_mRNA)]<-paste(i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9],  sep="")
+		names(consensus_sRNA)[length(consensus_sRNA)]<-paste(i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9],  sep="")
+			
 		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.6)
@@ -436,9 +452,9 @@ build_anno<-function(ooi="NC_000911"){
 		peak_mRNA<-as.numeric(c(tab_aligned[exist,1], tab_aligned[exist,2]))
 		peak_sRNA<-list(as.numeric(c(tab_aligned[exist,5], tab_aligned[exist,6])),NULL)
 		 
-		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
-		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
-		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.6)
+		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.5)
+		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.5)
+		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.5)
 		res<-cbind(tab,cons_mRNA,cons_sRNA,cons_sRNA2)
 		p_sub<-rep(NA,nrow(tab))
 		cons_sRNA_sub<-rep(NA,nrow(tab))
@@ -446,9 +462,9 @@ build_anno<-function(ooi="NC_000911"){
 		cons_mRNA_sub<-rep(NA,nrow(tab))
 		if(nrow(tabsub_aligned)>0){
 			
-			cons_sRNAsu<-overlap(peak_sRNA[[1]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.6)
-			cons_sRNAsu2<-overlap(peak_sRNA[[2]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.6)
-			cons_mRNAsu<-overlap(peak_mRNA, as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]),thres=0.6)
+			cons_sRNAsu<-overlap(peak_sRNA[[1]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.5)
+			cons_sRNAsu2<-overlap(peak_sRNA[[2]], as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]),thres=0.5)
+			cons_mRNAsu<-overlap(peak_mRNA, as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]),thres=0.5)
 			tabsub<-cbind(tabsub,cons_mRNAsu,cons_sRNAsu)
 			
 			ov<-na.omit(match(as.character(tabsub[,"name"]),as.character(tab[,"name"])))
@@ -486,6 +502,8 @@ build_anno<-function(ooi="NC_000911"){
 	###########################
 	}
 	}
+	consensus_both<-list(consensus_mRNA,consensus_sRNA)
+	save(consensus_both, file="consensus_positions.Rdata")
 	out<-list(conservation_table,conservation_table_sub,conservation_table_ooi,conservation_table_sub_ooi )
 	out
 }
@@ -493,5 +511,3 @@ build_anno<-function(ooi="NC_000911"){
 conservation_table<-build_anno(ooi=ooi2)
 save(conservation_table, file="conservation_table.Rdata")
 #################################
-
-
