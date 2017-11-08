@@ -520,6 +520,9 @@ unless ($noclean) {
         system "mv all_predictions/CopraRNA_result.csv .";
         system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
     }
+    
+    # zip evo_alignments folder to reduce file number
+    system "if [ -d evo_alignments ]; then zip -rmq evo_alignments evo_alignments 2>&1; fi";
 
     # remove weights.warning if its empty
     system "rm weights.warning" if (-z "weights.warning");
