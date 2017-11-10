@@ -165,7 +165,8 @@ build_anno<-function(ooi="NC_000911"){
 	conservation_table_sub<-conservation_table
 	conservation_table_ooi<-conservation_table
 	conservation_table_sub_ooi<-conservation_table
-	
+	conservation_position<-conservation_table
+	conservation_position_sub<-conservation_table
 	for(i in 1:nrow(dat)){
 		
 		#print(i)
@@ -421,14 +422,14 @@ build_anno<-function(ooi="NC_000911"){
 		 bar_sRNA<-paste("BAR_GRAPH\tweighted interaction region\t", bar_sRNA)
 		 cons_site<-rep("E",peak_sRNA[[1]][2]-peak_sRNA[[1]][1])
 		 cons_site<-paste(cons_site, collapse="|")
-		 cons_site<-c(rep("|",peak_sRNA[[1]][1]-1),"E,int_site_1",cons_site,rep("|",length(alignment[[1]])-peak_sRNA[[1]][2]))
+		 cons_site<-c(rep("|",peak_sRNA[[1]][1]-1),"E,int_site_1",cons_site,rep("|",length(sRNA_alignment[[1]])-peak_sRNA[[1]][2]))
 		 cons_site<-paste(cons_site, collapse="")
 		 cons_site<-paste("NO_GRAPH\t \t", cons_site)
 		 align_anno_sRNA<-c(align_anno_sRNA, bar_sRNA, cons_site)
 		 if(length(peak_sRNA[[2]]>0)){
 		 cons_site<-rep("E",peak_sRNA[[2]][2]-peak_sRNA[[2]][1])
 		 cons_site<-paste(cons_site, collapse="|")
-		 cons_site<-c(rep("|",peak_sRNA[[2]][1]-1),"E,int_site_2",cons_site,rep("|",length(alignment[[1]])-peak_sRNA[[1]][2]))
+		 cons_site<-c(rep("|",peak_sRNA[[2]][1]-1),"E,int_site_2",cons_site,rep("|",length(sRNA_alignment[[1]])-peak_sRNA[[1]][2]))
 		 cons_site<-paste(cons_site, collapse="")
 		 cons_site<-paste("NO_GRAPH\t \t", cons_site)
 		 align_anno_sRNA<-c(align_anno_sRNA, cons_site)
@@ -442,10 +443,14 @@ build_anno<-function(ooi="NC_000911"){
 	if(nrow(res2)>0){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
+		res2_position<-paste(as.numeric(res2[,1]),as.numeric(res2[,2]), sep="|")
+		conservation_position_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position
 	}
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
+	res_position<-paste(as.numeric(res[,1]),as.numeric(res[,2]), sep="|")		
+	conservation_position[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position
 	
 	########################################
 	if(length(exist)>0){
@@ -493,17 +498,21 @@ build_anno<-function(ooi="NC_000911"){
 	if(nrow(res2)>0){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub_ooi[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
+		
 	}
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table_ooi[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
+	
 	
 	}
 	###########################
 	}
 	}
 	consensus_both<-list(consensus_mRNA,consensus_sRNA)
+	interaction_positions<-list(conservation_position,conservation_position_sub)
 	save(consensus_both, file="consensus_positions.Rdata")
+	save(interaction_positions, file="interaction_positions.Rdata")
 	out<-list(conservation_table,conservation_table_sub,conservation_table_ooi,conservation_table_sub_ooi )
 	out
 }
