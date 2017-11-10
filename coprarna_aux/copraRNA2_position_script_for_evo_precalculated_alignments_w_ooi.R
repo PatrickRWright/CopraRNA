@@ -453,8 +453,8 @@ build_anno<-function(ooi="NC_000911"){
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
-	res_position<-paste(as.numeric(res[,1]),as.numeric(res[,2]), sep="|")
-	res_position_sRNA<-paste(as.numeric(res[,5]),as.numeric(res[,6]), sep="|")
+	res_position<-paste(as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]), sep="|")
+	res_position_sRNA<-paste(as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]), sep="|")
 	conservation_position[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position
 	conservation_position_sRNA[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position_sRNA
 			
