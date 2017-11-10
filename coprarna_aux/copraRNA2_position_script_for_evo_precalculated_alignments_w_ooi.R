@@ -167,6 +167,8 @@ build_anno<-function(ooi="NC_000911"){
 	conservation_table_sub_ooi<-conservation_table
 	conservation_position<-conservation_table
 	conservation_position_sub<-conservation_table
+	conservation_position_sRNA<-conservation_table
+	conservation_position_sRNA_sub<-conservation_table
 	for(i in 1:nrow(dat)){
 		
 		#print(i)
@@ -444,14 +446,18 @@ build_anno<-function(ooi="NC_000911"){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
 		res2_position<-paste(as.numeric(res2[,1]),as.numeric(res2[,2]), sep="|")
+		res2_position_sRNA<-paste(as.numeric(res2[,5]),as.numeric(res2[,6]), sep="|")
 		conservation_position_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position
+		conservation_position_sRNA_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position_sRNA
 	}
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
-	res_position<-paste(as.numeric(res[,1]),as.numeric(res[,2]), sep="|")		
+	res_position<-paste(as.numeric(res[,1]),as.numeric(res[,2]), sep="|")
+	res_position_sRNA<-paste(as.numeric(res[,5]),as.numeric(res[,6]), sep="|")
 	conservation_position[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position
-	
+	conservation_position_sRNA[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position_sRNA
+			
 	########################################
 	if(length(exist)>0){
 		peak_mRNA<-as.numeric(c(tab_aligned[exist,1], tab_aligned[exist,2]))
@@ -510,7 +516,7 @@ build_anno<-function(ooi="NC_000911"){
 	}
 	}
 	consensus_both<-list(consensus_mRNA,consensus_sRNA)
-	interaction_positions<-list(conservation_position,conservation_position_sub)
+	interaction_positions<-list(conservation_position,conservation_position_sub,conservation_position_sRNA,conservation_position_sRNA_sub)
 	save(consensus_both, file="consensus_positions.Rdata")
 	save(interaction_positions, file="interaction_positions.Rdata")
 	out<-list(conservation_table,conservation_table_sub,conservation_table_ooi,conservation_table_sub_ooi )
