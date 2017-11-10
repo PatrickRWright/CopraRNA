@@ -445,8 +445,8 @@ build_anno<-function(ooi="NC_000911"){
 	if(nrow(res2)>0){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
-		res2_position<-paste(as.numeric(res2[,1]),as.numeric(res2[,2]), sep="|")
-		res2_position_sRNA<-paste(as.numeric(res2[,5]),as.numeric(res2[,6]), sep="|")
+		res2_position<-paste(as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]), sep="|")
+		res2_position_sRNA<-paste(as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]), sep="|")
 		conservation_position_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position
 		conservation_position_sRNA_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position_sRNA
 	}
