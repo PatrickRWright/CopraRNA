@@ -118,8 +118,7 @@ overlap<-function(peak, start_interaction, end_interaction, thres=0.7){
 build_anno<-function(ooi="NC_000911"){
 	
 	require(seqinr)
-	consensus_mRNA<-list()
-	consensus_sRNA<-list()
+	
 	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
 	system(input)
 	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
@@ -169,6 +168,9 @@ build_anno<-function(ooi="NC_000911"){
 	conservation_position_sub<-conservation_table
 	conservation_position_sRNA<-conservation_table
 	conservation_position_sRNA_sub<-conservation_table
+	consensus_mRNA<-vector("list", nrow(conservation_table))
+	consensus_sRNA<-vector("list", nrow(conservation_table))
+	
 	for(i in 1:nrow(dat)){
 		
 		#print(i)
@@ -367,11 +369,11 @@ build_anno<-function(ooi="NC_000911"){
 		 peak_mRNA<-peakFind(align_table_mRNA, thres=0.40)
 		 peak_sRNA<-peakFind2(align_table_sRNA, thres=0.40)
 		 
-		consensus_mRNA[[length(consensus_mRNA)+1]]<-peak_mRNA	
-		consensus_sRNA[[length(consensus_sRNA)+1]]<-peak_sRNA
+		consensus_mRNA[[i]]<-peak_mRNA	
+		consensus_sRNA[[i]]<-peak_sRNA
 			
-		names(consensus_mRNA)[length(consensus_mRNA)]<-paste(i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9],  sep="")
-		names(consensus_sRNA)[length(consensus_sRNA)]<-paste(i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9],  sep="")
+		names(consensus_mRNA)[i]<-paste(i,"_" ,tab[1,9],  sep="")
+		names(consensus_sRNA)[i]<-paste(i,"_" ,tab[1,9],  sep="")
 			
 		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
