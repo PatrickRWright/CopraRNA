@@ -520,7 +520,15 @@ unless ($noclean) {
         system "mv all_predictions/CopraRNA_result.csv .";
         system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
     }
-    
+   
+    # make an archive for the Rdata files
+    unless ($cop1) {
+        system "mkdir Rdata";
+        system "mv consensus_positions.Rdata Rdata";
+        system "mv conservation_table.Rdata Rdata";
+        system "mv interaction_positions.Rdata Rdata";
+    }
+ 
     # zip evo_alignments folder to reduce file number
     system "if [ -d evo_alignments ]; then zip -rmq evo_alignments evo_alignments 2>&1; fi";
 

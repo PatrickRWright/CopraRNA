@@ -117,7 +117,7 @@ interaction regions in Jalview.
 all_predictions (not made if -cop1):
 This directory contains the results for all modes available in CopraRNA 2. 
 
-conservation_table.Rdata/consensus_positions.Rdata:
+Rdata:
 Precomputed R data environments. 
 
 README.txt:
