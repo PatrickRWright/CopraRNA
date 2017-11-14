@@ -1,4 +1,4 @@
-# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/repository/biocontainers/coprarna)
+# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA/releases)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/biocontainers/coprarna)
 ![CopraRNA](https://raw.githubusercontent.com/PatrickRWright/CopraRNA/master/copra_sRNA.jpg "CopraRNA")
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
@@ -13,7 +13,8 @@ for any character and X stands for a digit between 0 and 9). Depending on sequen
 or longer to compute. In most cases it is significantly faster. It is suggested to run CopraRNA
 on a machine with at least 8 GB of memory.
 
-Please note: Version 2.1.1 is currently experimental and changes are actively being pushed.
+CopraRNA produces a lot of file I/O. It is suggested to run CopraRNA in a dedicated
+empty directory to avoid unexpected behavior.
 
 For testing or ad hoc use of CopraRNA, you can use its webinterface at the
 
@@ -47,8 +48,9 @@ The following topics are covered by this documentation:
 <a name="install" />
 # Installation
 
-In order to use CopraRNA you can either install it directly via conda or
-clone this github repository and install the dependencies individually.
+In order to use CopraRNA you can either [install it directly via conda](#instconda) or
+clone this github repository and install the dependencies individually. 
+It is also possible to run CopraRNA [via a provided Docker container](#biocontainer).
 
 <br /><br />
 <a name="deps" />
@@ -115,7 +117,7 @@ source activate coprarnaenv
 
 ## Usage via biocontainer (docker)
 
-CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type:
+CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type (with changed version):
 ```bash
        docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
 ```
@@ -162,6 +164,7 @@ The following options are available:
 - `--noclean` : switch to prevent removal of temporary files (def:off)
 - `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
 - `--nooi` : if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
+- `--ooifilt` : post processing filter for organism of interest p-value 0=off (def:0)
 - `--root` : specifies root function to apply to the weights (def:1)
 - `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
 
@@ -179,7 +182,7 @@ cd run
 ```
 Here you can execute build_kegg2refseq.pl 
 ```bash
-./build_kegg2refseq.pl 
+../build_kegg2refseq.pl 
 ```
 which will download prokaryotes.txt from the
 NCBI and process it into the files CopraRNA_available_organisms.txt and kegg2refseqnew.csv.

@@ -38,15 +38,15 @@ peakFind<-function(interaction_site_distr, thres=0.4){
 peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	sorted<-sort(unique(interaction_site_distr), decreasing=T)
 	s1<-sorted[1]
-	s2<-sorted[2]
-	eq<-s2/s1
+	
+	
 	
 	th<-thres*s1
-	th2<-thres*s2
+	
 	mea<-which(interaction_site_distr==s1)
-	mea2<-which(interaction_site_distr==s2)
+	
 	s<-mea[1]
-	s2<-mea2[1]
+	
 	while(interaction_site_distr[s]>=th & s >= 1){
 	
 		s<-s-1
@@ -66,6 +66,14 @@ peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 	
 	peak<-c(s,e)
 	peak2<-c()
+	sorted2<-sort(unique(interaction_site_distr[-seq(s,e)]), decreasing=T)
+	if(length(sorted2)>10){
+	s2<-sorted2[1]
+	th2<-thres*s2
+	eq<-s2/s1
+	mea2<-which(interaction_site_distr==s2)
+	s2<-mea2[1]
+	
 	ov<-intersect(mea2,seq(s,e))
 	
 	if(length(ov)==0){
@@ -86,7 +94,7 @@ peakFind2<-function(interaction_site_distr, thres=0.4, thres2=0.9){
 		}
 		
 	}
-	
+	}
 	peak<-list(peak,peak2)
 	peak
 	}	
@@ -110,6 +118,7 @@ overlap<-function(peak, start_interaction, end_interaction, thres=0.7){
 build_anno<-function(ooi="NC_000911"){
 	
 	require(seqinr)
+	
 	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
 	system(input)
 	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
@@ -155,6 +164,12 @@ build_anno<-function(ooi="NC_000911"){
 	conservation_table_sub<-conservation_table
 	conservation_table_ooi<-conservation_table
 	conservation_table_sub_ooi<-conservation_table
+	conservation_position<-conservation_table
+	conservation_position_sub<-conservation_table
+	conservation_position_sRNA<-conservation_table
+	conservation_position_sRNA_sub<-conservation_table
+	consensus_mRNA<-vector("list", nrow(conservation_table))
+	consensus_sRNA<-vector("list", nrow(conservation_table))
 	
 	for(i in 1:nrow(dat)){
 		
@@ -354,6 +369,12 @@ build_anno<-function(ooi="NC_000911"){
 		 peak_mRNA<-peakFind(align_table_mRNA, thres=0.40)
 		 peak_sRNA<-peakFind2(align_table_sRNA, thres=0.40)
 		 
+		consensus_mRNA[[i]]<-peak_mRNA	
+		consensus_sRNA[[i]]<-peak_sRNA
+			
+		names(consensus_mRNA)[i]<-paste(i,"_" ,tab[1,9],  sep="")
+		names(consensus_sRNA)[i]<-paste(i,"_" ,tab[1,9],  sep="")
+			
 		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.6)
@@ -405,14 +426,14 @@ build_anno<-function(ooi="NC_000911"){
 		 bar_sRNA<-paste("BAR_GRAPH\tweighted interaction region\t", bar_sRNA)
 		 cons_site<-rep("E",peak_sRNA[[1]][2]-peak_sRNA[[1]][1])
 		 cons_site<-paste(cons_site, collapse="|")
-		 cons_site<-c(rep("|",peak_sRNA[[1]][1]-1),"E,int_site_1",cons_site,rep("|",length(alignment[[1]])-peak_sRNA[[1]][2]))
+		 cons_site<-c(rep("|",peak_sRNA[[1]][1]-1),"E,int_site_1",cons_site,rep("|",length(sRNA_alignment[[1]])-peak_sRNA[[1]][2]))
 		 cons_site<-paste(cons_site, collapse="")
 		 cons_site<-paste("NO_GRAPH\t \t", cons_site)
 		 align_anno_sRNA<-c(align_anno_sRNA, bar_sRNA, cons_site)
 		 if(length(peak_sRNA[[2]]>0)){
 		 cons_site<-rep("E",peak_sRNA[[2]][2]-peak_sRNA[[2]][1])
 		 cons_site<-paste(cons_site, collapse="|")
-		 cons_site<-c(rep("|",peak_sRNA[[2]][1]-1),"E,int_site_2",cons_site,rep("|",length(alignment[[1]])-peak_sRNA[[1]][2]))
+		 cons_site<-c(rep("|",peak_sRNA[[2]][1]-1),"E,int_site_2",cons_site,rep("|",length(sRNA_alignment[[1]])-peak_sRNA[[1]][2]))
 		 cons_site<-paste(cons_site, collapse="")
 		 cons_site<-paste("NO_GRAPH\t \t", cons_site)
 		 align_anno_sRNA<-c(align_anno_sRNA, cons_site)
@@ -426,11 +447,19 @@ build_anno<-function(ooi="NC_000911"){
 	if(nrow(res2)>0){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
+		res2_position<-paste(as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]), sep="|")
+		res2_position_sRNA<-paste(as.numeric(tabsub_aligned[,5]),as.numeric(tabsub_aligned[,6]), sep="|")
+		conservation_position_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position
+		conservation_position_sRNA_sub[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-res2_position_sRNA
 	}
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
-	
+	res_position<-paste(as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]), sep="|")
+	res_position_sRNA<-paste(as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]), sep="|")
+	conservation_position[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position
+	conservation_position_sRNA[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-res_position_sRNA
+			
 	########################################
 	if(length(exist)>0){
 		peak_mRNA<-as.numeric(c(tab_aligned[exist,1], tab_aligned[exist,2]))
@@ -477,15 +506,21 @@ build_anno<-function(ooi="NC_000911"){
 	if(nrow(res2)>0){
 		cons_res_sub<-paste(res2[,"p_sub"],res2[,"cons_mRNA_sub"],res2[,"cons_sRNA_sub"],res2[,"cons_sRNA_sub2"], sep="|")
 		conservation_table_sub_ooi[i,na.omit(match(res2[,"orgs"],colnames(conservation_table)))]<-cons_res_sub
+		
 	}
 	
 	write.table(res, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mapping_result.txt", sep=""), sep="\t")
 	conservation_table_ooi[i,na.omit(match(res[,"orgs"],colnames(conservation_table)))]<-cons_res
 	
+	
 	}
 	###########################
 	}
 	}
+	consensus_both<-list(consensus_mRNA,consensus_sRNA)
+	interaction_positions<-list(conservation_position,conservation_position_sub,conservation_position_sRNA,conservation_position_sRNA_sub)
+	save(consensus_both, file="consensus_positions.Rdata")
+	save(interaction_positions, file="interaction_positions.Rdata")
 	out<-list(conservation_table,conservation_table_sub,conservation_table_ooi,conservation_table_sub_ooi )
 	out
 }
@@ -493,5 +528,3 @@ build_anno<-function(ooi="NC_000911"){
 conservation_table<-build_anno(ooi=ooi2)
 save(conservation_table, file="conservation_table.Rdata")
 #################################
-
-
