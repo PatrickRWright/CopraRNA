@@ -4,10 +4,23 @@
 
 # dependency: CopraRNA_available_organisms.txt
 
-# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi_fast3.r --args NC_000913
+# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi_v3.R --args NC_000913
 
 args <- commandArgs(trailingOnly = TRUE) 
+
 ooi2 <- args[1] 
+
+
+
+seqle <- function(x,incr=1) { 
+  if(!is.numeric(x)) x <- as.numeric(x) 
+  n <- length(x)  
+  y <- x[-1L] != x[-n] + incr 
+  i <- c(which(y|is.na(y)),n) 
+  list(lengths = diff(c(0L,i)),
+       values = x[head(c(0L,i)+1L,-1L)]) 
+} 
+
 
 peakFind<-function(interaction_site_distr, thres=0.4){
 	m<-max(interaction_site_distr)
@@ -193,8 +206,8 @@ build_anno<-function(ooi="NC_000911"){
 		pos_opt<-(match(query, opt[,1]))
 		
 		tab<-opt[pos_opt,c("start1","end1","seedStart1","seedEnd1","start2","end2","seedStart2","seedEnd2")]
-		tab<-cbind(tab,paste(genename, "_", query,sep=""),query,opt[pos_opt,"p.value"],orgs)
-		colnames(tab)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs")
+		tab<-cbind(tab,paste(genename, "_", query,sep=""),query,opt[pos_opt,"p.value"],orgs,opt[pos_opt,"hybridDP"])
+		colnames(tab)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs","hybridDP")
 		
 		pos_sub<-(match(query, (subopt[,1])))
 		exist_sub<-which(is.na(pos_sub)==F)
@@ -202,8 +215,8 @@ build_anno<-function(ooi="NC_000911"){
 		tabsub<-matrix(,1,12)
 		if(length(pos_sub)>0){
 			tabsub<-subopt[pos_sub,c("start1","end1","seedStart1","seedEnd1","start2","end2","seedStart2","seedEnd2")]
-			tabsub<-cbind(tabsub,paste(genename[exist_sub], "_", query[exist_sub],sep=""),query[exist_sub],subopt[pos_sub,"p.value"],orgs[exist_sub])
-			colnames(tabsub)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs")
+			tabsub<-cbind(tabsub,paste(genename[exist_sub], "_", query[exist_sub],sep=""),query[exist_sub],subopt[pos_sub,"p.value"],orgs[exist_sub],subopt[pos_sub,"hybridDP"])
+			colnames(tabsub)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs","hybridDP")
 		}
 	
 		tabsub<-na.omit(tabsub)
@@ -219,8 +232,12 @@ build_anno<-function(ooi="NC_000911"){
 		write.fasta(alignment, paste(nam2[m_names],(orgs),tab[,10],sep="_"), file.out=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA.fasta", sep=""))
 		tab_aligned<-tab
 		tabsub_aligned<-tabsub
+		
+		
 		 if(nrow(tabsub)>0){
+		 ############
 		 for(j in 1:nrow(tabsub)){
+		 
 			align_num_sRNA<-which(names(sRNA_alignment2)==tabsub[j,"orgs"])
 			align_num<-which(names(alignment)==tabsub[j,"name2"])
 			 nogaps<-which(alignment[[align_num]]!="-")
@@ -229,55 +246,122 @@ build_anno<-function(ooi="NC_000911"){
 			 tabsub_aligned[j,2]<-nogaps[as.numeric(tabsub[j,2])]
 			 tabsub_aligned[j,5]<-nogaps2[as.numeric(tabsub[j,5])]
 			 tabsub_aligned[j,6]<-nogaps2[as.numeric(tabsub[j,6])]
-			 }
-			
-			a1<-which(as.numeric(tabsub[,11])<=0.001)
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp<=0001", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp<=0001", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+			 
+			 int_postion<-seq(tabsub[j, "start"],tabsub[j, "end"])
+			in_interaction<-gregexpr("\\(", tabsub[j,"hybridDP"])[[1]]
+			in_interaction<-int_postion[in_interaction]
+			in2<-seqle(in_interaction)
+			int_list<-c()
+
+			for(jj in 1:length(in2$lengths)){
+				temp_int<-c(in2$values[jj],in2$values[jj]+in2$lengths[jj]-1)
+				int_list[[jj]]<-temp_int
 			}
 			
-			a1<-which(as.numeric(tabsub[,11])>0.001 & as.numeric(tabsub[,11])<=0.01)
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp<=001", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp<=001", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+			int_postion_sRNA<-seq(tabsub[j, "start_sRNA"],tabsub[j, "end_sRNA"])
+			sRNA_string<-gsub(".*&","",tabsub[j,"hybridDP"])
+			sRNA_string<-paste(rev(strsplit(sRNA_string,"")[[1]]), collapse="")
+			in_interaction_sRNA<-gregexpr("\\)", sRNA_string)[[1]]
+			in_interaction_sRNA<-int_postion_sRNA[in_interaction_sRNA]
+			in2_sRNA<-seqle(in_interaction_sRNA)
+			int_list_sRNA<-c()
+
+			for(jj in 1:length(in2_sRNA$lengths)){
+				temp_int<-c(in2_sRNA$values[jj],in2_sRNA$values[jj]+in2_sRNA$lengths[jj]-1)
+				int_list_sRNA[[jj]]<-temp_int
 			}
 			
-			a1<-which(as.numeric(tabsub[,11])>0.01 & as.numeric(tabsub[,11])<=0.1)
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp<=01", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp<=01", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+			a1<-j
+			if(as.numeric(tabsub[j,11])<=0.001){
+				for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=0001", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=0001", sep="")
+					anno_sRNA<-c(anno_sRNA, s)
+					}
+					
+					
+				
 			}
 			
-			a1<-which(as.numeric(tabsub[,11])>0.1 & as.numeric(tabsub[,11])<=0.2)
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp<=02", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp<=02", sep="")
+			
+			if(as.numeric(tabsub[j,11])>0.001 & as.numeric(tabsub[j,11])<=0.01){
+				for(jj in 1:length(int_list)){
+				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=001", sep="")
 				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=001", sep="")
 				anno_sRNA<-c(anno_sRNA, s)
-			}
-			a1<-which(as.numeric(tabsub[,11])>0.2 & as.numeric(tabsub[,11])<=0.3)
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp<=03", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp<=03", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
-			}
-			a1<-which(as.numeric(tabsub[,11])>0.3 )
-			if(length(a1)>0){
-				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,1], "\t", tabsub[a1,2] ,"\tp>03", sep="")
-				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", tabsub[a1,5], "\t", tabsub[a1,6] ,"\tp>03", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
 			}
 			
-		 
+			
+			if(as.numeric(tabsub[j,11])>0.01 & as.numeric(tabsub[j,11])<=0.1){
+				for(jj in 1:length(int_list)){
+				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=01", sep="")
+				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=01", sep="")
+				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			
+			if(as.numeric(tabsub[j,11])>0.1 & as.numeric(tabsub[j,11])<=0.2){
+				for(jj in 1:length(int_list)){
+				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=02", sep="")
+				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=02", sep="")
+				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			if(as.numeric(tabsub[j,11])>0.2 & as.numeric(tabsub[j,11])<=0.3){
+				for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=03", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=03", sep="")
+					anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			if(as.numeric(tabsub[j,11])>0.3){
+				for(jj in 1:length(int_list)){
+				m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp>03", sep="")
+				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp>03", sep="")
+				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			
+			}
+		 ##################
 		 }
 		 
 		 for(j in 1:nrow(tab)){
@@ -290,55 +374,125 @@ build_anno<-function(ooi="NC_000911"){
 			 tab_aligned[j,5]<-nogaps2[as.numeric(tab[j,5])]
 			 tab_aligned[j,6]<-nogaps2[as.numeric(tab[j,6])]
 			 
+			int_postion<-seq(tab[j, "start"],tab[j, "end"])
+			in_interaction<-gregexpr("\\(", tab[j,"hybridDP"])[[1]]
+			in_interaction<-int_postion[in_interaction]
+			in2<-seqle(in_interaction)
+			int_list<-c()
+
+			for(jj in 1:length(in2$lengths)){
+				temp_int<-c(in2$values[jj],in2$values[jj]+in2$lengths[jj]-1)
+				int_list[[jj]]<-temp_int
 			}
 			
-			a1<-which(as.numeric(tab[,11])<=0.001)
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp<=0001", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp<=0001", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+			int_postion_sRNA<-seq(tab[j, "start_sRNA"],tab[j, "end_sRNA"])
+			sRNA_string<-gsub(".*&","",tab[j,"hybridDP"])
+			sRNA_string<-paste(rev(strsplit(sRNA_string,"")[[1]]), collapse="")
+			in_interaction_sRNA<-gregexpr("\\)", sRNA_string)[[1]]
+			in_interaction_sRNA<-int_postion_sRNA[in_interaction_sRNA]
+			in2_sRNA<-seqle(in_interaction_sRNA)
+			int_list_sRNA<-c()
+
+			for(jj in 1:length(in2_sRNA$lengths)){
+				temp_int<-c(in2_sRNA$values[jj],in2_sRNA$values[jj]+in2_sRNA$lengths[jj]-1)
+				int_list_sRNA[[jj]]<-temp_int
 			}
 			
-			a1<-which(as.numeric(tab[,11])>0.001 & as.numeric(tab[,11])<=0.01)
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp<=001", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp<=001", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+			a1<-j
+			if(as.numeric(tab[j,11])<=0.001){
+				for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=0001", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=0001", sep="")
+					anno_sRNA<-c(anno_sRNA, s)
+					}
+					
+					
+				
 			}
 			
-			a1<-which(as.numeric(tab[,11])>0.01 & as.numeric(tab[,11])<=0.1)
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp<=01", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp<=01", sep="")
+			
+			if(as.numeric(tab[j,11])>0.001 & as.numeric(tab[j,11])<=0.01){
+				for(jj in 1:length(int_list)){
+				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=001", sep="")
 				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=001", sep="")
 				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
 			}
 			
-			a1<-which(as.numeric(tab[,11])>0.1 & as.numeric(tab[,11])<=0.2)
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp<=02", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp<=02", sep="")
+			
+			if(as.numeric(tab[j,11])>0.01 & as.numeric(tab[j,11])<=0.1){
+				for(jj in 1:length(int_list)){
+				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=01", sep="")
 				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=01", sep="")
 				anno_sRNA<-c(anno_sRNA, s)
-			}
-			a1<-which(as.numeric(tab[,11])>0.2 & as.numeric(tab[,11])<=0.3)
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp<=03", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp<=03", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
-			}
-			a1<-which(as.numeric(tab[,11])>0.3 )
-			if(length(a1)>0){
-				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,1], "\t", tab[a1,2] ,"\tp>03", sep="")
-				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", tab[a1,5], "\t", tab[a1,6] ,"\tp>03", sep="")
-				anno_mRNA<-c(anno_mRNA, m)
-				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
 			}
 			
-		 tab_aligned[,11]<-1-as.numeric(tab_aligned[,11])
+			
+			if(as.numeric(tab[j,11])>0.1 & as.numeric(tab[j,11])<=0.2){
+				for(jj in 1:length(int_list)){
+				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=02", sep="")
+				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=02", sep="")
+				anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			if(as.numeric(tab[j,11])>0.2 & as.numeric(tab[j,11])<=0.3){
+				for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp<=03", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp<=03", sep="")
+					anno_sRNA<-c(anno_sRNA, s)
+				}
+				
+				
+				
+			}
+			
+			if(as.numeric(tab[j,11])>0.3){
+				for(jj in 1:length(int_list)){
+				m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1], "\t", int_list[[jj]][2] ,"\tp>03", sep="")
+				anno_mRNA<-c(anno_mRNA, m)
+				}
+				for(jj in 1:length(int_list_sRNA)){
+				s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list_sRNA[[jj]][1], "\t", int_list_sRNA[[jj]][2] ,"\tp>03", sep="")
+				anno_sRNA<-c(anno_sRNA, s)
+				
+				}
+				
+				
+				
+			}
+			
+			
+			}
+			
+		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)	
+		tab_aligned[,11]<-1-as.numeric(tab_aligned[,11])
 		tab<-as.matrix(tab)
 		 
 		 
@@ -378,6 +532,16 @@ build_anno<-function(ooi="NC_000911"){
 		cons_sRNA<-overlap(peak_sRNA[[1]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_sRNA2<-overlap(peak_sRNA[[2]], as.numeric(tab_aligned[,5]),as.numeric(tab_aligned[,6]),thres=0.6)
 		cons_mRNA<-overlap(peak_mRNA, as.numeric(tab_aligned[,1]),as.numeric(tab_aligned[,2]),thres=0.6)
+		min_mRNA_opt<-min(tab_aligned[which(cons_mRNA==TRUE),1])
+		min_sRNA_opt<-min(c(tab_aligned[which(cons_sRNA==TRUE),5],tab_aligned[which(cons_sRNA2==TRUE),5]))
+		max_mRNA_opt<-max(tab_aligned[which(cons_mRNA==TRUE),2])
+		max_sRNA_opt<-max(c(tab_aligned[which(cons_sRNA==TRUE),6],tab_aligned[which(cons_sRNA2==TRUE),6]))
+		
+		min_mRNA_sub<-c()
+		min_sRNA_sub<-c()
+		max_mRNA_sub<-c()
+		max_sRNA_sub<-c()
+		
 		res<-cbind(tab,cons_mRNA,cons_sRNA,cons_sRNA2)
 		p_sub<-rep(NA,nrow(tab))
 		cons_sRNA_sub<-rep(NA,nrow(tab))
@@ -390,6 +554,12 @@ build_anno<-function(ooi="NC_000911"){
 			cons_mRNAsu<-overlap(peak_mRNA, as.numeric(tabsub_aligned[,1]),as.numeric(tabsub_aligned[,2]),thres=0.6)
 			tabsub<-cbind(tabsub,cons_mRNAsu,cons_sRNAsu)
 			
+			min_mRNA_sub<-min(tabsub_aligned[which(cons_mRNAsu==TRUE),1])
+			min_sRNA_sub<-min(c(tabsub_aligned[which(cons_sRNAsu==TRUE),5],tabsub_aligned[which(cons_sRNAsu2==TRUE),5]))
+			max_mRNA_sub<-max(tabsub_aligned[which(cons_mRNAsu==TRUE),2])
+			max_sRNA_sub<-max(c(tabsub_aligned[which(cons_sRNAsu==TRUE),6],tabsub_aligned[which(cons_sRNAsu2==TRUE),6]))
+			
+			
 			ov<-na.omit(match(as.character(tabsub[,"name"]),as.character(tab[,"name"])))
 			
 			p_sub[ov]<-tabsub[,11]
@@ -399,15 +569,306 @@ build_anno<-function(ooi="NC_000911"){
 			res<-cbind(res,p_sub,cons_mRNA_sub,cons_sRNA_sub,cons_sRNA_sub2)
 			
 		}
-		 
+		
+
+		min_cons_int_start_mRNA<-max(0,min(peak_mRNA[1]-5,min_mRNA_opt,min_mRNA_sub))
+		max_cons_int_start_mRNA<-min(length(alignment[[1]]),max(peak_mRNA[2]+5,max_mRNA_opt,max_mRNA_sub))
+		min_cons_int_start_sRNA<-max(0,min(min(peak_sRNA[[1]][1],peak_sRNA[[2]][1],na.rm=T)-5,min_sRNA_opt,min_sRNA_sub))
+		max_cons_int_start_sRNA<-min(length(sRNA_alignment2[[1]]),max(max(peak_sRNA[[1]][2],peak_sRNA[[2]][2],na.rm=T)+5,max_sRNA_opt,max_sRNA_sub))
+		
+		m1<-vector("list",length(alignment))
+		s1<-vector("list",length(sRNA_alignment2))
+		
+		for(jj in 1:length(alignment)){
+			m1[[jj]]<-alignment[[jj]][min_cons_int_start_mRNA:max_cons_int_start_mRNA]
+		}
+	
+		for(jj in 1:length(sRNA_alignment2)){
+			s1[[jj]]<-sRNA_alignment2[[jj]][min_cons_int_start_sRNA:max_cons_int_start_sRNA]
+		}
+		
+		s1_rev<-lapply(s1,rev)
+		
+		conc<-vector("list",length(alignment))
+		
+		for(jj in 1:length(conc)){
+			conc[[jj]]<-c("5\'...",m1[[jj]],"...3\'-&-3\'...",s1_rev[[jj]],"...5\'")
+		}
+		
+		write.fasta(conc, paste(nam2[m_names],(orgs),tab[,10],sep="_"), file.out=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA+sRNA.fasta", sep=""))
+		
+		anno_mRNA<-c("p<=0001\tD9F69C", "p<=001\tC2F161","p<01\tBAEF4D", "p<02\tB3EE3A","p<03\tA1D634",  "p>03\tFF4500")
+		for(j in 1:nrow(tab)){
+			
+			 
+			int_postion2<-seq(tab_aligned[j, "start"],tab_aligned[j, "end"])
+			int_postion<-seq(tab[j, "start"],tab[j, "end"])
+			if(length(intersect(int_postion2, seq(min_cons_int_start_mRNA,max_cons_int_start_mRNA)))>0){
+			
+				in_interaction<-gregexpr("\\(", tab[j,"hybridDP"])[[1]]
+				in_interaction<-int_postion[in_interaction]
+				in2<-seqle(in_interaction)
+				int_list<-c()
+
+				for(jj in 1:length(in2$lengths)){
+					temp_int<-c(in2$values[jj],in2$values[jj]+in2$lengths[jj]-1)
+					int_list[[jj]]<-temp_int
+				}
+				
+				int_postion_sRNA<-seq(tab[j, "start_sRNA"],tab[j, "end_sRNA"])
+				sRNA_string<-gsub(".*&","",tab[j,"hybridDP"])
+				sRNA_string<-paste((strsplit(sRNA_string,"")[[1]]), collapse="")
+				in_interaction_sRNA<-gregexpr("\\)", sRNA_string)[[1]]
+				in_interaction_sRNA<-int_postion_sRNA[in_interaction_sRNA]
+				in2_sRNA<-seqle(in_interaction_sRNA)
+				int_list_sRNA<-c()
+
+				for(jj in 1:length(in2_sRNA$lengths)){
+					temp_int<-c(in2_sRNA$values[jj],in2_sRNA$values[jj]+in2_sRNA$lengths[jj]-1)
+					int_list_sRNA[[jj]]<-temp_int
+				}
+				
+				le_sRNA<-length(which(sRNA_alignment2[[j]]!="-"))
+				le_mRNA<-length(which(alignment[[j]][min_cons_int_start_mRNA:max_cons_int_start_mRNA]!="-"))
+				del_mRNA<-length(which(alignment[[j]][1:max((min_cons_int_start_mRNA-1),1)]!="-"))-2
+				sRNA_rev<-rev(sRNA_alignment2[[j]])
+				del_sRNA<-le_sRNA-length(which(sRNA_alignment2[[j]][1:(max_cons_int_start_sRNA)+1]!="-"))-7-le_mRNA
+				
+				a1<-j
+				if(as.numeric(tab[j,11])<=0.001){
+					for(jj in 1:length(int_list)){
+						
+						m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=0001", sep="")
+						anno_mRNA<-c(anno_mRNA, m)
+						}
+						for(jj in 1:length(int_list_sRNA)){
+						s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=0001", sep="")
+						anno_mRNA<-c(anno_mRNA, s)
+						}
+						
+						
+					
+				}
+				
+				
+				if(as.numeric(tab[j,11])>0.001 & as.numeric(tab[j,11])<=0.01){
+					for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=001", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=001", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				
+				if(as.numeric(tab[j,11])>0.01 & as.numeric(tab[j,11])<=0.1){
+					for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=01", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA,"\tp<=01", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				
+				if(as.numeric(tab[j,11])>0.1 & as.numeric(tab[j,11])<=0.2){
+					for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=02", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=02", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				if(as.numeric(tab[j,11])>0.2 & as.numeric(tab[j,11])<=0.3){
+					for(jj in 1:length(int_list)){
+						m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=03", sep="")
+						anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+						s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=03", sep="")
+						anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				if(as.numeric(tab[j,11])>0.3){
+					for(jj in 1:length(int_list)){
+					m<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp>03", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tab[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tab[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp>03", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					
+					}
+					
+					
+					
+				}
+				
+			}
+			}
+			
+###########################################################			
+			if(nrow(tabsub)>0){
+			for(j in 1:nrow(tabsub)){	
+			int_postion2<-seq(tabsub_aligned[j, "start"],tabsub_aligned[j, "end"])
+			int_postion<-seq(tabsub[j, "start"],tabsub[j, "end"])
+			if(length(intersect(int_postion2, seq(min_cons_int_start_mRNA,max_cons_int_start_mRNA)))>0){
+			
+				in_interaction<-gregexpr("\\(", tabsub[j,"hybridDP"])[[1]]
+				in_interaction<-int_postion[in_interaction]
+				in2<-seqle(in_interaction)
+				int_list<-c()
+
+				for(jj in 1:length(in2$lengths)){
+					temp_int<-c(in2$values[jj],in2$values[jj]+in2$lengths[jj]-1)
+					int_list[[jj]]<-temp_int
+				}
+				
+				int_postion_sRNA<-seq(tabsub[j, "start_sRNA"],tabsub[j, "end_sRNA"])
+				sRNA_string<-gsub(".*&","",tabsub[j,"hybridDP"])
+				sRNA_string<-paste((strsplit(sRNA_string,"")[[1]]), collapse="")
+				in_interaction_sRNA<-gregexpr("\\)", sRNA_string)[[1]]
+				in_interaction_sRNA<-int_postion_sRNA[in_interaction_sRNA]
+				in2_sRNA<-seqle(in_interaction_sRNA)
+				int_list_sRNA<-c()
+
+				for(jj in 1:length(in2_sRNA$lengths)){
+					temp_int<-c(in2_sRNA$values[jj],in2_sRNA$values[jj]+in2_sRNA$lengths[jj]-1)
+					int_list_sRNA[[jj]]<-temp_int
+				}
+				
+				le_sRNA<-length(which(sRNA_alignment2[[j]]!="-"))
+				le_mRNA<-length(which(alignment[[j]][min_cons_int_start_mRNA:max_cons_int_start_mRNA]!="-"))
+				del_mRNA<-length(which(alignment[[j]][1:max(min_cons_int_start_mRNA-1,1)]!="-"))-2
+				sRNA_rev<-rev(sRNA_alignment2[[j]])
+				del_sRNA<-le_sRNA-length(which(sRNA_alignment2[[j]][1:(max_cons_int_start_sRNA)+1]!="-"))-7-le_mRNA
+				
+				a1<-j
+				if(as.numeric(tabsub[j,11])<=0.001){
+					for(jj in 1:length(int_list)){
+						
+						m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA ),"\tp<=0001", sep="")
+						anno_mRNA<-c(anno_mRNA, m)
+						}
+						for(jj in 1:length(int_list_sRNA)){
+						s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=0001", sep="")
+						anno_mRNA<-c(anno_mRNA, s)
+						}
+						
+						
+					
+				}
+				
+				
+				if(as.numeric(tabsub[j,11])>0.001 & as.numeric(tabsub[j,11])<=0.01){
+					for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=001", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=001", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				
+				if(as.numeric(tabsub[j,11])>0.01 & as.numeric(tabsub[j,11])<=0.1){
+					for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=01", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA,"\tp<=01", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				
+				if(as.numeric(tabsub[j,11])>0.1 & as.numeric(tabsub[j,11])<=0.2){
+					for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=02", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=02", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				if(as.numeric(tabsub[j,11])>0.2 & as.numeric(tabsub[j,11])<=0.3){
+					for(jj in 1:length(int_list)){
+						m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp<=03", sep="")
+						anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+						s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp<=03", sep="")
+						anno_mRNA<-c(anno_mRNA, s)
+					}
+					
+					
+					
+				}
+				
+				if(as.numeric(tabsub[j,11])>0.3){
+					for(jj in 1:length(int_list)){
+					m<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", int_list[[jj]][1]-del_mRNA, "\t", min(le_mRNA+4,int_list[[jj]][2]-del_mRNA) ,"\tp>03", sep="")
+					anno_mRNA<-c(anno_mRNA, m)
+					}
+					for(jj in 1:length(int_list_sRNA)){
+					s<-paste(tabsub[a1,11],"\t", paste(nam2[m_names[a1]],(orgs)[a1],tabsub[a1,10],sep="_"), "\t-1\t", max(le_mRNA+6,le_sRNA-int_list_sRNA[[jj]][2]-del_sRNA), "\t", le_sRNA-int_list_sRNA[[jj]][1]-del_sRNA ,"\tp>03", sep="")
+					anno_mRNA<-c(anno_mRNA, s)
+					
+					}
+					
+					
+					
+				}
+				
+			}
+			}
+			}
+			write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA+sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+			
+		
 		 if(nrow(tabsub_aligned)==0){
 			res<-cbind(res,p_sub,cons_mRNA_sub,cons_sRNA_sub)
 		 }
 		 
 		 
 		
-		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
-		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		
+		
+		
+		
 		#########################
 		 align_anno_mRNA<-("JALVIEW_ANNOTATION")
 		 bar_mRNA<-paste(align_table_mRNA, collapse="|")
@@ -497,8 +958,8 @@ build_anno<-function(ooi="NC_000911"){
 		 
 		 
 		
-		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
-		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		#write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		#write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
 	
 	cons_res<-paste(res[,"pvalue"],res[,"cons_mRNA"],res[,"cons_sRNA"],res[,"cons_sRNA2"], sep="|")
 	
