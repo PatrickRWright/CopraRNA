@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.1.2
+# CopraRNA 2.1.3
 
  # License: MIT
 
@@ -95,6 +95,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.1.3   : input sRNA file is kept, updated organisms-list
+#
 # v2.1.2   : added R downstream ooi false positive removal
 #
 # v2.1.1   : added input exceptions
