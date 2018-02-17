@@ -461,7 +461,7 @@ unless ($noclean) {
     system "rm *pvalues* ncRNA_*";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
-    system "rm input_sRNA.fa merged_refseq_ids.txt";    
+    system "rm merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
     system "rm fasta_temp_file fasta_temp_file_out";
     #system "rm conservation_table.Rdata" unless ($cop1);
