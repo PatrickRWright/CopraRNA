@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 print "
-CopraRNA - version 2.1.3  - archive README
+CopraRNA - archive README
 
 License: MIT
 
