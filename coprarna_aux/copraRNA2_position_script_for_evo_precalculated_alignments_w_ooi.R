@@ -385,8 +385,8 @@ build_anno<-function(ooi="NC_000911"){
 		 
 		 
 		
-		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
-		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_features.txt", sep=""), quote=F, row.names=F, col.names=F)
+		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_features.txt", sep=""), quote=F, row.names=F, col.names=F)
 		#########################
 		 align_anno_mRNA<-("JALVIEW_ANNOTATION")
 		 bar_mRNA<-paste(align_table_mRNA, collapse="|")
