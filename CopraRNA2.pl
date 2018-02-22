@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-# CopraRNA 2.1.2
+# CopraRNA 2.1.3
 
  # License: MIT
 
@@ -95,6 +95,8 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 
 #### changelog
 
+# v2.1.3   : input sRNA file is kept, updated organisms-list
+#
 # v2.1.2   : added R downstream ooi false positive removal
 #
 # v2.1.1   : added input exceptions
@@ -461,7 +463,7 @@ unless ($noclean) {
     system "rm *pvalues* ncRNA_*";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
-    system "rm input_sRNA.fa merged_refseq_ids.txt";    
+    system "rm merged_refseq_ids.txt";    
     system "rm CopraRNA2_prep*";
     system "rm fasta_temp_file fasta_temp_file_out";
     #system "rm conservation_table.Rdata" unless ($cop1);
@@ -520,7 +522,15 @@ unless ($noclean) {
         system "mv all_predictions/CopraRNA_result.csv .";
         system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
     }
-    
+   
+    # make an archive for the Rdata files
+    unless ($cop1) {
+        system "mkdir Rdata";
+        system "mv consensus_positions.Rdata Rdata";
+        system "mv conservation_table.Rdata Rdata";
+        system "mv interaction_positions.Rdata Rdata";
+    }
+ 
     # zip evo_alignments folder to reduce file number
     system "if [ -d evo_alignments ]; then zip -rmq evo_alignments evo_alignments 2>&1; fi";
 

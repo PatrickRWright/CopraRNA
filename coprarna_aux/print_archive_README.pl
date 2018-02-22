@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 print "
-CopraRNA - v.2.1.2  - archive README
+CopraRNA - archive README
 
 License: MIT
 
@@ -88,6 +88,9 @@ organism of interest's genome. It is a copy of one of the
 coprarna_websrv_table.csv: (only if -websrv was set)
 This csv table contains the data for the Freiburg RNA tools webserver frontend.
 
+CopraRNA_result.map_evo_align: (only if -websrv was set)
+The file is used to post process the predictions for the webserver frontend.
+
 termClusterReport.txt: (only if -enrich was specified // in Enrichment)
 This file contains the DAVID functional enrichment for the amount of
 candidates specified in the -enrich parameter.
@@ -106,16 +109,16 @@ pdf and png files for the functional enrichment heatmap.
 sRNA_conservation_heatmap.pdf:
 This file shows the interaction conservation of the top 25 predictions.
 
-evo_alignments:
-This directory contains the alignments of the clusters of putative target
+evo_alignments.zip:
+This archive contains the alignments of the clusters of putative target
 sequences with an annotation to visualize the interaction sites and consensus
 interaction regions in Jalview.
 
 all_predictions (not made if -cop1):
 This directory contains the results for all modes available in CopraRNA 2. 
 
-conservation_table.Rdata:
-Precomputed R data environment for evolutionary heatmap. 
+Rdata:
+Precomputed R data environments. 
 
 README.txt:
 This file.

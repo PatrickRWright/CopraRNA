@@ -350,8 +350,6 @@ unless ($cop1) {
     # perform actual CopraRNA 2 p-value combination
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus 2> /dev/null > /dev/null"; ## edit 2.0.6
     
-    # post processing filter for organism of interest p-values
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_ooi_post_filtering.R --args ooi=$ooi_refseq_id thres=$ooi_filt 2> /dev/null > /dev/null"; 
 }
 
 # truncate final output // ## edit 2.0.5.1
@@ -362,8 +360,6 @@ unless ($cop1) {
     system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
     system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
-    # add system head calls for ooi post filt
-    # TODO
 }
 
 # figure out which result is the primary result ## edit 2.0.6
@@ -376,24 +372,57 @@ if ($cop1) { # CopraRNA 1 is the primary requested result
 } elsif ($nooi and ($cons eq 2)) { # CopraRNA 2 balanced prediction with overall consensus
     system "cp CopraRNA2_final_balanced_consensus.csv CopraRNA_result.csv"; 
     system "cp CopraRNA2_final_all_balanced_consensus.csv CopraRNA_result_all.csv";
-} elsif ($cons eq 1 and (not $ooi_filt)) { # CopraRNA 2 ooi prediction with ooi consensus
+} elsif ($cons eq 1) { # CopraRNA 2 ooi prediction with ooi consensus
     system "cp CopraRNA2_final_ooi_ooiconsensus.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi_ooiconsensus.csv CopraRNA_result_all.csv"; 
-} elsif ($cons eq 2 and (not $ooi_filt)) { # CopraRNA 2 ooi prediction with overall consensus
+} elsif ($cons eq 2) { # CopraRNA 2 ooi prediction with overall consensus
     system "cp CopraRNA2_final_ooi_consensus.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi_consensus.csv CopraRNA_result_all.csv"; 
-#} elsif ($ooi_filt and ($cons eq 1)) { # ooifilt with ooi consensus
-    # insert system calls
-    # TODO
-#} elsif ($ooi_filt and ($cons eq 2)) { # ooifilt with overall consensus
-    # insert system calls
-    # TODO
-#} elsif ($ooi_filt and (not $cons)) { # ooi_filt
-    # insert system calls
-    # TODO
 } else { # CopraRNA 2 with org of interest focus (standard)
     system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
     system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";
+}
+
+# filtering for ooi single p-value
+if ($ooi_filt) {
+
+    my @not_filtered_list = (); # values below the p-value threshold
+    my @filtered_list = ();     # values empty or above the p-value threshold
+
+    open(MYDATA, "CopraRNA_result_all.csv") or die("\nError: cannot open file CopraRNA_result_all.csv at homology_intaRNA.pl\n\n");
+        my @CopraRNA_all_out_lines = <MYDATA>;
+    close MYDATA;
+
+    push(@not_filtered_list, $CopraRNA_all_out_lines[0]); # header
+
+    for (my $i=1;$i<scalar(@CopraRNA_all_out_lines);$i++) {
+        my $curr_line = $CopraRNA_all_out_lines[$i];
+        my @split = split(/,/,$curr_line);
+        my $curr_ooi_cell = $split[2];
+        if ($curr_ooi_cell) {
+            my @split_ooi_cell = split(/\|/,$curr_ooi_cell);
+            my $curr_ooi_pv = $split_ooi_cell[2];
+            if($curr_ooi_pv<=$ooi_filt) { # smaller or eq to the set ooi_filt threshold
+                push(@not_filtered_list, $curr_line);
+            } else { # bigger tahn the set ooi_filt threshold
+                push(@filtered_list, $curr_line);
+            }
+        } else { # empty cell
+            push(@filtered_list, $curr_line);
+        }
+    }
+    # print
+    open WRITEFILT, ">", "CopraRNA_result_all_filt.csv";
+
+    foreach(@not_filtered_list) {
+        print WRITEFILT $_;
+    }
+    foreach(@filtered_list) {
+        print WRITEFILT $_;
+    }
+    close WRITEFILT;
+    system "cp CopraRNA_result_all_filt.csv CopraRNA_result_all.csv";
+    system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv";
 }
 
 # plot CopraRNA 2 evo heatmap

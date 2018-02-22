@@ -1,4 +1,4 @@
-# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/repository/biocontainers/coprarna)
+# CopraRNA [![GitHub](https://img.shields.io/github/tag/PatrickRWright/CopraRNA.svg)](https://github.com/PatrickRWright/CopraRNA/releases)  [![Bioconda](https://anaconda.org/bioconda/coprarna/badges/version.svg)](https://anaconda.org/bioconda/coprarna) [![Docker Repository on Quay](https://quay.io/repository/biocontainers/coprarna/status "Docker Repository on Quay")](https://quay.io/repository/biocontainers/coprarna)
 ![CopraRNA](https://raw.githubusercontent.com/PatrickRWright/CopraRNA/master/copra_sRNA.jpg "CopraRNA")
 
 **Phylogenetic target prediction for prokaryotic *trans*-acting small RNAs**
@@ -12,6 +12,9 @@ for any character and X stands for a digit between 0 and 9). Depending on sequen
 (target and sRNA), amount of input organisms and genome sizes, CopraRNA can take up to 24h
 or longer to compute. In most cases it is significantly faster. It is suggested to run CopraRNA
 on a machine with at least 8 GB of memory.
+
+CopraRNA produces a lot of file I/O. It is suggested to run CopraRNA in a dedicated
+empty directory to avoid unexpected behavior.
 
 For testing or ad hoc use of CopraRNA, you can use its webinterface at the
 
