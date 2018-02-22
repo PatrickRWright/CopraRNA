@@ -4,7 +4,7 @@
 
 # dependency: CopraRNA_available_organisms.txt
 
-# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi_fast3.r --args NC_000913
+# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args NC_000913
 
 args <- commandArgs(trailingOnly = TRUE) 
 ooi2 <- args[1] 
