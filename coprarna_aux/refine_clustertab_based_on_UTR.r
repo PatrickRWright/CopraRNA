@@ -6,7 +6,7 @@
 
 
 require(seqinr)
-
+require(phangorn)
 
 count_char <- function(string, char) {
 	string_as_vector = unlist(strsplit(string, ""))
@@ -78,7 +78,7 @@ id1<-max(id1)
 id2<-max(id2)
 #seq_length<-300
 for(j in 1:nrow(clus)){
-	print(paste(j,nrow(clus),sep="/"))
+	#print(paste(j,nrow(clus),sep="/"))
 	tmp<-clus[j,2:ncol(clus)]
 	if(tmp[1]!=""){
 		#empty<-length(which(tmp==""))
@@ -91,11 +91,11 @@ for(j in 1:nrow(clus)){
 			
 			locus<-c()
 			
-			name_file1<-gsub("\\:.*","",names(locus))
+			#name_file1<-gsub("\\:.*","",names(locus))
 			#name_file2<-gsub(".*:","",locus)
-			n3<-rep(seq_length,length(locus))
-			name_file<-cbind(name_file1,locus,n3)
-			write.table(name_file, file="names.txt", sep=" ", quote=F, row.names=F, col.names=F)
+			# n3<-rep(seq_length,length(locus))
+			# name_file<-cbind(name_file1,locus,n3)
+			#write.table(name_file, file="names.txt", sep=" ", quote=F, row.names=F, col.names=F)
 				for(i in 1:length(tmp)){
 				
 					loc<-strsplit(as.character(tmp[i])," ")[[1]]
@@ -257,6 +257,11 @@ for(j in 1:nrow(clus)){
 						}
 			}
 		}
+		
+	unlink("cdhit_res.txt")
+	unlink("cdhit_res.txt.clstr")
+	unlink("temp.fasta")
+	unlink("temp2.fasta")
 	}
 
 write.table(clus_new,file="cluster.tab", sep="\t", quote=F, row.names=F)
