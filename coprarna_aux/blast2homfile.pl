@@ -1,12 +1,14 @@
 #!/usr/bin/env perl
 
-$EVAL_CUT = 0.001;
 $infile = $ARGV[0];
+
+$EVAL_CUT = 0.001;
+$BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 $distconv = 1; ## edit 2.0.5.1 // this is no longer a parameter // needed to be done like this to change shebang
 
-$BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
+$do_sort = 1; ## ie. TRUE
 
-if (! $skip_sort) {
+if ($do_sort) {
 	## eliminate comment lines (when using blastall -m 9)
 	$infile = "egrep -v '^#' $infile | " .
 	## excahnge name1 and name2, and also start and end positions
@@ -29,10 +31,6 @@ while (<IN>) {
 	}
 	$prev_qid = $qid; $prev_sid = $sid;
 
-	if ( $evalcorr) {
-		# corrected E-value
-		$eval *= len
-	}
 	$score /= $BITUNIT;
 	$dist = 100 - $ident;
 
