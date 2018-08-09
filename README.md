@@ -186,7 +186,7 @@ Here you can execute build_kegg2refseq.pl
 ```
 which will download prokaryotes.txt from the
 NCBI and process it into the files `CopraRNA_available_organisms.txt` and `kegg2refseqnew.csv`.
-These two files must then be copied into coprarna_aux where they override their older versions.
+These two files must then be copied into `coprarna_aux` where they override their older versions.
 
 Note, some genomes are known to cause problems and might have to be removed (manually) from `CopraRNA_available_organisms.txt`:
 
