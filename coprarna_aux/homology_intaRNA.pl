@@ -266,9 +266,15 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported ## ed
     my $domclustErrorFile = "domclust.error";
     my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
     $domclustExitStatus /= 256; # get original exit value
-    # ensure all went fine
+    # ensure domclust went fine
     if ($domclustExitStatus != 0) {
-    	die("\nERROR: 'domclust' returned with non-zero exit status $domclustExitStatus.\n\n");
+    	# restart domclust with --nobreak option
+	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
+	    $domclustExitStatus /= 256; # get original exit value
+	    # check if second run was successful
+	    if ($domclustExitStatus != 0) {
+	    	die("\nERROR: 'domclust' returned with non-zero exit status $domclustExitStatus.\n\n");
+	    }
     }
     # remove empty error file
     system("rm -f $domclustErrorFile") if ( -z $domclustErrorFile );
