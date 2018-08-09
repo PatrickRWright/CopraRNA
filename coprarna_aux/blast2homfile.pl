@@ -1,14 +1,16 @@
 #!/usr/bin/env perl
 
+# this file was taken from the domclust package and adapted 
+
 $infile = $ARGV[0];
 
-$EVAL_CUT = 0.001;
-$BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 $distconv = 1; ## edit 2.0.5.1 // this is no longer a parameter // needed to be done like this to change shebang
+$skip_sort = 0; ## added to make checks explicit instead of checking against undef values
 
-$do_sort = 1; ## ie. TRUE
+$EVAL_CUT = 0.01;
+$BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 
-if ($do_sort) {
+if (! $skip_sort) {
 	## eliminate comment lines (when using blastall -m 9)
 	$infile = "egrep -v '^#' $infile | " .
 	## excahnge name1 and name2, and also start and end positions
@@ -19,7 +21,7 @@ if ($do_sort) {
 	"sort -T . -k 1,2 -k 11,11g | "; ## edit 2.0.6 // added -T to prevent tmp space limitation
 }
 
-open(IN, $infile) || die;
+open(IN, $infile) || die ("ERROR blast2homfile.pl : cannot open input file $infile");
 
 while (<IN>) {
 	next if (/^#/);

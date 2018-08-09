@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+
+# this file was taken from the domclust package and adapted 
+
 # usage : fasta2genefile.pl <FASTAFILE>
 # produces FASTAFILE.gene and FASTAFILE.tit from FASTA header information
 
