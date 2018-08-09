@@ -1136,7 +1136,8 @@ NC_015914	Cyclobacterium_marinum_DSM_745
 NZ_CP007536	Nitrososphaera_viennensis_EN76
 NZ_LN831776	Paenibacillus_riograndensis_SBR5
 NC_015848	Mycobacterium_canettii_CIPT_140010059
-NC_022528 NZ_FO203526 NC_022543 NZ_FO203527	Vibrio_nigripulchritudo
+# disabling the following
+# NC_022528 NZ_FO203526 NC_022543 NZ_FO203527	Vibrio_nigripulchritudo
 NC_015921 NC_015907 NC_015903 NC_015908 NC_015904 NC_015909 NC_015905 NC_015910 NC_015906 NC_015911 NC_015915 NC_015922 NC_015916 NC_015917 NC_015918 NC_015919 NC_015920	Borreliella_bissettii_DN127
 NC_018515	Desulfosporosinus_meridiei_DSM_13257
 NC_017095	Fervidobacterium_pennivorans_DSM_9078
