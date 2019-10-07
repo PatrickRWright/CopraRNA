@@ -15,7 +15,7 @@ for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
     # split
     curr_line = CopraRNA_lines[i]
     split = curr_line.split(",")
-    orgOfIntEntry = split[2]
+    orgOfIntEntry = split[3]  #edit jens
     if orgOfIntEntry:
         splitOrgOfInt = orgOfIntEntry.split(":")
         entrezID = splitOrgOfInt[1][:-1]
