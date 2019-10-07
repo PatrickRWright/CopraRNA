@@ -346,7 +346,6 @@ my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
 my $ooi_refseq_id = $split[0];
 
 
-system "R --slave -f ". $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; #edit jens
 ### edit jens
 unless ($cop1) {
     # align homologous targets
