@@ -322,6 +322,10 @@ print $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $
 system $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
 ## end  edit 2.0.0
 
+# re-cluster based on 5'UTRs
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; #edit jens
+
+
 # do CopraRNA combination 
 ## edit 2.0.4 // removed all N*final.csv files as input to combine_clusters.pl
 print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
@@ -357,6 +361,7 @@ system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl C
 my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
 # get the first id entry
 my $ooi_refseq_id = $split[0];
+
 
 ### edit jens
 unless ($cop1) {
