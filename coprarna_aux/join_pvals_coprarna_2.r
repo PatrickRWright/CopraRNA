@@ -7,7 +7,7 @@
 require(phangorn)
 require(seqinr)
 require(doMC)
-require(tools)
+
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
