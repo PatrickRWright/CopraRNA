@@ -71,6 +71,8 @@ The specified versions are tested and functional.
 - MAFFT 7.310                                                          // conda install mafft
 - clustalo 1.2.3                                                       // conda install clustalo
 - phantomjs 2.1.1-0                                                    // conda install phantomjs
+- dialign-tx                                                           // conda install -c bioconda dialign-tx
+- jalview                                                              // conda install -c bioconda jalview
 
 - Perl (5.22.0) Module(s):                                             // conda install perl
 
@@ -81,12 +83,13 @@ The specified versions are tested and functional.
     - Bio::DB::EUtilities 1.75                                             // conda install perl-bio-eutilities
     - Cwd 3.56                                                             // included in the conda perl installation       
 
-- R statistics 3.2.2                                                   // conda install r-base==3.2.2
+- R statistics 3.6.0                                                   // conda install r-base==3.6.0
 
     - seqinr 3.1\_3                                                       // conda install r-seqinr 
-    - robustrankaggreg 1.1                                                // conda install r-robustrankaggreg
-    - pheatmap 1.0.8                                                      // conda install r-pheatmap
-
+    - phangorn                                                            // conda install -c bioconda r-phangorn
+    - complexheatmap                                                      // conda install -c bioconda bioconductor-complexheatmap
+    - doMC                                                                // conda install -c r r-domc
+    
 - python                                                              // conda install python
 
     - sys                                                                  // available from conda python
