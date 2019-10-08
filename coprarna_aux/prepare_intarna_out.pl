@@ -115,6 +115,9 @@ close FILE;
 
 my $suffix = '_upfromstartpos_' . $upfromstartpos . '_down_' . $down . '.fa';
 
+
+##### edit jens
+
 my $pm = new Parallel::ForkManager($cores);   
 foreach (@files) {
     if ($_ =~ m/(N[ZC]_.+)$suffix$/) { ## edit 2.0.2
@@ -130,12 +133,15 @@ foreach (@files) {
             }
         }
         my $ncrnafilename = $ncrnaarray[0]; 
-        $ncrnafilename = $ncrnafilename . ".fa";
-        @ncrnaarray = ();
+		my $ncrnafilename1 = $ncrnaarray[0];
+			$ncrnafilename = $ncrnafilename . ".fa";
+			@ncrnaarray = ();
+		system("mkdir $ncrnafilename1"); # edit jens
         my $intarnaout = $_ . ".intarna.csv"; ## edit 2.0.5.1 // added .csv
             $pm->start and next;            
-            system("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout") unless (-e $intarnaout); ## edit 2.0.4 added -s 1 for consensus prediction // ## edit 2.0.5 changed to IntaRNA2 // ## edit 2.0.5.1 changed to IntaRNA 2.0 csv output
-            print("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout\n") if ($verbose);
+            #system("/home/jens/For_CopraRNA2.0/IntaRNA-dev190704 --model=X --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv") unless (-e $intarnaout); ## edit 2.0.4 added -s 1 for consensus prediction // ## edit 2.0.5 changed to IntaRNA2 // ## edit 2.0.5.1 changed to IntaRNA 2.0 csv output
+            system("IntaRNA --outOverlap=Q --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv") unless (-e $intarnaout);
+			print("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout\n") if ($verbose);
             $pm->finish;
      }                                                                                   
 }

@@ -114,7 +114,7 @@ for(i in 1:nrow(res)){
 #----------------	
 x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",") ## edit 2.0.5.1
 
-l<-(strsplit(as.character(x[1:300,3]), "\\|"))
+l<-(strsplit(as.character(x[1:300,4]), "\\|"))
 
 ll<-matrix(,200,8)
 
@@ -158,12 +158,12 @@ id2<-id1
 p<-c()
 for(i in 1:length(id2)){
 
-pp<-grep(id2[i],x[,3])
+pp<-grep(id2[i],x[,4])
 p<-c(p,pp[1])
 
 }
 
-res2<-cbind(id2,as.character(x[p,3]),x[p,2])	
+res2<-cbind(id2,as.character(x[p,4]),x[p,2])	
 	
 #---------------------	
 
