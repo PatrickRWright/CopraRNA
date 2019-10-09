@@ -115,9 +115,6 @@ close FILE;
 
 my $suffix = '_upfromstartpos_' . $upfromstartpos . '_down_' . $down . '.fa';
 
-
-##### edit jens
-
 my $pm = new Parallel::ForkManager($cores);   
 foreach (@files) {
     if ($_ =~ m/(N[ZC]_.+)$suffix$/) { ## edit 2.0.2
