@@ -32,7 +32,7 @@ print WRITEINTERNAL "Rank,CopraRNA p-value,CopraRNA fdr,Locus Tag,Gene Name,Ener
 
 for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
     my @split = split(/,/,$CopraRNA_out_lines[$i]);
-    if($split[2] != "") { ## edit 1.1.0 // check if organism of interest has an entry (not empty)
+    if($split[3] != "") { ## edit 1.1.0 // check if organism of interest has an entry (not empty)
         
         # print Rank and CopraRNA p-value and fdr
         print WRITEINTERNAL "$printedcounter,";
@@ -44,7 +44,7 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
 
         # print the IntaRNA outputs for the organism of interest
         # split up organism of interest cell
-        my @split_ooi = split(/[\(,|]/, $split[2]); ## edit 2.0.6 changed var name to split_ooi
+        my @split_ooi = split(/[\(,|]/, $split[3]); ## edit 2.0.6 changed var name to split_ooi
         # locus tag
         my $ltag = $split_ooi[0]; ## edit 2.0.6
         print WRITEINTERNAL $ltag . ",";
