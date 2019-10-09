@@ -141,8 +141,10 @@ foreach (@files) {
 		system("mkdir $ncrnafilename1");
         my $intarnaout = $_ . ".intarna.csv"; 
             $pm->start and next;            
-            system("IntaRNA --outOverlap=Q --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv") unless (-e $intarnaout);
-			print("IntaRNA --tAccW $winsize --tAccL $maxbpdist --outNumber 2 --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout\n") if ($verbose);
+#	    my $intarnaCall = "IntaRNA --outOverlap=Q --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv";
+	    my $intarnaCall = "IntaRNA --outOverlap=Q --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,start1,end1,start2,end2,hybridDP,E,seedStart1,seedEnd1,seedStart2,seedEnd2' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv";
+            system($intarnaCall) unless (-e $intarnaout);
+			print("$intarnaCall\n") if ($verbose);
             $pm->finish;
      }                                                                                   
 }
