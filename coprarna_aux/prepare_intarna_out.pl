@@ -13,6 +13,11 @@ my $down = $ARGV[2];
 my $mrnapart = $ARGV[3]; 
 my $refseqid = '';
 
+# files dedicated to capture output of subcalls for debugging
+my $OUT_STD = "CopraRNA2_subprocess.out";
+my $OUT_ERR = "CopraRNA2_subprocess.err";
+
+
 my $orgcnt = (scalar(@ARGV) - 4);
 
 # get absolute path
@@ -185,6 +190,6 @@ system $PATH_COPRA_SUBSCRIPTS . "cluster_intarna_csv.pl > opt_tags.clustered";
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_clusters_under_percantage.R" if ($cop1); 
 
 system "mafft --localpair --quiet 16s_sequences.fa > 16s_sequences.aln";
-system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2> /dev/null"; 
+system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2>> $OUT_ERR"; 
 system $PATH_COPRA_SUBSCRIPTS . "transform_distmat.pl distmat.out > compatible.distmat";
 
