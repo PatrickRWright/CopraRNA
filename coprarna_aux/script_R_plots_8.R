@@ -1,5 +1,5 @@
 # call
-# R --slave -f /home/jens/.conda/envs/cop/bin/coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv 100
+# R --slave -f ./script_R_plots_8.R --args CopraRNA_result_all.csv 200
 # script by Jens Georg
 
 # numplot2:		The number of best predictions for which the targets sequences of 
