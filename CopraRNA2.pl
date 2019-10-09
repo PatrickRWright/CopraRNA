@@ -520,15 +520,6 @@ unless ($noclean) {
         system "mv aux_table.csv Enrichment";
     }
 
-    # all predictions types archive
-    # unless ($cop1) {
-        # system "mkdir all_predictions";
-        # system "mv *csv all_predictions";
-        # system "mv all_predictions/CopraRNA_result_all.csv .";
-        # system "mv all_predictions/CopraRNA_result.csv .";
-        # system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
-    # }
-   
     # make an archive for the Rdata files
     unless ($cop1) {
         system "mkdir Rdata";
