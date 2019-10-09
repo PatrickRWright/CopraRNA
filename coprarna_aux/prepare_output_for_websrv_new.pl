@@ -9,7 +9,7 @@ my $CopraRNA_out = $ARGV[0];
 my $intarna_out = $ARGV[1];
 
 # check CopraRNA1 switch 
-my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.5.1
+my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`;
 chomp $cop1;
 
 open(MYDATA, $CopraRNA_out) or die("Error: cannot open file $CopraRNA_out at prepare_output_for_websrv_new.pl\n");
@@ -28,25 +28,25 @@ open(WRITEINTERNAL, ">coprarna_internal_table.csv");
 
 my $printedcounter = 1; # when this is on 101 we stop because we have then printed 100 lines
 
-print WRITEINTERNAL "Rank,CopraRNA p-value,CopraRNA fdr,Locus Tag,Gene Name,Energy kcal/mol,IntaRNA p-value,Position mRNA,Position ncRNA,Annotation,Additional homologs,Entrez GeneID,Interaction,Position Seed - mRNA,Position Seed - ncRNA,Hybridization Energy kcal/mol,Unfolding Energy - mRNA kcal/mol,Unfolding Energy - ncRNA kcal/mol,Amount sampled\n"; # header ## edit 2.0.1
+print WRITEINTERNAL "Rank,CopraRNA p-value,CopraRNA fdr,Locus Tag,Gene Name,Energy kcal/mol,IntaRNA p-value,Position mRNA,Position ncRNA,Annotation,Additional homologs,Entrez GeneID,Interaction,Position Seed - mRNA,Position Seed - ncRNA,Hybridization Energy kcal/mol,Unfolding Energy - mRNA kcal/mol,Unfolding Energy - ncRNA kcal/mol,Amount sampled\n"; # header
 
 for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
     my @split = split(/,/,$CopraRNA_out_lines[$i]);
-    if($split[3] != "") { ## edit 1.1.0 // check if organism of interest has an entry (not empty)
+    if($split[3] != "") { ## check if organism of interest has an entry (not empty)
         
         # print Rank and CopraRNA p-value and fdr
         print WRITEINTERNAL "$printedcounter,";
-        printf WRITEINTERNAL ("%.4g", ( $split[1] == "NA" ? 1 : $split[1] ) ); ## edit 1.1.0
-        print WRITEINTERNAL ",";                  ## edit 1.1.0
-        printf WRITEINTERNAL ("%.4g", ( $split[0] == "NA" ? 1 : $split[0] )); ## edit 1.1.0
+        printf WRITEINTERNAL ("%.4g", ( $split[1] == "NA" ? 1 : $split[1] ) );
+        print WRITEINTERNAL ",";
+        printf WRITEINTERNAL ("%.4g", ( $split[0] == "NA" ? 1 : $split[0] ));
         print WRITEINTERNAL ",";
         $printedcounter++;
 
         # print the IntaRNA outputs for the organism of interest
         # split up organism of interest cell
-        my @split_ooi = split(/[\(,|]/, $split[3]); ## edit 2.0.6 changed var name to split_ooi
+        my @split_ooi = split(/[\(,|]/, $split[3]);
         # locus tag
-        my $ltag = $split_ooi[0]; ## edit 2.0.6
+        my $ltag = $split_ooi[0];
         print WRITEINTERNAL $ltag . ",";
         # gene name
         print WRITEINTERNAL $split_ooi[1] . ",";
@@ -64,9 +64,9 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         print WRITEINTERNAL $split_ooi[6] . " -- " . $split_ooi[7] . ",";
 
         # annotation
-        print WRITEINTERNAL $split[-3] . ","; ## edit 2.0.1
+        print WRITEINTERNAL $split[-3] . ",";
         # additional homologs
-        my $temp = $split[-2]; ## edit 2.0.1
+        my $temp = $split[-2];
         chomp $temp;
         print WRITEINTERNAL $temp . ",";
         
@@ -107,8 +107,8 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
  
         # these are the interaction properties
         if ($cop1) {
-            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . $split[-1]; ## edit 2.0.1
-        } else { ## edit 2.0.6
+            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . $split[-1];
+        } else {
             print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . "0\n";
         }       
     }
