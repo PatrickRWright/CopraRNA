@@ -390,12 +390,7 @@ if ($verbose) {
 
 # run homology_intaRNA.pl 
 print $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds\n" if ($verbose);
-my $homology_intaRNA_exitStatus = system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
-$homology_intaRNA_exitStatus /= 256; # get original exit value
-# check exit status
-if ($homology_intaRNA_exitStatus != 0) { 
-	die ("\nERROR: homology_intaRNA.pl returned with exit code $homology_intaRNA_exitStatus. Something went wrong, so please check the error files!\n\n");
-}
+system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
 
 # get organism of interest
 my $ncrnaRIDs = `grep ">" ncrna.fa | sed 's/>ncRNA_//g' | tr '\n' ' '`;
@@ -465,7 +460,8 @@ unless ($noclean) {
     system "rm *pvsample*" if ($cop1);
     system "rm compatible.distmat.mapped";
     system "rm err.log *anno* padj.csv";
-    system "rm *pvalues* ncRNA_*";
+	system "rm -r *ncRNA*";
+    system "rm *pvalues*";
     system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
     system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
     system "rm merged_refseq_ids.txt";    
@@ -520,20 +516,20 @@ unless ($noclean) {
     }
 
     # all predictions types archive
-    unless ($cop1) {
-        system "mkdir all_predictions";
-        system "mv *csv all_predictions";
-        system "mv all_predictions/CopraRNA_result_all.csv .";
-        system "mv all_predictions/CopraRNA_result.csv .";
-        system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
-    }
+    # unless ($cop1) {
+        # system "mkdir all_predictions";
+        # system "mv *csv all_predictions";
+        # system "mv all_predictions/CopraRNA_result_all.csv .";
+        # system "mv all_predictions/CopraRNA_result.csv .";
+        # system "mv all_predictions/coprarna_websrv_table.csv ." if ($websrv);
+    # }
    
     # make an archive for the Rdata files
     unless ($cop1) {
         system "mkdir Rdata";
-        system "mv consensus_positions.Rdata Rdata";
+        system "mv int_sites.Rdata Rdata";
+        system "mv order_table_all.Rdata Rdata";
         system "mv conservation_table.Rdata Rdata";
-        system "mv interaction_positions.Rdata Rdata";
     }
  
     # zip evo_alignments folder to reduce file number
