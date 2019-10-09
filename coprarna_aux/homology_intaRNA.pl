@@ -260,28 +260,23 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
     # prep for DomClust
     system "formatdb -i all.fas" unless (-e "all.fas.blast"); 
     # blast sequences
-    my $blastallErrorFile = "blastall.error";
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> $blastallErrorFile" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage 
+    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> $OUT_ERR" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage 
     # remove empty error file
-    system("rm -f $blastallErrorFile") if ( -z $blastallErrorFile );
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    my $domclustErrorFile = "domclust.error";
-    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $domclustErrorFile"; 
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $OUT_ERR"
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
     if ($domclustExitStatus != 0) {
     	# restart domclust with --nobreak option
-	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $domclustErrorFile"; 
+	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $OUT_ERR"; 
 	    $domclustExitStatus /= 256; # get original exit value
 	    # check if second run was successful
 	    if ($domclustExitStatus != 0) {
 	    	die("\nERROR: 'domclust' returned with non-zero exit status $domclustExitStatus.\n\n");
 	    }
     }
-    # remove empty error file
-    system("rm -f $domclustErrorFile") if ( -z $domclustErrorFile );
 
     # edit 2.0.2
     system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
