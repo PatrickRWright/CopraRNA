@@ -74,10 +74,10 @@ with all dependencies.
 Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information. We recommend installing into a dedicated environment, to avoid conflicts with
-other installed tools. Following two commands install CopraRNA into the enviroment and activate it:
+other installed tools (or their versions). Following two commands install CopraRNA into the enviroment `CopraRNA2` and activate it:
 ```bash
-conda create -n coprarnaenv -c r -c conda-forge -c bioconda coprarna
-conda activate coprarnaenv
+conda create -n CopraRNA2 -c r -c conda-forge -c bioconda coprarna
+conda activate CopraRNA2
 ```
 <br /><br />
 <a name="biocontainer" />
