@@ -56,64 +56,28 @@ It is also possible to run CopraRNA [via a provided Docker container](#biocontai
 <a name="deps" />
 ## Dependencies
 
-The specified versions are tested and functional.
+We provide a [list of dependencies](CopraRNA2-deps.yml) within the file [CopraRNA2-deps.yml](CopraRNA2-deps.yml).
 
-- bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
-- gawk 4.1.3                                                           // conda install gawk
-- sed 4.2.2.165-6e76-dirty                                             // conda install sed
-- grep 2.14                                                            // conda install grep
-- GNU coreutils 8.25                                                   // conda install coreutils 
-- IntaRNA 2.1.0                                                        // conda install intarna
-- EMBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
-- embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
-- ncbiblast-2.2.22                                                     // conda install blast-legacy
-- DomClust 1.2.8a                                                      // conda install domclust
-- MAFFT 7.310                                                          // conda install mafft
-- clustalo 1.2.3                                                       // conda install clustalo
-- phantomjs 2.1.1-0                                                    // conda install phantomjs
-- dialign-tx                                                           // conda install -c bioconda dialign-tx
-- jalview                                                              // conda install -c bioconda jalview
-
-- Perl (5.22.0) Module(s):                                             // conda install perl
-
-    - List::MoreUtils 0.413                                                // conda install perl-list-moreutils
-    - Parallel::ForkManager 1.17                                           // conda install perl-parallel-forkmanager
-    - Getopt::Long 2.45                                                    // conda install perl-getopt-long
-    - Bio::SeqIO (bioperl 1.6.924)                                         // conda install perl-bioperl
-    - Bio::DB::EUtilities 1.75                                             // conda install perl-bio-eutilities
-    - Cwd 3.56                                                             // included in the conda perl installation       
-
-- R statistics 3.6.0                                                   // conda install r-base==3.6.0
-
-    - seqinr 3.1\_3                                                       // conda install r-seqinr 
-    - phangorn                                                            // conda install -c bioconda r-phangorn
-    - complexheatmap                                                      // conda install -c bioconda bioconductor-complexheatmap
-    - doMC                                                                // conda install -c r r-domc
-    
-- python                                                              // conda install python
-
-    - sys                                                                  // available from conda python
-    - logging                                                              // available from conda python
-    - traceback                                                            // available from conda python 
-    - suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
-    - suds         (suds-jurko 0.6)                                        // conda install suds-jurko
-    - suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
-    - datetime                                                             // available from conda python
+You can easily create a [`conda` environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) using the following command (after installing `conda`)
+```bash
+conda env create --file ~/Temp/CopraRNA2-deps.yml
+conda activate CopraRNA2-deps
+```
 
 <br /><br />
 <a name="instconda" />
 ## CopraRNA via conda (bioconda channel)
 The most easy way to locally install CopraRNA is via conda using the 
-[bioconda](https://bioconda.github.io/) 
-channel (linux only). This way, you will install CopraRNA along
+[bioconda](https://bioconda.github.io/recipes/coprarna/README.html) 
+channel (linux and osx only). This way, you will install CopraRNA along
 with all dependencies.
 Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information. We recommend installing into a dedicated environment, to avoid conflicts with
 other installed tools. Following two commands install CopraRNA into the enviroment and activate it:
 ```bash
-conda create -n coprarnaenv -c bioconda -c conda-forge coprarna
-source activate coprarnaenv
+conda create -n coprarnaenv -c r -c conda-forge -c bioconda coprarna
+conda activate coprarnaenv
 ```
 <br /><br />
 <a name="biocontainer" />
