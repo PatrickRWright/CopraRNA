@@ -1,5 +1,5 @@
 # call
-# R --slave -f ../script_R_plots_8.R --args CopraRNA_result_all.csv 200
+# R --slave -f /home/jens/.conda/envs/cop/bin/coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv 100
 # script by Jens Georg
 
 # numplot2:		The number of best predictions for which the targets sequences of 
@@ -69,7 +69,7 @@ names(d)<-gsub("ncRNA_","",names(d))
 d<-map(d)
 
 en<-grep("Annotation", colnames(da))
-da2<-da[,3:(en-1)]
+da2<-da[,4:(en-1)]
 namegenomes<-colnames(da2)
 genomes<-list()
 
@@ -299,7 +299,6 @@ gap_list<-vector("list", length(seqs)*length(seqs[[1]]))
 
 
 for(i in 1:length(seqs)){
-	
 	for(j in 1:length(seqs[[1]])){
 		su<-0
 		if(rescale==TRUE){
