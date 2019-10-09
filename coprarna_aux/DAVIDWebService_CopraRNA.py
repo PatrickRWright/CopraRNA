@@ -3,7 +3,7 @@
 import sys
 CopraRNA_result = sys.argv[1]
 # amount of top predictions to enrich with
-enrichment_count = int(sys.argv[2]) ## edit 2.0.5.1
+enrichment_count = int(sys.argv[2])
 #print CopraRNA_result
 
 with open(CopraRNA_result) as file:
@@ -15,7 +15,7 @@ for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
     # split
     curr_line = CopraRNA_lines[i]
     split = curr_line.split(",")
-    orgOfIntEntry = split[3]  #edit jens
+    orgOfIntEntry = split[3]
     if orgOfIntEntry:
         splitOrgOfInt = orgOfIntEntry.split(":")
         entrezID = splitOrgOfInt[1][:-1]
@@ -25,7 +25,7 @@ backgroundList = list(map(str,backgroundList))
 
 print ("background:" + str(len(backgroundList)))
 
-inputList = backgroundList[0:enrichment_count] ## edit 2.0.5.1 // dynamic list length
+inputList = backgroundList[0:enrichment_count]
 print ("input:" + str(len(inputList)))
 
 inputIds = ",".join(inputList)
@@ -86,7 +86,6 @@ print (client.service.getDefaultCategoryNames())
 #print client.service.getChartReport(thd, count)
 
 #getTermClusterReport
-## edit 2.0.6 changing parameters to high
 overlap = 3
 initialSeed = 2
 finalSeed = 2
