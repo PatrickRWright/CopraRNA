@@ -1,10 +1,18 @@
-## edit 1.2.7 new script
+## edit 1.2.8 new script
 ## script by Jens Georg
 
 args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
 inputFile_CopraRNA <- args[1] ## edit 2.0.5.1
 inputFile_DAVID <- args[2] ## edit 2.0.5.1
 output_file <- args[3] ## edit 2.0.5.1
+
+
+# number of top predictions which should be investigated
+co<-readLines("CopraRNA_option_file.txt") 
+top<-grep("top count:", co)
+top<-as.numeric(gsub("top count:","",co[top]))
+
+
 
 x<-read.delim(inputFile_DAVID, header=FALSE) ## edit 2.0.5.1
 
@@ -114,9 +122,9 @@ for(i in 1:nrow(res)){
 #----------------	
 x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",") ## edit 2.0.5.1
 
-l<-(strsplit(as.character(x[1:300,4]), "\\|"))
+l<-(strsplit(as.character(x[1:top,4]), "\\|"))
 
-ll<-matrix(,200,8)
+ll<-matrix(,top,8)
 
 colnames(ll)<-c("GeneName", "IntaRNA energy","IntaRNA p-Value","start mRNA", "end mRNA", "start ncRNA", "end ncRNA", "Entrez GeneID")
 
@@ -127,7 +135,7 @@ for(i in 1:nrow(ll)){
 
 }
 
-ll<-cbind(x[1:200,2],ll)
+ll<-cbind(x[1:top,2],ll)
 
 lll<-which(is.na(ll[,2])==TRUE)
 
