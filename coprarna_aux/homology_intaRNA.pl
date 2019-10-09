@@ -2,13 +2,13 @@
 
 use strict;
 use warnings;
-use Cwd 'abs_path'; ## edit 2.0.5.1
+use Cwd 'abs_path'; 
 
 # get absolute path
-my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
+my $ABS_PATH = abs_path($0); 
 # remove script name at the end
 # match all non slash characters at the end of the string
-$ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
+$ABS_PATH =~ s|[^/]+$||g; 
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
 # files dedicated to capture output of subcalls for debugging
@@ -223,7 +223,7 @@ foreach (@files) {
 
 #### end quickfix
 
-## edit 1.2.2 adding new exception check
+
 @files = <*gb>;
 
 foreach (@files) {
@@ -278,7 +278,7 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
 	    }
     }
 
-    # edit 2.0.2
+    
     system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
     if (-s "N_chars_in_CDS.txt") {
         print ERRORLOG "'N' characters found in nucleotide CDS. Please remove organism(s) with locus tags:\n";
@@ -360,7 +360,7 @@ my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
 my $ooi_refseq_id = $split[0];
 
 
-### edit jens
+
 unless ($cop1) {
     # align homologous targets
     system $PATH_COPRA_SUBSCRIPTS . "parallelize_target_alignments.pl CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv";
@@ -372,7 +372,7 @@ unless ($cop1) {
     
 }
 
-#edit jens
+
 # truncate final output // 
 system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); 
 unless ($cop1) {
@@ -469,7 +469,7 @@ if ($websrv) { # only if webserver output is requested via -websrv
     my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
 
     # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; ## edit 2.0.6 switched to generic output file
+    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; 
 
     # split
     my @split = split(/,/, $top_predictons_locus_tags);
