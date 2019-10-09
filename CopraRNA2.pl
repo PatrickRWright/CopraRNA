@@ -390,7 +390,12 @@ if ($verbose) {
 
 # run homology_intaRNA.pl 
 print $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds\n" if ($verbose);
-system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+my $homology_intaRNA_exitStatus = system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+$homology_intaRNA_exitStatus /= 256; # get original exit value
+# check exit status
+if ($homology_intaRNA_exitStatus != 0) { 
+	die ("\nERROR: homology_intaRNA.pl returned with exit code $homology_intaRNA_exitStatus. Something went wrong, so please check the error files!\n\n");
+}
 
 # get organism of interest
 my $ncrnaRIDs = `grep ">" ncrna.fa | sed 's/>ncRNA_//g' | tr '\n' ' '`;
