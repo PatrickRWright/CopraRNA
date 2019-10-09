@@ -12,8 +12,8 @@ $ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
 # files dedicated to capture output of subcalls for debugging
-my $OUT_STD = "CopraRNA2_process.out";
-my $OUT_ERR = "CopraRNA2_process.err";
+my $OUT_STD = "CopraRNA2_subprocess.out";
+my $OUT_ERR = "CopraRNA2_subprocess.err";
 
 my $ncrnas = $ARGV[0]; # input_sRNA.fa
 my $upfromstartpos = $ARGV[1]; # 200
@@ -260,17 +260,17 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
     # prep for DomClust
     system "formatdb -i all.fas" unless (-e "all.fas.blast"); 
     # blast sequences
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> $OUT_ERR" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage 
+    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2>> $OUT_ERR" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage 
     # remove empty error file
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $OUT_ERR"
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> $OUT_ERR"
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
     if ($domclustExitStatus != 0) {
     	# restart domclust with --nobreak option
-	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $OUT_ERR"; 
+	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2>> $OUT_ERR"; 
 	    $domclustExitStatus /= 256; # get original exit value
 	    # check if second run was successful
 	    if ($domclustExitStatus != 0) {
@@ -366,9 +366,9 @@ unless ($cop1) {
     system $PATH_COPRA_SUBSCRIPTS . "parallelize_target_alignments.pl CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv";
     # run position script
     system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; 
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2> $OUT_ERR > $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR >> $OUT_STD"; 
     # perform actual CopraRNA 2 p-value combination
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2> $OUT_ERR > $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR >> $OUT_STD"; 
     
 }
 
@@ -429,8 +429,8 @@ if ($ooi_filt) {
 unless ($cop1) {
 
 
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2> $OUT_ERR > $OUT_STD";
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2> $OUT_ERR > $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR >> $OUT_STD";
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR >> $OUT_STD"; 
     system "rm -f CopraRNA_available_organisms.txt"; 
 }
 
