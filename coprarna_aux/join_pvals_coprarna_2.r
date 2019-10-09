@@ -1,7 +1,7 @@
 # script by Jens Georg
 
 #call:
-#R --slave -f /home/jens/For_CopraRNA2.0/Final_functions/join_pvals_coprarna_2.r 
+#R --slave -f ./join_pvals_coprarna_2.r 
  
 #Dependencies:
 require(phangorn)
