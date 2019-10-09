@@ -13,7 +13,7 @@
 ### jalview_props.txt
 
 #call:
-# R --slave -f /home/jens/.conda/envs/cop/bin/coprarna_aux/copraRNA2_find_conserved_sites.r --args copref_path=/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt dialign_conf=/home/jens/For_CopraRNA2.0/dialign_conf/ weight_method=clustal ribosomal_rna=16s_sequences.fa copra_result=CopraRNA_result_all.csv top=200
+# R --slave -f ./copraRNA2_find_conserved_sites.r --args copref_path=/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt dialign_conf=/home/jens/For_CopraRNA2.0/dialign_conf/ weight_method=clustal ribosomal_rna=16s_sequences.fa copra_result=CopraRNA_result_all.csv top=200
 require(phangorn)
 require(seqinr)
 require(doMC)
