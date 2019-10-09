@@ -33,14 +33,12 @@ inputIds = ",".join(inputList)
 backgroundIds = ",".join(backgroundList)
 #print backgroundIds
 
-#sys.exit()
+# lets see if we need this line...
+#sys.path.append('../')
 
-sys.path.append('../')
-
-import logging
+#import logging
 import traceback as tb
 import suds.metrics as metrics
-#from tests import *
 from suds import *
 from suds.client import Client
 from datetime import datetime
