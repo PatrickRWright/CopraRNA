@@ -12,7 +12,7 @@ require(seqinr)
 require(parallel)
 
 #call
-# R --slave -f /home/jens/.conda/envs/cop/bin/coprarna_aux/copraRNA2_conservation_heatmaps.r --args top=50
+# R --slave -f ./copraRNA2_conservation_heatmaps.r --args top=50
 
 # CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
