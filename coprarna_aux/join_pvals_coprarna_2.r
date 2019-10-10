@@ -19,7 +19,7 @@ weight_method<-"clustal"
 weight_tree<-"upgma"	# "ML" , "upgma"
 rholimit<-TRUE			# if TRUE rho can take only values between  0 and 1 even if the fit suggests higher rho values
 rho_weights<-2			# 
-min_length<-2			# minimal length of homologs for combining a p_value
+min_length<-2			# minimal number of homologs for combining a p_value
 
 
 # register cores for parallel processing
@@ -44,7 +44,7 @@ if(length(args)>0){
 rholimit<-as.logical(rholimit)
 rho_weights<-as.numeric(rho_weights)
 mnum<-as.numeric(mnum)
-
+min_length<-as.numeric(min_length)
 
 option<- read.table("CopraRNA_option_file.txt", sep=":") 
 root<-as.numeric(as.character(option[14,2]))
