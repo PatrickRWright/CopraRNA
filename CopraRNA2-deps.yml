@@ -40,6 +40,7 @@ dependencies:
   - r-domc
   - r-kableextra
   - r-knitr
+  - r-rmarkdown
       
   - python
   - suds-jurko
