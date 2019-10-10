@@ -38,6 +38,8 @@ dependencies:
   - r-phangorn
   - bioconductor-complexheatmap
   - r-domc
+  - r-kableextra
+  - r-knitr
       
   - python
   - suds-jurko
