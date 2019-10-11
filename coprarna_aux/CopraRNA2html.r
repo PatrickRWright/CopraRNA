@@ -1,7 +1,7 @@
 
 
 #Call:
-# R --slave -f /home/jens/.conda/envs/cop/bin/coprarna_aux/CopraRNA2html.r
+# R --slave -f ./CopraRNA2html.r
 
 require(seqinr)
 
