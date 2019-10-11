@@ -1268,12 +1268,24 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 					posprobs[[j]]<-temp_align_table2*weight[temp_org]
 					align_table_int_pos<-align_table_int_pos+temp_align_table2*weight[temp_org]
 				}
+				align_table<-align_table_int_pos
 				align_table_int_pos<-align_table_int_pos/max(align_table_int_pos)
 				
 				# identify conserved interaction regions and map the organism specific predicted sites to these regions 
 				test<-peak_find2D(align_table_int_pos, tab_aligned, tabsub_aligned,alignment,sRNA_alignment2, min_thres=0.2, perc=0.1, min_length=6,eps=0.55,ooi=conservation_oois, ooi_force=FALSE, dialign_conf2=dialign_conf2, tempf=tempf, posprobs=posprobs)
 				na3<-paste("./evo_alignments2/",tab[1,"name"],sep="")
 				dir.create(na3)
+				
+				#plot Spot Probabilities heatmap based on normalized multiple alignment
+				x<-align_table
+				w<-2000
+				h<-ncol(x)/nrow(x)*w
+				png(paste(na3,"/spot_probabilities.png",sep=""), width = w, height = h)	
+					filled.contour(1:nrow(x),1:ncol(x),x,col=topo.colors(20), xlab="mRNA_alignment [nt]",ylab="sRNA_alignment [nt]",main=paste(tab[1,"name"]," combined interaction spot-probabilities",sep=""),zlim=c(0,1), 
+						plot.axes = {contour(1:nrow(x),1:ncol(x),x, nlevels = 20, drawlabels = TRUE, axes = FALSE, rame.plot = FALSE, add = TRUE);axis(1); axis(2)}
+					)
+				dev.off()
+								
 				peaks1<-list()
 				if(length(test[[3]])>0){
 					# if a peak overlaps with another peak and both peaks are assigned to the same interaction site, the smaller peak is assigned a subpeak of the larger peak
