@@ -5,7 +5,7 @@
 ## Mafft
 
 #call:
-# R --slave -f ./copraRNA2_phylogenetic_sorting.r --args copref_path=/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt dialign_conf=/home/jens/For_CopraRNA2.0/dialign_conf/ weight_method=clustal ribosomal_rna=16s_sequences.fa
+# R --slave -f ./copraRNA2_phylogenetic_sorting.r 
 
 require(phangorn)
 require(seqinr)
