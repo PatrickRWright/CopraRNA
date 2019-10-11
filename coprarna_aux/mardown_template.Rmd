@@ -1,0 +1,24 @@
+---
+title: "CopraRNA2 result"
+author: Jens Georg
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+theme: cerulean
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(kableExtra)
+  #knit_hooks$set(webgl = hook_webgl)
+```
+
+&nbsp;
+
+# This file provides a summary of the CopraRNA2 result.
+
+# {.tabset .tabset-fade .tabset-pills}
+
+
+
+
