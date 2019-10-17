@@ -35,6 +35,7 @@ dependencies:
   
   - r-base==3.6.0
   - r-seqinr 
+  - libopenblas
   - r-phangorn
   - bioconductor-complexheatmap
   - r-domc
