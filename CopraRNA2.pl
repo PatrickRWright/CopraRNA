@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path';
 
-# CopraRNA 2.1.3
+my $COPRARNA_VERSION="2.1.3";
 
  # License: MIT
 
@@ -180,6 +180,8 @@ my $topcount = 200; # amount of top predictions //
 my $root = 1; # root function to apply to the weights //
 my $enrich = 0; ## functional enrichment needs to be specifically turned on 
                 ## this option also allows to specify how many top predictions to use for the enrichment
+my $genomePath = "."; # where to look for and store genome files
+my $temperature = 37; # temperature for prediction
 
 # get absolute path
 my $ABS_PATH = abs_path($0);
@@ -208,12 +210,13 @@ GetOptions (
     'root:i'		=> \$root, # root function to apply to the weights
     'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons
     'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
+    'temperature:f'		=> \$temperature,
+    'genomePath:s'		=> \$genomePath,
 );
-
 
 if ($help) {
 
-print "\nCopraRNA 2.1.2\n\n",
+print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
 "by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
@@ -258,9 +261,9 @@ print "\nCopraRNA 2.1.2\n\n",
 " --ooifilt                 post processing filter for organism of interest p-value 0=off (def:0)\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
-" --pathGB                  path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
-"\n"
-
+" --genomePath              path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
+" --temperature             temperature in Celsius to be used for interaction prediction (def:37.0)\n\n",
+"\n",
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
 "References: \n",
@@ -276,6 +279,9 @@ exit(0);
 unless (-e $sRNAs_fasta) {
     die("\nError: No input FASTA supplied!\nUse '-h' option for help.\n\n");
 }
+
+# create genome path if necessary
+(system("mkdir -p $genomePath") == 0) or die("\nError: could not create genome path '$genomePath'.\n\n");
 
 # rudimentary check for fasta
 my $check_fa = `grep '>' $sRNAs_fasta`;
@@ -364,7 +370,9 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "cons:" . $cons . "\n";
     print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
-    print WRITETOOPTIONS "version:CopraRNA 2.1.2\n";
+    print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
+    print WRITETOOPTIONS "genomePath:$genomePath\n";
+	print WRITETOOPTIONS "temperature:$temperature\n";
 close WRITETOOPTIONS;
 # end write options
 
@@ -495,24 +503,24 @@ unless ($noclean) {
     system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
 
     # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots
-    system "mkdir IntaRNA";
+    system "mkdir -p IntaRNA";
     system "mv *.fa.intarna.csv IntaRNA";
 
-    system "mkdir Phylogeny";
+    system "mkdir -p Phylogeny";
     system "mv compatible.* Phylogeny";
     system "mv 16s_sequences.* Phylogeny";
 
-    system "mkdir FASTA";
+    system "mkdir -p FASTA";
     system "rm aligned_sRNA.fa" unless ($cop1);
     system "rm ncrna_aligned.fa";
     system "mv *.fa FASTA";
 
-    system "mkdir Regions_plots";
+    system "mkdir -p Regions_plots";
     system "mv *regions* Regions_plots";
     system "mv thumbnail_* Regions_plots" if ($websrv);   
 
     if ($enrich) { 
-        system "mkdir Enrichment";
+        system "mkdir -p Enrichment";
         system "mv copra_heatmap.html Enrichment";
         system "mv copraRNA.json Enrichment";
         system "mv enriched_heatmap_big* Enrichment";

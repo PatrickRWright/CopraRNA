@@ -11,7 +11,7 @@ TESTDIR=$PWD
 
 ##########################################################
 
-CALLARGS=" -verbose -srnaseq $TESTDIR/test1.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4 $KEEPTMPFILES"
+CALLARGS=" -verbose -srnaseq $TESTDIR/test1.fa -genomePath $TESTDIR/genomes -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4 $KEEPTMPFILES"
 
 ##########################################################
 

@@ -22,51 +22,153 @@ my $mrnapart = $ARGV[3]; # cds or 5utr or 3utr
 my $GenBankFiles = "";
 my $orgcount = 0;
 
-my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; 
-chomp $cores;
+
+##########################################################################################
+sub getOptionValue
+##########################################################################################
+# @param 1 option name from CopraRNA_option_file.txt file
+# @return the respective value from CopraRNA_option_file.txt
+##########################################################################################
+{
+	my $option = $_[0];
+	my $value = `grep -m 1 -P '^\\s*$option:' CopraRNA_option_file.txt | sed 's/^\\s*$option://g'`;
+	chomp $value;
+	return( $value );
+}
+######################################################################## END OF SUBROUTINE
+
+
+my $cores = getOptionValue("core count");
 
 # check if CopraRNA1 prediction should be made
-my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; 
-chomp $cop1;
+my $cop1 = getOptionValue("CopraRNA1");
 
 # check nooi switch
-my $nooi = `grep 'nooi:' CopraRNA_option_file.txt | sed 's/nooi://g'`; 
-chomp $nooi;
+my $nooi = getOptionValue("nooi");
 
 # check for verbose printing
-my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; 
-chomp $verbose;
+my $verbose = getOptionValue("verbose");
+
+# check for genomePath
+my $genomePath = getOptionValue("genomePath");
+# sanity check
+if ($genomePath eq "") {
+	$genomePath = ".";
+}
 
 # get amount of top predictions to return
-my $topcount = `grep 'top count:' CopraRNA_option_file.txt | grep -oP '\\d+'`;
-chomp $topcount;
+my $topcount = getOptionValue("top count");
 $topcount++; # need this to include the header
 
 # check for websrv output printing
-my $websrv = `grep 'websrv:' CopraRNA_option_file.txt | sed 's/websrv://g'`; 
-chomp $websrv;
+my $websrv = getOptionValue("websrv");
 
 # check for enrichment on/off and count
-my $enrich = `grep 'enrich:' CopraRNA_option_file.txt | sed 's/enrich://g'`; 
-chomp $enrich;
+my $enrich = getOptionValue("enrich"); 
 
 # get window size option
-my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; 
-chomp $winsize;
+my $winsize = getOptionValue("win size");
 
 # get maximum base pair distance 
-my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; 
-chomp $maxbpdist;
+my $maxbpdist = getOptionValue("max bp dist");
 
 # get consensus prediction option
-my $cons = `grep 'cons:' CopraRNA_option_file.txt | sed 's/cons://g'`; 
-chomp $cons;
+my $cons = getOptionValue("cons");
 
 # get ooifilt
-my $ooi_filt = `grep 'ooifilt:' CopraRNA_option_file.txt | sed 's/ooifilt://g'`;
-chomp $ooi_filt;
+my $ooi_filt = getOptionValue("ooifilt");
+
+####################################
+# open error stream
+####################################
 
 open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); 
+
+
+##########################################################################################
+sub stopFurtherProcessing
+##########################################################################################
+# @param 0 error message to be displayed before exiting this script
+# @param 1 exit code
+##########################################################################################
+{
+	print ERRORLOG $_[0];
+	exit( $_[1] );
+}
+######################################################################## END OF SUBROUTINE
+
+
+##########################################################################################
+sub removeInvalidGenomeFiles
+##########################################################################################
+# @param 0 (optional) error message to be displayed for each removed invalid file
+# @return the number of deleted files
+##########################################################################################
+{
+    my $errorMsg = "";
+    if (scalar(@_) > 0) {
+    	$errorMsg = $_[0];
+    }
+    
+    my $deletedFiles = 0;
+    
+    # iterate all "gb" files
+    foreach my $gbFile (<*gb>) {
+    
+    	my $lastTwoLines = `tail -n 2 $gbFile | tr -d "\n"`;
+    
+    	# proper gb file ends with "//" line
+    	unless ( $lastTwoLines =~ m/.*\/\/\s*$/ ) {
+    		`rm -f $gbFile`; # remove link
+    		`rm -f $genomePath/$gbFile`; # remove gb file to try download again later
+    		# count deletion
+    		$deletedFiles++;
+    		# print error message if given
+    		unless ($errorMsg eq "") {
+    			print ERRORLOG "Genome file $gbFile : $errorMsg\n";
+    		}
+    	} # if invalid file
+ 
+    } # for all gbFiles
+    
+    return( $deletedFiles );
+
+}
+######################################################################## END OF SUBROUTINE
+
+
+
+
+
+##########################################################################################
+sub downloadGenomeAndLink
+##########################################################################################
+# @param 1 accession number of the genome to download if not already present
+##########################################################################################
+{
+	my $accessionnumber = $_[0];
+
+    my $refseqoutputfile = "$accessionnumber.gb";
+
+  	# download genome file if needed
+	unless ( -e "$genomePath/$refseqoutputfile" ) {
+	  	my $gbCall = $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $genomePath/$refseqoutputfile";
+    	print $gbCall . "\n" if ($verbose); 
+      	system $gbCall;
+	}
+
+  	# link genome file locally if not present
+  	if ( (not -e "$refseqoutputfile") and (-e "$genomePath/$refseqoutputfile") ) {
+  		system ("ln -s $genomePath/$refseqoutputfile .");
+  	}
+}
+######################################################################## END OF SUBROUTINE
+
+
+
+####################################
+# create kegg 2 refseq mapping
+####################################
 
 my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
 # RefSeqID -> space separated RefSeqIDs // 'NC_005140' -> 'NC_005139 NC_005140 NC_005128'
@@ -89,6 +191,8 @@ foreach(@keggtorefseqnew) {
         $refseqaffiliations{$_} = $all_refseqs;
     }
 }
+
+####################################
 
 # add "ncRNA_" to fasta headers
 system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa"; 
@@ -120,39 +224,22 @@ foreach(@split_RefIds) {
     my $presplitreplicons = $refseqaffiliations{$currRefSeqID};
     my @replikons = split(/\s/, $presplitreplicons);
     
-    foreach(@replikons) {
-        my $refseqoutputfile = $_ . ".gb"; # added .gb
-        $GenBankFiles = $GenBankFiles . $refseqoutputfile . ",";
-        my $accessionnumber = $_;
-        print $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb \n" if ($verbose); 
-        system $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb";
+    foreach my $accessionnumber (@replikons) {
+        $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb" . ",";
+		downloadGenomeAndLink( $accessionnumber );
     }
+	# remove trailing comma
     chop $GenBankFiles;
+	# add space separator to begin next block of genome files
     $GenBankFiles = $GenBankFiles . " ";
 }
 
 ## RefSeq correct download check for 2nd try
-my @files = ();
-@files = <*gb>;
+removeInvalidGenomeFiles();
 
-foreach(@files) {
-    open(GBDATA, $_) or die("\nError: cannot open file $_ in homology_intaRNA.pl\n\n");
-        my @gblines = <GBDATA>;
-    close GBDATA;
 
-    my $lastLine = $gblines[-2]; 
-    my $lastLine_new = $gblines[-1]; 
-    if ($lastLine =~ m/^\/\//) {
-        # all is good
-    } elsif ($lastLine_new =~ m/^\/\//) {
-        # all is good
-    } else {
-        system "rm -f $_"; # remove file to try download again later
-    }
-}
-
-## refseq availability check
-@files = ();
+## list of available refseq files
+my @gbFiles = ();
 
 my @totalrefseqFiles = split(/\s|,/, $GenBankFiles);
 my $consistencyswitch = 1;
@@ -161,30 +248,28 @@ my $limitloops = 0;
 
 my $sleeptimer = 30; 
 while($consistencyswitch) {
-    @files = ();
-    @files = <*gb>;
-    foreach(@totalrefseqFiles) {
-        chomp $_;
-        my $value = $_;
-        if(grep( /^$value$/, @files )) { 
+    @gbFiles = <*gb>;
+    foreach my $gbFile (@totalrefseqFiles) {
+        chomp $gbFile;
+        if(grep( /^$gbFile$/, @gbFiles )) { 
             $consistencyswitch = 0;
         } else {
              $limitloops++;
              $consistencyswitch = 1;
  
              if($limitloops > 100) { 
-                 $consistencyswitch = 0;
-                 print ERRORLOG "Not all RefSeq *gb files downloaded correctly. Restart your job.\n"; 
-                 last;
+                $consistencyswitch = 0;
+				stopFurtherProcessing( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
              }
-             my $accNr = $_;
+             my $accNr = $gbFile;
+			# cut off last three characters of file name
              chop $accNr;
              chop $accNr;
              chop $accNr;
              sleep $sleeptimer; 
              $sleeptimer = $sleeptimer * 1.1; 
-             print "next try: " . $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accNr -g $accNr.gb\n" if ($verbose); 
-             system $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accNr -g $accNr.gb"; 
+			# try downloading
+			downloadGenomeAndLink( $accNr );
              last;
         }
     }
@@ -194,54 +279,39 @@ while($consistencyswitch) {
 
 
 ### refseq correct DL check kill job 
-@files = <*gb>;
+if ( 0 < removeInvalidGenomeFiles("Genome file did not download correctly. This is probably due to a connectivity issue with the NCBI servers. Please retry later..") ) {
+	stopFurtherProcessing( "Not all RefSeq *gb files downloaded correctly. Restart your job.\n", 1 );
+}
 
-foreach(@files) {
-    open(GBDATA, $_) or die("\nError: cannot open file $_ in homology_intaRNA.pl\n\n");
-        my @gblines = <GBDATA>;
-    close GBDATA;
+foreach my $gbFile (@gbFiles) {
 
-    my $lastLine = $gblines[-2]; 
-    my $lastLine_new = $gblines[-1]; 
-    if ($lastLine =~ m/^\/\//) {
-        # all is good
-    } elsif ($lastLine_new =~ m/^\/\//) {
-        # all is good
-    } else {
-        print ERRORLOG "File $_ did not download correctly. This is probably due to a connectivity issue on your or the NCBI's side. Please try to resubmit your job later (~2h.).\n"; # kill
+	## fixing issue with CONTIG and ORIGIN both in gb file (can't parse without this) 
+	# check if gbFile has to be corrected
+	my $gbContainsCONTIG = `grep -m 1 -c -P "^CONTIG" $gbFile`;
+	if ($gbContainsCONTIG > 0) {
+		# remove "CONTIG" string
+    	system "sed -i '/^CONTIG/d' $gbFile"; ## d stands for delete
+	}
+
+	# check for CDS features
+    system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $gbFile >> gene_CDS_exception.txt";
+
+}
+
+# check sanity of CDS features
+{ 
+    open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
+        my @exception_lines = <MYDATA>;
+    close MYDATA;
+    
+    if (scalar(@exception_lines) >= 1) {
+        my $exceptionRefSeqs = "";
+        foreach(@exception_lines) {
+            my @split = split(/\s+/,$_);
+            $exceptionRefSeqs = $exceptionRefSeqs . $split[-1] . " ";
+        }
+        print ERRORLOG "Error: gene but no CDS features present in $exceptionRefSeqs.\n This is most likely connected to currently corrupted RefSeq record(s) at the NCBI.\nPlease resubmit your job without the currently errorous organism(s) or wait some time with your resubmission.\nUsually the files are fixed within ~1 week.\n"; 
     }
-}
-
-
-## fixing issue with CONTIG and ORIGIN both in gbk file (can't parse without this) 
-
-@files = <*gb>;
-
-foreach (@files) {
-    system "sed -i '/^CONTIG/d' $_"; ## d stands for delete
-}
-
-#### end quickfix
-
-
-@files = <*gb>;
-
-foreach (@files) {
-    system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $_ >> gene_CDS_exception.txt";
-}
-
-open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
-    my @exception_lines = <MYDATA>;
-close MYDATA;
-
-
-if (scalar(@exception_lines) >= 1) {
-    my $exceptionRefSeqs = "";
-    foreach(@exception_lines) {
-        my @split = split(/\s+/,$_);
-        $exceptionRefSeqs = $exceptionRefSeqs . $split[-1] . " ";
-    }
-    print ERRORLOG "Error: gene but no CDS features present in $exceptionRefSeqs.\n This is most likely connected to currently corrupted RefSeq record(s) at the NCBI.\nPlease resubmit your job without the currently errorous organism(s) or wait some time with your resubmission.\nUsually the files are fixed within ~1 week.\n"; 
 }
 ## end CDS gene exception check
 
@@ -251,10 +321,8 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
 
     ### get AA fasta for homolog clustering
 
-    @files = <*gb>;
-
-    foreach(@files) {
-        system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $_ >> all.fas"; 
+    foreach my $gbFile (@gbFiles) {
+        system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $gbFile >> all.fas"; 
     }
 
     # prep for DomClust
@@ -530,5 +598,6 @@ if ($enrich) {
 }
 
 
-close ERRORLOG;
+# close error stream and be done
+stopFurtherProcessing("",0);
 
