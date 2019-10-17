@@ -47,21 +47,35 @@ foreach(@kegg2refseq) {
 
 my $seqin = Bio::SeqIO->new( -format => 'genbank', -file => $refid);
 
+# we will hash all printed CDS to avoid duplicated output for subsequences of transpliced Genes
+# see https://www.ncbi.nlm.nih.gov/genbank/genomesubmit_annotation/
+# alternatively: check sub_SeqFeature of $sf  https://metacpan.org/pod/Bio::Seq
+my %printedCDS=();
+
 while( (my $seq = $seqin->next_seq()) ) {
+
     foreach my $sf ( $seq->get_SeqFeatures() ) {
-        if( $sf->primary_tag eq 'CDS' ) {
-            my $ltag = "";
-            my $protein = "";
-            if ($sf->has_tag("locus_tag") and $sf->has_tag("translation")) {
+
+        if( $sf->primary_tag eq 'CDS' 
+			and $sf->has_tag("locus_tag") 
+			and $sf->has_tag("translation")) 
+		{
+				# get locus tag
                 my @ltaglist = $sf->get_tag_values("locus_tag");
-                $ltag = $ltaglist[0];
-                my @translationlist = $sf->get_tag_values("translation");
-                $protein = $translationlist[0];
-            
+                my $ltag = $ltaglist[0];
                 chomp $ltag;
-                print ">$keggcode:$ltag\n";
-                chomp $protein;
-                print "$protein\n";
+
+				# print if unknown
+				if ( not exists($printedCDS{$ltag} ) {
+					# get CDS data for entry
+					my @translationlist = $sf->get_tag_values("translation");
+					my $protein = $translationlist[0];
+					chomp $protein;
+					# print fasta entry
+					print ">$keggcode:$ltag\n$protein\n";
+					# mark as printed
+					$printedCDS{$ltag} = $ltag;
+				}
          }
       }
    }
