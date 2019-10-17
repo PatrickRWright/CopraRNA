@@ -13,15 +13,16 @@ GetOptions('acc=s'      =>  \$acc_number,
            'g|genome=s' =>  \$genome_file,);
 
 &usage unless ($acc_number && $genome_file);
-#die "file $genome_file does already exist\n" if (-e $genome_file);
-exit(0) if (-e $genome_file); ## edit 2.0.3
+
+# check if file is already present
+exit(0) if (-e $genome_file);
 
 # get GI for given genome accession number
 my $factory = Bio::DB::EUtilities->new(-eutil => 'esearch',
                                        -db => 'nuccore',
                                        -field => 'Accession',
                                        -term => $acc_number,
-                                       -tool => 'coprarna', ## edit 2.0.5.1 // changed to coprarna // also removed email
+                                       -tool => 'coprarna',
                                        -verbose => -1); # no warnings
 my ($id) = $factory->get_ids;
 die "no genome with accession number '$acc_number' found\n" unless ($id);
@@ -44,8 +45,7 @@ while (my $item = $ds->next_Item('flattened'))  {
 $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                     -db => 'nuccore',
                                     -id => $id,
-                                    -tool => 'intarna_web',
-                                    -email => 'intarna@informatik.uni-freiburg.de',
+                                    -tool => 'coprarna',
                                     -rettype => 'gbwithparts'); # gbwithparts to get full sequence
 $factory->get_Response(-file => $genome_file); 
 
