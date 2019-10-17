@@ -3,15 +3,12 @@
 use strict;
 use warnings;
 use List::MoreUtils qw(uniq);
-
-## edit 2.0.4.1 // rewrote this script
 ## run in a CopraRNA directory with
 ## *_opt.intarna.csv files and cluster.tab
 ## to create a clustering of IntaRNA predictions 
 
-print "d1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;hybridDB;E;ED1;ED2;Pu1;Pu2;E_init;E_loops;E_dangleL;E_dangleR;E_endL;E_endR;seedStart1;seedEnd1;seedStart2;seedEnd2;seedE;seedED1;seedED2;seedPu1;seedPu2;E_norm;p-value;clusternumber\n";
-
-my @final_csv_files = <*_opt.intarna.csv>;  ## edit 2.0.5.1 // changed file suffix
+my @final_csv_files = <*_opt.intarna.csv>; 
+my $intarna_csv_header = "";
 
 my %ltag_line_hash = (); # locus_tag -> intarna.csv line
 
@@ -19,9 +16,14 @@ my %ltag_line_hash = (); # locus_tag -> intarna.csv line
 # this hash will be later accessed using the lines from cluster.tab
 foreach ( @final_csv_files ) {
 
-    open(MYDATA, $_) or die("\nError: cannot open file $_ in cluster_intarna_csv.pl\n\n"); ## edit 2.0.5.1 // added script name
+    open(MYDATA, $_) or die("\nError: cannot open file $_ in cluster_intarna_csv.pl\n\n"); ## 
 
         my @final_csv_lines = <MYDATA>;
+
+		# copy header information if not already done
+		$intarna_csv_header = $final_csv_lines[0] if ( $intarna_csv_header eq "" );
+
+		# store intarna output 
         for (my $i=1;$i<scalar(@final_csv_lines);$i++) { 
             my $curr_line = lc($final_csv_lines[$i]);
             chomp $curr_line;
@@ -32,9 +34,12 @@ foreach ( @final_csv_files ) {
     close MYDATA;
 }
 
+# print new output header
+print "$intarna_csv_header;clusternumber\n";
+
 my $homologlist = "cluster.tab";
 
-open(MYDATA, $homologlist) or die("\nError: cannot open file $homologlist in cluster_intarna_csv.pl\n\n"); ## edit 2.0.5.1 // added script name
+open(MYDATA, $homologlist) or die("\nError: cannot open file $homologlist in cluster_intarna_csv.pl\n\n");
     my @cluster_tab_lines = <MYDATA>;
 close MYDATA;
 
@@ -57,7 +62,7 @@ for (my $i=1;$i<scalar(@cluster_tab_lines);$i++) {
            $_ =~ s/\w+://g; # remove pseudo KEGG id and colon
            if (exists $ltag_line_hash{$_}) {
                my @split_line = split(/;/, $ltag_line_hash{$_});
-               # $split_line[35] is the current p-value           ## edit 2.0.5.1 // changed to check on pvalue instead of energy because of cds option
+               # $split_line[35] is the current p-value
                if ($split_line[35] < $pvalue) {
                    $print_line = $ltag_line_hash{$_};
                    $pvalue = $split_line[35];
