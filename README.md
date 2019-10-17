@@ -134,6 +134,9 @@ The following options are available:
 - `--ooifilt` : post processing filter for organism of interest p-value 0=off (def:0)
 - `--root` : specifies root function to apply to the weights (def:1)
 - `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+- `--temperature` : temperature in Celsius to be used for interaction prediction (def:37.0)
+- `--genomePath`: path where NCBI genome files (`*.gb`) are to be stored (def:`.` i.e. working directory). Set this path if you (want to) store all your genomes in a dedicated folder to be shared by different CopraRNA calls.
 
 <br /><br />
 <a name="updateava" />
