@@ -265,7 +265,7 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> $OUT_ERR"
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> ".$OUT_ERR;
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
     if ($domclustExitStatus != 0) {
@@ -279,10 +279,11 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
     }
 
     
-    system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
-    if (-s "N_chars_in_CDS.txt") {
-        print ERRORLOG "'N' characters found in nucleotide CDS. Please remove organism(s) with locus tags:\n";
-        system "cat err.log N_chars_in_CDS.txt >> err.log";
+    system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
+    if (-s "duplicated_CDS.txt") {
+        print ERRORLOG "duplicated CDS for some genes. Please check locus tags:\n";
+		my $fileContent = do{local(@ARGV,$/)="duplicated_CDS.txt";<>};
+		print ERRORLOG $fileContent . "\n";
     }
 
 }
@@ -317,8 +318,9 @@ if ($sixteenScounter ne $orgcount) {
 ## prepare single organism whole genome target predictions 
 system "echo $GenBankFiles > merged_refseq_ids.txt"; # need this for iterative region plot construction
 
-print $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
+my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
+print $prepare_intarna_out_call . "\n" if ($verbose);
+system $prepare_intarna_out_call;
 ## end
 
 # re-cluster based on 5'UTRs
