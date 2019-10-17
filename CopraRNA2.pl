@@ -388,9 +388,9 @@ if ($verbose) {
     print "\nOrganism of interest: $full_ooi\n\n";
 }
 
-# run homology_intaRNA.pl 
-print $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds\n" if ($verbose);
-my $homology_intaRNA_exitStatus = system $PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+print $homology_intaRNA_call . "\n" if ($verbose);
+my $homology_intaRNA_exitStatus = system $homology_intaRNA_call;
 $homology_intaRNA_exitStatus /= 256; # get original exit value
 # check exit status
 if ($homology_intaRNA_exitStatus != 0) { 
