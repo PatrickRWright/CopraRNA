@@ -43,6 +43,10 @@ chomp $cop1;
 my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; 
 chomp $winsize;
 
+# get temperature
+my $temperature = `grep -m 1 -P '^\\s*temperature:' CopraRNA_option_file.txt | sed 's/^\\s*temperature://g'`; 
+chomp $temperature;
+
 # get maximum base pair distance 
 my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; 
 chomp $maxbpdist;
@@ -141,31 +145,41 @@ foreach (@files) {
 		system("mkdir $ncrnafilename1");
         my $intarnaout = $_ . ".intarna.csv"; 
             $pm->start and next;            
-			my $intarna_call = "IntaRNA --outOverlap=Q --tAccW $winsize --tAccL $maxbpdist  --target $_ --query $ncrnafilename --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm' --outMode=C --out $intarnaout --out=SpotProb:./$ncrnafilename1/probs.csv";
+			my $intarna_call = 
+					"IntaRNA"
+					." --outOverlap=Q"
+					." --target $_ --tAccW $winsize --tAccL $maxbpdist"
+					." --query $ncrnafilename --qAccW $winsize --qAccL $maxbpdist"
+					." --temperature $temperature"
+					." --outMode=C --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm'"
+					." --out $intarnaout"
+					." --outCsvSort E"
+					." --out=SpotProb:./$ncrnafilename1/probs.csv";
 			print($intarna_call . "\n") if ($verbose);
             system($intarna_call) unless (-e $intarnaout);
             $pm->finish;
+			# create temporary "sorted" file to support old pipeline
+			system("ln -s $intarnaout $_.intarna.sorted.csv";
      }                                                                                   
 }
                                                                                         
 $pm->wait_all_children;  
 
-## sort IntaRNA output by energy
-@files = <*intarna.csv>;
-
-foreach (@files) {
-    
-    my $temp = $_;
-    chomp $temp;
-    chop $temp;
-    chop $temp;
-    chop $temp;
-    my $sortedcsv = $temp . "sorted.csv"; 
-    system "env LC_ALL=C sort -t';' -g -k15 $_ -o $sortedcsv"; 
-}
-
-@files = ();
-@files = <*>;
+### sort IntaRNA output by energy  # obsolete due to "--outCsvSort E" in intarna call
+#@files = <*intarna.csv>;
+#
+#foreach (@files) {
+#    
+#    my $temp = $_;
+#    chomp $temp;
+#    chop $temp;
+#    chop $temp;
+#    chop $temp;
+#    my $sortedcsv = $temp . "sorted.csv"; 
+#    system "env LC_ALL=C sort -t';' -g -k15 $_ -o $sortedcsv"; 
+#}
+#
+#@files = <*>;
 
 my %ncrnalengthhash = (); 
 my @lines = (); 
