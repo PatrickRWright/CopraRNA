@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use Cwd 'abs_path'; ## edit 2.0.5.1
+use Cwd 'abs_path';
 
 # CopraRNA 2.1.3
 
@@ -159,7 +159,7 @@ use Cwd 'abs_path'; ## edit 2.0.5.1
 # v1.2.2   : Fixed issue with organism: 'sfd'
 # v1.2.1   : RefSeq files now being downloaded from NCBI FTP
 
-my $help = ""; ## edit 2.0.4
+my $help = "";
 my $sRNAs_fasta = "input_sRNA.fa";
 my $upstream = 200;
 my $downstream = 100;
@@ -169,26 +169,26 @@ my $core_count = 1; # how many parallel processes are allowed
 my $winsize = 150; # IntaRNA window size
 my $maxbpdist = 100; # IntaRNA maximum base pair distance 
 my $cop1 = 0;
-my $cons = 0; ## edit 2.0.6
-my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 balanced else ooi ## edit 2.0.6
-my $verbose = 0; ## edit 2.0.5.1
-my $noclean = 0; ## edit 2.0.5.1
-my $websrv = 0; ## edit 2.0.5.1
+my $cons = 0;
+my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 balanced else ooi
+my $verbose = 0;
+my $noclean = 0;
+my $websrv = 0;
 my $ooi_filt = 0; ## for copraRNA2_ooi_post_filtering.R
-my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 // ## edit 2.0.5.1
-my $topcount = 200; # amount of top predictions // ## edit 2.0.5.1
-my $root = 1; # root function to apply to the weights // ## edit 2.0.5.1
-my $enrich = 0; ## edit 2.0.5.1 // functional enrichment needs to be specifically turned on 
-                ##              // this option also allows to specify how many top predictions to use for the enrichment
+my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 //
+my $topcount = 200; # amount of top predictions //
+my $root = 1; # root function to apply to the weights //
+my $enrich = 0; ## functional enrichment needs to be specifically turned on 
+                ## this option also allows to specify how many top predictions to use for the enrichment
 
 # get absolute path
-my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
+my $ABS_PATH = abs_path($0);
 # remove script name at the end
 # match all non slash characters at the end of the string
-$ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
-my $PATH_COPRA = $ABS_PATH; ## edit 2.0.4 // changed $versiondirectory to $PATH_COPRA in all scripts
+$ABS_PATH =~ s|[^/]+$||g;
+my $PATH_COPRA = $ABS_PATH; 
 
-GetOptions ( ## edit 2.0.4
+GetOptions (
     'help|?'		=> \$help,
     'srnaseq:s'		=> \$sRNAs_fasta,
     'ntup:i'		=> \$upstream,
@@ -196,22 +196,22 @@ GetOptions ( ## edit 2.0.4
     'cores:i'		=> \$core_count,
     'region:s'		=> \$region, # one of "5utr", "3utr", "cds"
     'rcsize:f'		=> \$RelClusterSize,
-    'winsize:i'		=> \$winsize,    ## edit 2.0.5.1 
-    'maxbpdist:i'	=> \$maxbpdist,  ## edit 2.0.5.1
+    'winsize:i'		=> \$winsize,
+    'maxbpdist:i'	=> \$maxbpdist,
     'cop1'		=> \$cop1, # switch for coprarna1, if set then coprarna1 is run // else only coprarna2
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
     'noclean'		=> \$noclean, # switch to prevent cleaning of files
     'nooi'		=> \$nooi, # switch to set prediction mode to balanced mode
-    'topcount:i'	=> \$topcount, # amount of top predictions to return ## edit 2.0.5.1
+    'topcount:i'	=> \$topcount, # amount of top predictions to return
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
-    'root:i'		=> \$root, # root function to apply to the weights ## edit 2.0.5.1
-    'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons ## edit 2.0.6
+    'root:i'		=> \$root, # root function to apply to the weights
+    'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons
     'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
 );
 
 
-if ($help) { ## edit 2.0.4 // added  help and getopt
+if ($help) {
 
 print "\nCopraRNA 2.1.2\n\n",
 
@@ -242,22 +242,24 @@ print "\nCopraRNA 2.1.2\n\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
 " --rcsize                  minimum amount (%) of putative target homologs that need to be available \n",
-"                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)\n",  ## edit 2.0.5.1
-" --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",                                 ## edit 2.0.5.1
+"                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)\n",
+" --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",
 " --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)\n",
-" --cop1                    switch for CopraRNA1 prediction (def:off)\n",  ## edit 2.0.6
-" --cons                    controls consensus prediction (def:0)\n", ## edit 2.0.6
-"                           '0' for off\n", ## edit 2.0.6
-"                           '1' for organism of interest based consensus\n", ## edit 2.0.6
-"                           '2' for overall consensus based prediction\n", ## edit 2.0.6
-" --verbose                 switch to print verbose output to terminal during computation (def:off)\n",  ## edit 2.0.5.1
-" --websrv                  switch to provide webserver output files (def:off)\n",  ## edit 2.0.5.1
-" --noclean                 switch to prevent removal of temporary files (def:off)\n",  ## edit 2.0.5.1
-" --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",  ## edit 2.0.5.1
-" --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",  ## edit 2.0.6
+" --cop1                    switch for CopraRNA1 prediction (def:off)\n",
+" --cons                    controls consensus prediction (def:0)\n",
+"                           '0' for off\n",
+"                           '1' for organism of interest based consensus\n",
+"                           '2' for overall consensus based prediction\n",
+" --verbose                 switch to print verbose output to terminal during computation (def:off)\n",
+" --websrv                  switch to provide webserver output files (def:off)\n",
+" --noclean                 switch to prevent removal of temporary files (def:off)\n",
+" --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",
+" --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",
 " --ooifilt                 post processing filter for organism of interest p-value 0=off (def:0)\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
-" --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n\n", ## edit 2.0.6
+" --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
+" --pathGB                  path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
+"\n"
 
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -271,7 +273,7 @@ exit(0);
 }
 
 # input check
-unless (-e $sRNAs_fasta) { ## edit 2.0.2
+unless (-e $sRNAs_fasta) {
     die("\nError: No input FASTA supplied!\nUse '-h' option for help.\n\n");
 }
 
@@ -289,19 +291,19 @@ die("\nError: The input file ($sRNAs_fasta) seems to contain less than 3 sequenc
 die("\nError: ooifilt needs to be specified between 0 and 1. You set $ooi_filt\n\n") unless ($ooi_filt>=0 and $ooi_filt<=1);
 
 # create warning for non empty run dir
-my @dir_files = <*>; ## edit 2.0.5.1
-my $file_count = scalar(@dir_files); ## edit 2.0.5.1
-print "\nWarning: your run directory contains many files ($file_count). In general it is suggested to run CopraRNA in an empty directory to avoid unexpected behaviour.\n\n" if ($file_count > 10); ## edit 2.0.5.1
+my @dir_files = <*>;
+my $file_count = scalar(@dir_files);
+print "\nWarning: your run directory contains many files ($file_count). In general it is suggested to run CopraRNA in an empty directory to avoid unexpected behaviour.\n\n" if ($file_count > 10);
 
-# check core count // if wrong set it to 1 // ## edit 2.0.4
+# check core count // if wrong set it to 1 //
 if ($core_count <= 1) {
     $core_count = 1;
 }
 
-# check region parameter ## edit 2.0.4
+# check region parameter
 die ("\nError: -region parameter must be one of 5utr, 3utr or cds. You set '$region'.\n\n") unless ($region eq "5utr" or $region eq "3utr" or $region eq "cds");
 
-# check cons paramter ## edit 2.0.6
+# check cons paramter
 die ("\nError: -cons parameter must be one of 0, 1 or 2. You set '$cons'.\n\n") unless ($cons eq 2 or $cons eq 1 or $cons eq 0);
 
 # disallow nooi=1 and cons=1 combination
@@ -311,10 +313,10 @@ die ("\nError: -cons 1 can not be combined with -nooi 1. Set -cons to 0 or 2.\n\
 die ("\nError: -cons must be 0 for -cop1 prediction. You set '$cons'.\n\n") if ( ( ($cons eq 1) and $cop1 ) or ( ($cons eq 2) and $cop1 ) );
 
 # check for gaps
-system "grep '-' $sRNAs_fasta > find_gaps.txt"; ## edit 2.0.2
-if (-s "find_gaps.txt") { die("\nError: Gaps are present in sRNA sequences. Please delete them from the file and restart.\n\n"); } ## edit 2.0.2
+system "grep '-' $sRNAs_fasta > find_gaps.txt";
+if (-s "find_gaps.txt") { die("\nError: Gaps are present in sRNA sequences. Please delete them from the file and restart.\n\n"); }
 
-# check for correct RefSeq formatted headers and their presence in the availibility table ## edit 2.0.4
+# check for correct RefSeq formatted headers and their presence in the availibility table
 my $headerIDs = `grep ">" $sRNAs_fasta | sed 's/>//g' | tr '\n' ';'`;
 chop $headerIDs;
 my @splitHeaderIDs = split(/;/,$headerIDs);
@@ -326,23 +328,23 @@ foreach(@splitHeaderIDs) {
 }
 
 # check that maxbpdist ist smaller or equal to windowsize
-die("\nError: The maximal basepair distance ($maxbpdist) is larger than the given window size ($winsize) but must be <= to the windows size. Please change the parameters accordingly.\n\n") if ($maxbpdist > $winsize); ## edit 2.0.5.1
+die("\nError: The maximal basepair distance ($maxbpdist) is larger than the given window size ($winsize) but must be <= to the windows size. Please change the parameters accordingly.\n\n") if ($maxbpdist > $winsize);
 
-# check for ntup + ntdown being >= $winsize because of IntaRNA parameters ## edit 2.0.5.1
+# check for ntup + ntdown being >= $winsize because of IntaRNA parameters
 my $sumUpDown = $upstream+$downstream;
-if ($region eq "5utr" or $region eq "3utr") { ## edit 2.0.4.2
-    die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize (--winsize). Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize ); ## edit 2.0.5.1
+if ($region eq "5utr" or $region eq "3utr") {
+    die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize (--winsize). Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize );
 }
 
-# check for correct range of 0.5 <= -rcsize <= 1.0 ## edit 2.0.5.1
+# check for correct range of 0.5 <= -rcsize <= 1.0
 die("\nError: -rcsize can only be specified between 0 and 1.0. You set '$RelClusterSize'.\n\n") unless ($RelClusterSize >= 0 and $RelClusterSize <= 1.0);
 
-# check for duplicate IDs in FASTA header // not allowed ## edit 2.0.4
+# check for duplicate IDs in FASTA header // not allowed
 my $duplicate_fasta_header = `grep ">" $sRNAs_fasta | sort | uniq -d`;
 chomp $duplicate_fasta_header;
 die("\nError: Duplicate organisms ($duplicate_fasta_header) are present in $sRNAs_fasta.\n\n") if($duplicate_fasta_header);
 
-# write input options to file ## edit 2.0.4
+# write input options to file
 open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "sRNA FASTA:" . $sRNAs_fasta . "\n";
     print WRITETOOPTIONS "nt upstream:" . $upstream . "\n";
@@ -360,9 +362,9 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
-    print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
+    print WRITETOOPTIONS "cons:" . $cons . "\n";
     print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
-    print WRITETOOPTIONS "version:CopraRNA 2.1.2\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "version:CopraRNA 2.1.2\n";
 close WRITETOOPTIONS;
 # end write options
 
@@ -403,17 +405,16 @@ my @splitRID = split(/\s/, $ncrnaRIDs);
 my $organismOfInterest = $splitRID[0];
 chomp $organismOfInterest;
 # final optimal IntaRNA result for organism of interest
-my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . "_opt.intarna.csv"; ## edit 2.0.5.1
+my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . "_opt.intarna.csv";
 
-if ($enrich) { ## edit 2.0.5.1
+if ($enrich) {
     # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
     print "Performing auxiliary enrichment\n" if ($verbose);
     system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
-    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## edit 2.0.6 // aux einrich for same amout as regular enrichment
-    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt"; ## edit 2.0.6 // no longer removing all spaces
+    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## aux einrich for same amout as regular enrichment
+    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt";
     system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
-    ## edit 2.0.6 new aux table
     system "echo 'locus_tag,start_tar,stop_tar,start_query,stop_query,energy,p-value,gene_name,gene_id,annotation,functional_terms' > aux_table.csv";
     system "awk -F';' '{ print \$1\",\"\$9\",\"\$10\",\"\$11\",\"\$12\",\"\$15\",\"\$36\",\"\$37\",\"\$38\",\"\$39 }' intarna_websrv_table_ncbi.csv > intarna_websrv_table_ncbi_awk.csv";
     my $aux_gids = `grep -oP ';\\d+\\(' org_of_interest_aux_enrichment.txt | sed 's/[;(]//g' | sort -u | tr '\n' ';'`;
@@ -427,7 +428,7 @@ if ($enrich) { ## edit 2.0.5.1
 }
 
 # output warnings
-system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning"; ## edit 2.0.2
+system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning";
 
 # check err.log // should be empty // err.log contains information on 
 # 1. not correctly downloaded RefSeq files 
@@ -436,11 +437,11 @@ system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted.
 # 4. empty CopraRNA_result.csv 
 # 5. the exception in add_pval_to_csv_evdfit.R
 # -s  File has nonzero size (returns size in bytes).
-if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## edit 2.0.4 // added another check here at the bottom maybe we need some more check hooks in the new scripts
+if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\n"); } ## added another check here at the bottom maybe we need some more check hooks in the new scripts
 
 # create regions plots
 print "Preparing interaction plots\n" if ($verbose);
-system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## edit 2.0.5.1 // changed input file and piping command line output to /dev/null for silencing // ## edit 2.0.6 new input file
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## echanged input file and piping command line output to /dev/null for silencing // 
 
 # convert postscript files to PNG
 
@@ -474,7 +475,7 @@ unless ($noclean) {
     system "rm fasta_temp_file fasta_temp_file_out";
     #system "rm conservation_table.Rdata" unless ($cop1);
 
-    # fix warning "rm: missing operand Try 'rm --help' for more information." ## edit 2.0.1
+    # fix warning "rm: missing operand Try 'rm --help' for more information."
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
     if ($temp_fasta_check) {
         system 'find -regex ".*fa[0-9]+$" | xargs rm';
@@ -493,7 +494,7 @@ unless ($noclean) {
     system "rm formatdb.log" if (-e "formatdb.log");
     system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
 
-    # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots ## edit 2.0.5.1 // 2.0.6
+    # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots
     system "mkdir IntaRNA";
     system "mv *.fa.intarna.csv IntaRNA";
 
