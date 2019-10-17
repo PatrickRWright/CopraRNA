@@ -66,7 +66,7 @@ while( (my $seq = $seqin->next_seq()) ) {
                 chomp $ltag;
 
 				# print if unknown
-				if ( not exists($printedCDS{$ltag} ) {
+				if ( not exists($printedCDS{$ltag}) ) {
 					# get CDS data for entry
 					my @translationlist = $sf->get_tag_values("translation");
 					my $protein = $translationlist[0];
@@ -76,7 +76,6 @@ while( (my $seq = $seqin->next_seq()) ) {
 					# mark as printed
 					$printedCDS{$ltag} = $ltag;
 				}
-         }
       }
    }
 }
