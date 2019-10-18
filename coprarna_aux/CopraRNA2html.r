@@ -11,6 +11,10 @@ path<-initial.options [4]
 path<-sub("CopraRNA2html.r","",path)
 
 
+# jalview properties file
+jalprops<-paste(path,"jalview_props.txt",sep="")
+#jalprops<-"/media/cyano_share/data/GLASSgo_postprocessing/jalview_props.txt"
+
 # CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
 dat<-read.csv(inputfile, sep=",")
@@ -152,9 +156,9 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 		pos<-grep(selection[i],d)
 		na<-d[pos]
 		fol<-paste(align_folder,"/",na,"/",sep="")
-		jal<-paste("jalview -nodisplay -props /media/cyano_share/data/GLASSgo_postprocessing/jalview_props.txt -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -png ",  paste("./jalview/",na,"_mRNA.PNG", sep="") , sep="" )
+		jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -svg ",  paste("./jalview/",na,"_mRNA.PNG", sep="") , sep="" )
 		system(jal)
-		jal<-paste("jalview -nodisplay -props /media/cyano_share/data/GLASSgo_postprocessing/jalview_props.txt -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste("./jalview/",na,"_sRNA.PNG", sep="") , sep="" )
+		jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste("./jalview/",na,"_sRNA.PNG", sep="") , sep="" )
 		system(jal)
 	}
 }
@@ -255,22 +259,22 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	ints<-paste("./evo_alignments2/",selection,"/interactions.html",sep="")
 	ints<- paste0("[interaction](",ints,"){target='_blank'}")
 	#d<-dir("./jalview")
-	#mrna<-paste("./jalview/",d[match(paste(selection,"_mRNA.PNG",sep=""),sub(".*?_","",d))],sep="")
-	#mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
-	#srna<-paste("./jalview/",d[match(paste(selection,"_sRNA.PNG",sep=""),sub(".*?_","",d))],sep="")
-	#srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
+	mrna<-paste("./evo_alignments2/",d[match(paste(selection,"_mRNA.PNG",sep=""),sub(".*?_","",d))],sep="")
+	mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
+	srna<-paste("./evo_alignments2/",d[match(paste(selection,"_sRNA.PNG",sep=""),sub(".*?_","",d))],sep="")
+	srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
 	heat<-paste("./evo_alignments2/",selection,"/",selection,"_conservation_heatmap.pdf",sep="")
 	#heat<-paste("./heatmaps/",selection,".pdf",sep="")
 	heat<- paste0("[conservation](",heat,"){target='_blank'}")
 	probcons<-paste("./evo_alignments2/",selection,"/spot_probabilities.png",sep="")
 	probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
 	#Links<-paste(heat,mrna,srna,ints, sep=", ")
-	Links<-paste(heat,ints,probcons, sep=", ")
+	Links<-paste(heat,mrna, srna,ints,probcons, sep=", ")
 	ind_tables<-paste(getwd(),"/evo_alignments2/ind_tables",sep="")
 	dir.create(ind_tables)
 	
 	
-	tab<-cbind(tabs[[1]], Links)
+	tab<-cbind(tabs[[1]][,1], Links,tabs[[1]][,2:ncol(tabs[[1]])])
 	write.table(tab, file=paste(ind_tables,"/",names(tabs)[1],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
 	tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[1],".txt'",sep="")
 	tmp<-c("tab<-read.csv(",tmp,",sep='\\t')")
@@ -278,7 +282,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	if(length(tabs)>1){
 		for(i in 2:length(tabs)){
-			tab<-cbind(tabs[[i]], Links)
+			tab<-cbind(tabs[[i]][,1], Links,tabs[[i]][,2:ncol(tabs[[i]])])
 			write.table(tab, file=paste(ind_tables,"/",names(tabs)[i],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
 			tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[i],".txt'",sep="")
 			tmp<-c("tab<-read.csv(",tmp,",sep='\\t')")
@@ -291,4 +295,5 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 }
 
 interactions()	
+#jalview()
 html_table()

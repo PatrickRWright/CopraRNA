@@ -432,9 +432,7 @@ my $ooi_refseq_id = $split[0];
 
 
 unless ($cop1) {
-    # align homologous targets
-    system $PATH_COPRA_SUBSCRIPTS . "parallelize_target_alignments.pl CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv";
-    # run position script
+    # compute phylogenetic distances to the ooi UTRs
     system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; 
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR >> $OUT_STD"; 
     # perform actual CopraRNA 2 p-value combination

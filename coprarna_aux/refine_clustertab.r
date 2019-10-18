@@ -75,9 +75,9 @@ d<-dir()
 fasta<-grep("_upfrom.*_down_.*.fa$", d)
 fasta1<-c()
 for(i in 1:length(fasta)){
-fasta1<-c(fasta1, read.fasta(d[fasta[i]]))
-
+	fasta1<-c(fasta1, read.fasta(d[fasta[i]]))
 }
+write.fasta(fasta1, names=names(fasta1),file="utr_seqs.fa")
 
 #read the original cluster file produced by domclust and write a backup version
 clus<-read.csv("cluster.tab", sep="\t")
@@ -228,7 +228,7 @@ vari<-foreach(ji=1:max_cores)  %dopar% {
 				temp_fasta<-fasta_text(temp_fasta)
 				tempf<-tempfile()
 				write.fasta(fasta1[pos],names=names(locus), file.out=tempf)
-				ca<-paste("mafft --maxiterate 1000 --retree 1 --localpair --quiet --inputorder ", tempf,"",sep="")
+				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf,"",sep="")
 				align<-parse_fasta(system(ca, intern=T))
 				file.remove(tempf)
 				dis<-dist_hamming(align)
