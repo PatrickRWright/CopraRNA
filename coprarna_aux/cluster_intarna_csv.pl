@@ -35,6 +35,7 @@ foreach ( @final_csv_files ) {
 }
 
 # print new output header
+chomp $intarna_csv_header;
 print "$intarna_csv_header;clusternumber\n";
 
 my $homologlist = "cluster.tab";
