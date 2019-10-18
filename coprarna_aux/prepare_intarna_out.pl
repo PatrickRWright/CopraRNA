@@ -143,8 +143,10 @@ foreach (@files) {
 			$ncrnafilename = $ncrnafilename . ".fa";
 			@ncrnaarray = ();
 		system("mkdir $ncrnafilename1");
-        my $intarnaout = $_ . ".intarna.csv"; 
+	        my $intarnaout = $_ . ".intarna.csv"; 
+			my $intarnasortedout = $_ . ".intarna.sorted.csv"; 
             $pm->start and next;            
+			# create temporary "sorted" file to support old pipeline
 			my $intarna_call = 
 					"IntaRNA"
 					." --outOverlap=Q"
@@ -154,12 +156,10 @@ foreach (@files) {
 					." --outMode=C --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm'"
 					." --out $intarnaout"
 					." --outCsvSort E"
-					." --out=SpotProb:./$ncrnafilename1/probs.csv";
+					." --out=SpotProb:./$ncrnafilename1/probs.csv; ln -s $intarnaout $intarnasortedout";
 			print($intarna_call . "\n") if ($verbose);
             system($intarna_call) unless (-e $intarnaout);
             $pm->finish;
-			# create temporary "sorted" file to support old pipeline
-			system("ln -s $intarnaout $_.intarna.sorted.csv";
      }                                                                                   
 }
                                                                                         
