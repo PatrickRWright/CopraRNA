@@ -183,7 +183,7 @@ for(j in 1:nrow(clus)){
 # deal with clusters with multiple ooi entries
 if ( length(mult) > 0 ) {
 
-clus_in<-clus;
+clus_in<-clus
 clus2<-clus[mult,]
 
 # divide the data in subsets for parallel processing 
@@ -194,10 +194,9 @@ jobs[1]<-jobs[1]+rest
 count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 count_vect2<-cumsum(jobs)
 
+
 # start parallel processing
-vari<-foreach(ji=1:(max_cores))  %dopar% {
-	"drin"
-	paste("DEBUG ji ",ji)
+vari<-foreach(ji=1:max_cores)  %dopar% {
 	clus<-clus2[count_vect1[ji]:count_vect2[ji],]
 	out_clus<-vector("list",nrow(clus))
 	names(out_clus)<-clus[,1]
