@@ -1,27 +1,28 @@
+#!/usr/bin/env Rscript
+
 # script by Jens Georg
 
-#dependencies
+#dependencies:
 # mafft
 
 #call:
-# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/refine_clustertab.r 
+# Rscript --slave refine_clustertab.r 
 # no arguments
 
-print("re-clustering")
-require(seqinr)
-require(doMC)
+suppressPackageStartupMessages(require(seqinr))
+suppressPackageStartupMessages(require(doMC))
 
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
 co2<-grep("core count:", co)
-max_cores<-as.numeric(gsub("core count:","",co[co2]))
+max_cores <- min( detectCores(), as.numeric(gsub("core count:","",co[co2])), na.rm = TRUE)
 registerDoMC(max_cores)
 
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("./ncrna.fa"))[1])  
-print(ooi)
+print(paste("re-clustering for ooi",ooi))
 
 
 # function for 
@@ -165,7 +166,7 @@ dist_hamming<-function(x){
 	
 }
 
-# check occurence of clusers with multiple ooi entries
+# check occurence of clusters with multiple ooi entries
 mult<-c()
 for(j in 1:nrow(clus)){
 	tmp<-clus[j,2:ncol(clus)]
@@ -179,7 +180,10 @@ for(j in 1:nrow(clus)){
 	}
 }
 
-clus_in<-clus
+# deal with clusters with multiple ooi entries
+if ( length(mult) > 0 ) {
+
+clus_in<-clus;
 clus2<-clus[mult,]
 
 # divide the data in subsets for parallel processing 
@@ -189,10 +193,11 @@ jobs<-rep(jobs,max_cores)
 jobs[1]<-jobs[1]+rest
 count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 count_vect2<-cumsum(jobs)
-	
 
 # start parallel processing
-vari<-foreach(ji=1:max_cores)  %dopar% {
+vari<-foreach(ji=1:(max_cores))  %dopar% {
+	"drin"
+	paste("DEBUG ji ",ji)
 	clus<-clus2[count_vect1[ji]:count_vect2[ji],]
 	out_clus<-vector("list",nrow(clus))
 	names(out_clus)<-clus[,1]
@@ -305,5 +310,7 @@ for(j in 1:length(final_clus1)){
 		}
 	}
 }
+
+} # if cluster with multiple ooi entries
 
 write.table(clus_new,file="cluster.tab", sep="\t", quote=F, row.names=F)
