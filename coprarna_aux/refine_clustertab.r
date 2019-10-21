@@ -1,15 +1,23 @@
 # script by Jens Georg
 
 #dependencies
-# clustalo
 # mafft
 
 #call:
-# R --slave -f ./refine_clustertab.r 
+# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/refine_clustertab.r 
 # no arguments
 
 print("re-clustering")
 require(seqinr)
+require(doMC)
+
+
+# register cores for parallel processing
+co<-readLines("CopraRNA_option_file.txt") 
+co2<-grep("core count:", co)
+max_cores<-as.numeric(gsub("core count:","",co[co2]))
+registerDoMC(max_cores)
+
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("./ncrna.fa"))[1])  
@@ -31,7 +39,7 @@ mafft<-function(filename="./ncrna.fa", outname="ncrna_aligned.fa"){
 
 
 # function for density based clustering similar to DBSCAN
-## dm = similarity matrix
+## dm = distance matrix
 ## eps = minimal similarity for clustering
 ## minpts = minimal cluster size
 
@@ -67,9 +75,9 @@ d<-dir()
 fasta<-grep("_upfrom.*_down_.*.fa$", d)
 fasta1<-c()
 for(i in 1:length(fasta)){
-fasta1<-c(fasta1, read.fasta(d[fasta[i]]))
-
+	fasta1<-c(fasta1, read.fasta(d[fasta[i]]))
 }
+write.fasta(fasta1, names=names(fasta1),file="utr_seqs.fa")
 
 #read the original cluster file produced by domclust and write a backup version
 clus<-read.csv("cluster.tab", sep="\t")
@@ -79,7 +87,7 @@ clus_new<-clus
 colnames(clus_new)[1]<-"#id"
 
 # identify the pseudo kegg code assigned to the ooi
-ooi_pos<-grep(paste(ooi,"_upfromstartpos_.*fa$",sep=""), dir())
+ooi_pos<-grep(paste(ooi,"_upfrom.*_.*fa$",sep=""), dir())
 inp<-read.fasta(dir()[ooi_pos])
 ooi_pos<-names(inp)[1:100]
 ooi2<-c()
@@ -99,101 +107,203 @@ id2<-as.numeric(id2)
 id1<-max(id1)
 id2<-max(id2)
 
-# check each cluster if re-clustering is neccessary (two or more genes of the ooi in one cluster) and perform re-clustering
+fasta_text<-function(fasta){
+	out<-c()
+	for(i in 1:length(fasta)){
+		out<-c(out, paste(">",names(fasta)[i]))
+		out<-c(out, paste(fasta[[i]],collapse=""))
+	}
+	out
+}
+
+parse_fasta<-function(x){
+	fasta<-x
+	seq_start<-grep(">", fasta)
+	seq_name<-fasta[seq_start]
+	seq_name<-gsub(">","",seq_name)
+	seqs<-vector("list",length(seq_start))
+	names(seqs)<-seq_name
+	for(i in 1:length(seq_start)){
+		if(i<length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):(seq_start[i+1]-1)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
+		if(i==length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):length(fasta)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
+	}
+	seqs
+}
+
+
+dist_hamming<-function(x){
+	se<-x
+	le<-length(se)
+	le_se<-length(se[[1]])
+	out<-matrix(,le,le)
+	out[]<-0
+	colnames(out)<-names(se)
+	rownames(out)<-names(se)
+	for(i in 1:le){
+		for(j in i:le){
+			if(i!=j){
+				temp<-length(which(se[[i]]!=se[[j]]))/(le_se-length(which(se[[i]]== "-" & se[[j]]=="-" )))
+				out[i,j]=out[j,i]=temp
+			}
+		}
+	}
+	out
+	
+}
+
+# check occurence of clusers with multiple ooi entries
+mult<-c()
 for(j in 1:nrow(clus)){
 	tmp<-clus[j,2:ncol(clus)]
 	# check if the cluster contains a gene from the ooi
 	if(tmp[ooi]!=""){ 								
 		homologs<-count_char(paste(tmp[ooi],collapse=""),":")
 		# sub-clustering only if more than one homologs exist in the ooi
-		if(homologs>1){  							
-			empty<-which(tmp=="")
-			if(length(empty)>0){
-			tmp<-tmp[-empty]
-			}
-			# extract locus tags and write the corresponding UTRs in a temporary fasta file
-			locus<-c()
-			for(i in 1:length(tmp)){
-				loc<-strsplit(as.character(tmp[i])," ")[[1]]
-				loc2<-loc
-				loc<-gsub(".*\\:","",loc)
-				names(loc)<-loc2
-				loc<-gsub("\\(.*\\)","",loc)
-				locus<-c(locus,loc)
-			}
-			dup<-which(duplicated(locus))
-			if(length(dup)>0){
-				locus<-locus[-dup]
-			}
-			ooi_locus_tags<-names(locus)[grep(ooi,names(locus))]
-			pos<-match(locus,names(fasta1))
-			write.fasta(fasta1[pos],names=names(locus), file.out="temp.fasta")
-			# perform clustalo to get a fast distance matrix (all vs all UTRs in the cluster)
-			command<-paste("clustalo -i ", "temp.fasta", " --distmat-out=distmatout.txt --full --percent-id --output-order=input-order --force --max-hmm-iterations=-1", sep="")
-			system(command)
-			dis<-read.delim("distmatout.txt",sep="",header=F, , skip=1)
-			dis<-dis[,2:ncol(dis)]
-			unlink("distmatout.txt")
-			colnames(dis)<-names(locus)
-			rownames(dis)<-names(locus)
-			# transform the distance matrix in a similarity matrix and do the densitity based clustering
-			clust_tmp<-cluster(1-dis/100,eps=0.40,1)
-			# identify clusters that do not contain a gene from the ooi
-			## merge the genes from the "no_ooi" clusters in a single vector and remove the clusters from the temporary cluster list
-			no_ooi<-setdiff(1:length(clust_tmp),grep(ooi, clust_tmp))
-			if(length(no_ooi)>0){
-				no_ooi<-unlist(clust_tmp[no_ooi])
-				clust_tmp<-clust_tmp[grep(ooi, clust_tmp)]
-			} else{
-				no_ooi<-c()
-			}
-			
-			# create the new clusters with only one ooi gene per cluster
-			final_clus<-list()
-			for(jj in 1:length(clust_tmp)){
-				tmp_ooi<-grep(ooi, clust_tmp[[jj]])
-				
-				# if a cluster still contains more than one gene from the ooi (e.g. because the UTRs are too similar), the cluster is multiplied by the number of ooi genes
-				if(length(tmp_ooi)>1){
-					nam<-clust_tmp[[jj]][tmp_ooi]
-					for(jjj in 1:length(tmp_ooi)){
-						tmp2<-c(setdiff(clust_tmp[[jj]],nam),nam[jjj])
-						final_clus[[length(final_clus)+1]]<-tmp2
-					}
-				} else {
-					final_clus[[length(final_clus)+1]]<-clust_tmp[[jj]]
-				}
-			}
-			
-
-			# the genes of the no_ooi clusters are assigned to all final clusters
-			final_clus<-lapply(final_clus, function (x){return(c(x,no_ooi))})
-			
-			# the cluster file is updated and extended based on the new cluster results
-			for(i in 1:length(final_clus)){					
-				na1<-unique(gsub("\\:.*","",final_clus[[i]]))
-				na<-match(na1, colnames(clus))
-				new<-rep("",ncol(clus))
-				te<-final_clus[[i]]
-				te2<-c()
-				for(jj in 1:length(na1)){
-					p1<-grep(na1[jj],te)
-					te2<-c(te2, paste(te[p1],collapse=" "))
-				}
-				new[na]<-te2	
-				if(i==1){
-					ooi_p<-grep(ooi, gsub("\\(.*","",final_clus[[i]]))
-					clus_p<-j
-					clus_new[clus_p,2:ncol(clus_new)]<-new[2:length(new)]
-				}
-				if(i>1){
-					id1<-id1+1
-					id2<-id2+1
-					new[1]<-paste(id1,id2,sep="|")
-					clus_new<-rbind(clus_new,new)
-				}
-			}
+		if(homologs>1){  
+			mult<-c(mult,j)
 		}
 	}
 }
+
+clus_in<-clus
+clus2<-clus[mult,]
+
+# divide the data in subsets for parallel processing 
+jobs<-length(mult)%/%max_cores
+rest<-length(mult)-max_cores*jobs
+jobs<-rep(jobs,max_cores)
+jobs[1]<-jobs[1]+rest
+count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
+count_vect2<-cumsum(jobs)
+	
+
+# start parallel processing
+vari<-foreach(ji=1:max_cores)  %dopar% {
+	clus<-clus2[count_vect1[ji]:count_vect2[ji],]
+	out_clus<-vector("list",nrow(clus))
+	names(out_clus)<-clus[,1]
+	# check each cluster if re-clustering is neccessary (two or more genes of the ooi in one cluster) and perform re-clustering
+	for(j in 1:nrow(clus)){
+		tmp<-clus[j,2:ncol(clus)]
+		# check if the cluster contains a gene from the ooi
+		if(tmp[ooi]!=""){ 								
+			homologs<-count_char(paste(tmp[ooi],collapse=""),":")
+			# sub-clustering only if more than one homologs exist in the ooi
+			if(homologs>1){  							
+				empty<-which(tmp=="")
+				if(length(empty)>0){
+				tmp<-tmp[-empty]
+				}
+				# extract locus tags and write the corresponding UTRs in a temporary fasta file
+				locus<-c()
+				for(i in 1:length(tmp)){
+					loc<-strsplit(as.character(tmp[i])," ")[[1]]
+					loc2<-loc
+					loc<-gsub(".*\\:","",loc)
+					names(loc)<-loc2
+					loc<-gsub("\\(.*\\)","",loc)
+					locus<-c(locus,loc)
+				}
+				dup<-which(duplicated(locus))
+				if(length(dup)>0){
+					locus<-locus[-dup]
+				}
+				ooi_locus_tags<-names(locus)[grep(ooi,names(locus))]
+				pos<-match(locus,names(fasta1))
+				temp_fasta<-fasta1[pos]
+				temp_fasta<-fasta_text(temp_fasta)
+				tempf<-tempfile()
+				write.fasta(fasta1[pos],names=names(locus), file.out=tempf)
+				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf,"",sep="")
+				align<-parse_fasta(system(ca, intern=T))
+				file.remove(tempf)
+				dis<-dist_hamming(align)
+				#  do the densitity based clustering
+				clust_tmp<-cluster(dis,eps=0.40,1)
+				# identify clusters that do not contain a gene from the ooi
+				## merge the genes from the "no_ooi" clusters in a single vector and remove the clusters from the temporary cluster list
+				no_ooi<-setdiff(1:length(clust_tmp),grep(ooi, clust_tmp))
+				if(length(no_ooi)>0){
+					no_ooi<-unlist(clust_tmp[no_ooi])
+					clust_tmp<-clust_tmp[grep(ooi, clust_tmp)]
+				} else{
+					no_ooi<-c()
+				}
+				
+				# create the new clusters with only one ooi gene per cluster
+				final_clus<-list()
+				for(jj in 1:length(clust_tmp)){
+					tmp_ooi<-grep(ooi, clust_tmp[[jj]])
+					
+					# if a cluster still contains more than one gene from the ooi (e.g. because the UTRs are too similar), the cluster is multiplied by the number of ooi genes
+					if(length(tmp_ooi)>1){
+						nam<-clust_tmp[[jj]][tmp_ooi]
+						for(jjj in 1:length(tmp_ooi)){
+							tmp2<-c(setdiff(clust_tmp[[jj]],nam),nam[jjj])
+							final_clus[[length(final_clus)+1]]<-tmp2
+						}
+					} else {
+						final_clus[[length(final_clus)+1]]<-clust_tmp[[jj]]
+					}
+				}
+				
+
+				# the genes of the no_ooi clusters are assigned to all final clusters
+				final_clus<-lapply(final_clus, function (x){return(c(x,no_ooi))})
+				out_clus[[j]]<-final_clus
+			}
+		}
+	}
+	out_clus
+}
+
+final_clus1<-list()
+for(i in 1:length(vari)){
+	final_clus1<-c(final_clus1,vari[[i]])
+}
+
+clus<-clus_in	
+# the cluster file is updated and extended based on the new cluster results
+for(j in 1:length(final_clus1)){	
+	final_clus<-final_clus1[[j]]
+	clus_p<-mult[j]
+	for(i in 1:length(final_clus)){					
+		na1<-unique(gsub("\\:.*","",final_clus[[i]]))
+		na<-match(na1, colnames(clus))
+		new<-rep("",ncol(clus))
+		te<-final_clus[[i]]
+		te2<-c()
+		
+		for(jj in 1:length(na1)){
+			p1<-grep(na1[jj],te)
+			te2<-c(te2, paste(te[p1],collapse=" "))
+		}
+		new[na]<-te2	
+		if(i==1){
+			ooi_p<-grep(ooi, gsub("\\(.*","",final_clus[[i]]))
+			clus_new[clus_p,2:ncol(clus_new)]<-new[2:length(new)]
+		}
+		if(i>1){
+			id1<-id1+1
+			id2<-id2+1
+			new[1]<-paste(id1,id2,sep="|")
+			clus_new<-rbind(clus_new,new)
+		}
+	}
+}
+
 write.table(clus_new,file="cluster.tab", sep="\t", quote=F, row.names=F)

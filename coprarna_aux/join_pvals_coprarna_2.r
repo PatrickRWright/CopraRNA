@@ -29,7 +29,7 @@ max_cores<-as.numeric(gsub("core count:","",co[co2]))
 registerDoMC(max_cores)
 
 
-# transforming arguments in valid variables 
+# transforming arguments into valid variables 
 args <- commandArgs(trailingOnly = TRUE) 
 if(length(args)>0){
 	for(i in 1:length(args)){

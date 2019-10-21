@@ -142,7 +142,6 @@ foreach (@files) {
 		my $ncrnafilename1 = $ncrnaarray[0];
 			$ncrnafilename = $ncrnafilename . ".fa";
 			@ncrnaarray = ();
-		system("mkdir $ncrnafilename1");
 	        my $intarnaout = $_ . ".intarna.csv"; 
 			my $intarnasortedout = $_ . ".intarna.sorted.csv"; 
             $pm->start and next;            

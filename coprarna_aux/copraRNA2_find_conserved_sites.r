@@ -5,7 +5,6 @@
 ## Tools: 
 ### Mafft
 ### dialign-tx
-### jalview
 
 ## Files:
 ### CopraRNA_available_organisms.txt
@@ -13,7 +12,7 @@
 ### jalview_props.txt
 
 #call:
-# R --slave -f ./copraRNA2_find_conserved_sites.r --args copref_path=/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt dialign_conf=/home/jens/For_CopraRNA2.0/dialign_conf/ weight_method=clustal ribosomal_rna=16s_sequences.fa copra_result=CopraRNA_result_all.csv top=200
+# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r 
 require(phangorn)
 require(seqinr)
 require(doMC)
@@ -42,6 +41,19 @@ registerDoMC(max_cores)
 # number of top predictions which should be investigated
 top<-grep("top count:", co)
 top<-as.numeric(gsub("top count:","",co[top]))
+
+# IntaRNA parameters
+winsize<-grep("win size:", co)
+winsize<-as.numeric(gsub("win size:","",co[winsize]))
+
+maxbpdist<-grep("max bp dist:", co)
+maxbpdist<-as.numeric(gsub("max bp dist:","",co[maxbpdist]))
+
+maxbpdist<-grep("max bp dist:", co)
+maxbpdist<-as.numeric(gsub("max bp dist:","",co[maxbpdist]))
+
+temperature<-grep("temperature:", co)
+temperature<-as.numeric(gsub("temperature:","",co[temperature]))
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
 weight_method="clustal"
@@ -464,7 +476,7 @@ check_length<-function(summ2, min_length=6){
 }
 
 # function to identify peaks and assign interactions to peaks
-peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_alignment2, min_thres=2, perc=0.1, min_length=6,eps=0.4,ooi=ooi, ooi_force=TRUE, dialign_conf2=dialign_conf2, tempf=tempf, posprobs=posprobs)	{
+peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_alignment2, min_thres=2, perc=0.1, min_length=6,eps=0.4,ooi=ooi, ooi_force=TRUE, posprobs=posprobs)	{
 	fun3<-function(x, se="|"){
 		if(is.null(x[1])==FALSE & is.na(x[1])==F){
 			y<-strsplit(x,"_")
@@ -550,7 +562,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 					count<-1
 					while(identical(out_comb_old,out_comb)==F & length(summ2)>0){
 						out_comb_old<-out_comb
-						out_comb<-comb_peaks3(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=2, eps=eps, dialign_conf2=dialign_conf2, tempf=tempf)
+						out_comb<-comb_peaks3(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=2, eps=eps)
 						nu<-which(unlist(lapply(out_comb,is.null)))
 						if(length(nu)<length(out_comb)){
 							out_comb[nu]<-NA
@@ -638,7 +650,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 					tab_comb<-rbind(tab_aligned2,tabsub_aligned2)
 					if(length(na.omit(out_comb))>1){
 						summ2<-out_comb[ooipos]
-						out_comb<-comb_peaks3(tab_comb,summ2,alignment,sRNA_alignment2,out_comb,minpts=1, dialign_conf2=dialign_conf2, tempf=tempf)
+						out_comb<-comb_peaks3(tab_comb,summ2,alignment,sRNA_alignment2,out_comb,minpts=1)
 						pos<-which(out_comb==unlist(out_comb[ooipos]))
 						if(length(pos)>0){
 							for(jj in 1:length(pos)){
@@ -666,7 +678,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 }
 
 # compare interaction sites that are assigned to a peak in the site probability landscape
-comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=2, eps=0.55, dialign_conf2=dialign_conf2, tempf=tempf){
+comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=2, eps=0.55){
 	out<-vector("list", nrow(tab_comb))
 	peak_consensus<-vector("list",length(summ2))
 	# investigate each peak
@@ -698,10 +710,10 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			fasta_s<-fasta_s[-short]
 		}
 		if(length(fasta_temp2)>1){
-			tempfi<-tempfile(tmpdir=tempf)
-			tempfi2<-tempfile(tmpdir=tempf)
+			tempfi<-tempfile()
+			tempfi2<-tempfile()
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
-			command<-paste("dialign-tx -D ", dialign_conf2," ",tempfi, " ", tempfi2, " > trash")
+			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > dev.null")
 			system(command)
 			fasta_temp2<-read.fasta(tempfi2)
 			s2=max(1,coo1[3]-2)
@@ -719,7 +731,7 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			}
 			if(length(fasta_s2)>1){
 				write.fasta(fasta_s2, names=tab_comb[cands,"name"], file.out=tempfi)
-				command<-paste("dialign-tx -D ", dialign_conf2," ",tempfi, " ", tempfi2, " > trash")
+				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > dev.null")
 				system(command)
 				fasta_s2<-read.fasta(tempfi2)
 				unlink(tempfi)
@@ -972,31 +984,52 @@ assign_int_fin<-function(peaks, out_comb, tab_comb, alignment,sRNA_alignment2, o
 	out_opt
 }
 
+parse_fasta<-function(x){
+	fasta<-x
+	seq_start<-grep(">", fasta)
+	seq_name<-fasta[seq_start]
+	seq_name<-gsub(">","",seq_name)
+	seqs<-vector("list",length(seq_start))
+	names(seqs)<-seq_name
+	for(i in 1:length(seq_start)){
+		if(i<length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):(seq_start[i+1]-1)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
+		if(i==length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):length(fasta)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
+	}
+	seqs
+}
+
 #mafft("16s_sequences.fa", outname="16s_sequences_mafft_align.fas", mode="accurate")
 ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
 dm <- dist.ml(ribo, model="F81")
 tree_rib<- NJ(dm)
-
 weight1<-read.csv("weights.txt",skip=1, header=F, sep="\t")
 weight<-weight1[,2]
 names(weight)<-weight1[,1]
 
 
 # function to map interaction positions to the alignments and wrapper for the other functions
-build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
+build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	dir.create("evo_alignments2")
-	if(own_alignment==TRUE){
-		dir.create("evo_alignments")
-		fast()
-		fastutr<-read.fasta("utr_seqs.fa") # for own alignments
-		fastnames<-tolower(names(fastutr)) # for own alignments
-	}
+	fastutr<-read.fasta("utr_seqs.fa") # for own alignments
+	fastnames<-tolower(names(fastutr)) # for own alignments
 	
 	# create alignment of sRNAs
-	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
-	system(input)
-	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
-	
+	sRNA_alignment<-parse_fasta(system("mafft --maxiterate 1000 --localpair --quiet input_sRNA.fa ", intern=T))
+
 	wd<-getwd()
 	
 	# reference for homolog clusters
@@ -1019,21 +1052,6 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 	subopt[,1]<-tolower(subopt[,1])
 	opt<-as.matrix(opt)
 	subopt<-as.matrix(subopt)
-	
-	# readout all locustags and find the respective pre-calculated IntaRNA spot probability file
-	locus_list<-fast2()
-	locus_list_lookup<-locus_list
-	dirs<-list.dirs(,recursive=F)
-	for(i in 1:length(all_orgs)){
-		tmp<-grep(all_orgs[i], dirs)
-		d<-dir(dirs[tmp])
-		d2<-gsub(".*t","",d)
-		d2<-gsub("q.*","",d2)
-		d3<-locus_list[[all_orgs[i]]][as.numeric(d2)]
-		locus_list_lookup[[all_orgs[i]]]<-toupper(d3)
-		locus_list[[all_orgs[i]]]<-d
-	}
-
 	
 	# read availbale organism file for annotation purposes
 	copref<-read.delim(copref_path, sep="\t", header=T,comment.char = "#")	
@@ -1083,13 +1101,6 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 
 	# start parallel processing of site conservation
 	vari<-foreach(ji=1:max_cores)  %dopar% {
-		dir.create(as.character(ji))
-		dialign_conf2<-paste("./",ji, "/",sep="")
-		file.copy(dialign_conf,dialign_conf2,recursive=T)
-		dialign_conf2<-paste("./",ji, "/dialign_conf/",sep="")
-		tempf<-paste("./",ji,sep="")
-		
-		
 		dat<-dat_all[count_vect1[ji]:count_vect2[ji],]
 		if(is.matrix(dat)==F){
 			dat<-t(as.matrix(dat))
@@ -1108,8 +1119,7 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 				genename<-gsub(".*\\(","",as.character(temp))
 				genename<-gsub("\\|.*", "", genename)
 				genename<-gsub("\\/", "", genename)
-				
-				
+		
 				# read information from the optimal and suboptimal IntaRNA predictions for all UTRs of the respective homolog cluster
 				pos_opt<-(match(query, opt[,1]))
 				tab<-opt[pos_opt,c("start1","end1","seedStart1","seedEnd1","start2","end2","seedStart2","seedEnd2")]
@@ -1134,28 +1144,14 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 				colnames(tabsub)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs","hybridDP","Energy","seq_mrna","seq_srna")
 				tabsub<-na.omit(tabsub)
 				pos<-as.numeric(names(sort(table(poslist), decreasing=T))[1])
-				
-				
-				## read or create alignments 
-				if(own_alignment==TRUE){
-					temp2<-na.omit(match(tolower(tab[,10]), fastnames))
-					write.fasta(fastutr[temp2],file="test.fa" ,names=tab[,"name2"])
-					input<-paste("mafft --maxiterate 1000 --localpair --quiet"," --localpair",  " --quiet test.fa > test2.fa", sep="")
-					system(input)
-					alignment<-read.fasta("test2.fa")
-					unlink("test2.fa")
-					unlink("test.fa")
-				}
-				if(own_alignment==FALSE){
-					alignment<-read.fasta(paste(wd,"/target_alignments/",align_pos[count_vect1[ji]+i-1], ".aln", sep=""))
-					dup<-which(duplicated(names(alignment)))
-					if(length(dup)>0){
-						alignment<-alignment[-dup]
-					}
-					unlink("test2.fa")
-					unlink("test.fa")
-				}
-				
+							
+				# create alignments 
+				tempf2<-tempfile()
+				temp2<-na.omit(match(tolower(tab[,10]), fastnames))
+				write.fasta(fastutr[temp2],file=tempf2 ,names=tab[,"name2"])
+				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf2,"",sep="")
+				alignment<-parse_fasta(system(ca, intern=T))
+				file.remove(tempf2)
 				m_names<-na.omit( match(orgs, names(dat[i,3:(e-1)])))
 				s_names2<-na.omit(match(orgs, s_names))
 				sRNA_alignment2<-sRNA_alignment[s_names2]
@@ -1226,14 +1222,17 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 				temp_align_table<-matrix(,length(alignment[[1]]),length(sRNA_alignment[[1]]))
 				temp_align_table[]<-0
 				
+				
+				
 				posprobs<-vector("list",nrow(tab))
 				names(posprobs)<-tab[,"orgs"]
 				for(j in 1:nrow(tab_aligned)){
 					temp_org<-tab_aligned[j,"orgs"]
 					temp_locus<-tab_aligned[j,"name2"]
-					temp_table<-which(locus_list_lookup[[temp_org]]==toupper(temp_locus))
-					temp_table<-locus_list[[temp_org]][temp_table]
-					temp_table<-as.matrix(read.csv(paste("ncRNA_",temp_org,"/",temp_table,sep=""),sep=";", row.names=1))
+					
+					# run IntaRNA for spot probabilities
+					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --out dev.null --out=SpotProb:STDOUT", sep="")
+					temp_table<-as.matrix(read.csv(textConnection(system(temp_table,intern=T)),sep=";", row.names=1,comment.char = "#"))
 					temp_align_table2<-temp_align_table
 					mRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_mRNA"],")",sep="") ))
 					sRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_sRNA"],")",sep="") ))
@@ -1272,7 +1271,7 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 				align_table_int_pos<-align_table_int_pos/max(align_table_int_pos)
 				
 				# identify conserved interaction regions and map the organism specific predicted sites to these regions 
-				test<-peak_find2D(align_table_int_pos, tab_aligned, tabsub_aligned,alignment,sRNA_alignment2, min_thres=0.2, perc=0.1, min_length=6,eps=0.55,ooi=conservation_oois, ooi_force=FALSE, dialign_conf2=dialign_conf2, tempf=tempf, posprobs=posprobs)
+				test<-peak_find2D(align_table_int_pos, tab_aligned, tabsub_aligned,alignment,sRNA_alignment2, min_thres=0.2, perc=0.1, min_length=6,eps=0.55,ooi=conservation_oois, ooi_force=FALSE, posprobs=posprobs)
 				na3<-paste("./evo_alignments2/",tab[1,"name"],sep="")
 				dir.create(na3)
 				
@@ -1318,7 +1317,6 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 		names(int_sites)<-dat[,ooi_pos2]
 		names(peak_list)<-dat[,ooi_pos2]
 		temp_out<-list(int_sites,peak_list)
-		unlink(tempf, recursive = T)
 		temp_out
 	}
 	dat<-dat_old
@@ -1333,4 +1331,4 @@ build_anno<-function(ooi="NC_000911",own_alignment=F, conservation_oois=ooi){
 	save(int_sites, file="int_sites.Rdata")
 	save(peak_list, file="peak_list.Rdata")
 }
-build_anno(ooi=ooi,own_alignment=F,  conservation_oois=ooi)
+build_anno(ooi=ooi, conservation_oois=ooi)

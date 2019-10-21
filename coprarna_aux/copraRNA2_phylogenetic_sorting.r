@@ -50,21 +50,6 @@ if(length(args)>0){
 		assign(as.character(temp1),temp2)
 	}
 }
-# combine all UTR sequences in one fasta file (needed if alignments are not available)
-fast<-function(){
-	require(seqinr)
-	falist1<-dir()
-	int<-grep("intarna", falist1)
-	falist1<-falist1[-int]
-	falist<-grep("_([0-9]){1,}_down_([0-9]){1,}\\.fa$",falist1)
-	
-	
-	for(i in 1:length(falist)){
-		temp<-read.fasta(falist1[falist[i]], strip.desc = TRUE)
-		write.fasta(temp, names=names(temp),file="utr_seqs.fa", open="a")
-		}
-	}
-
 
 # wrapper function for mafft
 mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa", mode="fast"){
@@ -129,25 +114,49 @@ tree_weights<-function(tree, method="clustal"){
 	weight
 }
 
-# re-align the 16S sequences with an accurate mafft setting and calculate weights
-mafft(ribosomal_rna, outname="16s_sequences_mafft_align.fas", mode="accurate")
-ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
-dm <- dist.ml(ribo, model="F81")
-fitJC<- upgma(dm)
-weight<-tree_weights(fitJC, method=weight_method)
-
-build_anno<-function(ooi="NC_000911",own_alignment=F){
-	if(own_alignment==TRUE){
-		dir.create("evo_alignments")	
-		fast()
-		fastutr<-read.fasta("utr_seqs.fa") # for own alignments
-		fastnames<-tolower(names(fastutr)) # for own alignments
+parse_fasta<-function(x){
+	fasta<-x
+	seq_start<-grep(">", fasta)
+	seq_name<-fasta[seq_start]
+	seq_name<-gsub(">","",seq_name)
+	seqs<-vector("list",length(seq_start))
+	names(seqs)<-seq_name
+	for(i in 1:length(seq_start)){
+		if(i<length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):(seq_start[i+1]-1)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
+		if(i==length(seq_start)){
+			temp<-fasta[(seq_start[i]+1):length(fasta)]
+			temp<-as.character(temp)
+			temp<-gsub(" ","",temp)
+			temp<-paste(temp,collapse="")
+			temp<-strsplit(temp,"")[[1]]
+			seqs[[i]]<-temp
+		}
 	}
+	seqs
+}
+
+
+
+# re-align the 16S sequences with an accurate mafft setting and calculate weights
+# mafft(ribosomal_rna, outname="16s_sequences_mafft_align.fas", mode="accurate")
+# ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
+# dm <- dist.ml(ribo, model="F81")
+# fitJC<- upgma(dm)
+# weight<-tree_weights(fitJC, method=weight_method)
+
+build_anno<-function(ooi="NC_000911"){
+	fastutr<-read.fasta("utr_seqs.fa") # for own alignments
+	fastnames<-tolower(names(fastutr)) # for own alignments
 	
 	# create alignment of sRNAs
-	input<-paste("mafft --maxiterate 1000 --localpair --quiet", " --localpair", " --quiet input_sRNA.fa >", "aligned_sRNA.fa", sep="")
-	system(input)
-	sRNA_alignment<-read.fasta("aligned_sRNA.fa")
+	sRNA_alignment<-parse_fasta(system("mafft --maxiterate 1000 --localpair --quiet input_sRNA.fa ", intern=T))
 	
 	wd<-getwd()
 	
@@ -196,9 +205,7 @@ build_anno<-function(ooi="NC_000911",own_alignment=F){
 	dat<-dat[ex,]
 	align_pos<-ex
 	dat_all<-dat
-	
-	
-	
+		
 	# divide the data in subsets for parallel processing 
 	jobs<-nrow(dat)%/%max_cores
 	rest<-nrow(dat)-max_cores*jobs
@@ -207,7 +214,6 @@ build_anno<-function(ooi="NC_000911",own_alignment=F){
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 	
-
 	# start parallel processing of phylogenetic order
 	vari<-foreach(ji=1:max_cores)  %dopar% {	
 		dat<-dat_all[count_vect1[ji]:count_vect2[ji],]
@@ -234,29 +240,13 @@ build_anno<-function(ooi="NC_000911",own_alignment=F){
 				tab<-cbind(tab,paste(genename, "_", query,sep=""),query,opt[pos_opt,"p.value"],orgs)
 				colnames(tab)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs")
 				
-				if(own_alignment==TRUE){
-					temp2<-na.omit(match(tolower(tab[,10]), fastnames))
-					write.fasta(fastutr[temp2],file="test.fa" ,names=tab[,"name2"])
-					input<-paste("mafft --maxiterate 1000 --localpair --quiet"," --localpair",  " --quiet test.fa > test2.fa", sep="")
-					system(input)
-					alignment<-read.fasta("test2.fa")
-					unlink("test2.fa")
-					unlink("test.fa")
-				}
-
-				if(own_alignment==FALSE){
-					alignment<-read.fasta(paste(wd,"/target_alignments/",align_pos[count_vect1[ji]+i-1], ".aln", sep=""))
-					dup<-which(duplicated(names(alignment)))
-					if(length(dup)>0){
-						alignment<-alignment[-dup]
-					}
-					unlink("test2.fa")
-					unlink("test.fa")
-				}
-				
-				write.fasta(alignment, names=tab[,"orgs"], file.out=paste(align_pos[count_vect1[ji]+i-1],"_" ,tab[1,9],"_ooi_cons_pos_mRNA.fasta", sep=""))
-				datp<-read.dna(paste(align_pos[count_vect1[ji]+i-1],"_" ,tab[1,9],"_ooi_cons_pos_mRNA.fasta", sep=""), format = "fasta")
-				unlink(paste(align_pos[count_vect1[ji]+i-1],"_" ,tab[1,9],"_ooi_cons_pos_mRNA.fasta", sep=""))
+				tempf<-tempfile()
+				temp2<-na.omit(match(tolower(tab[,10]), fastnames))
+				write.fasta(fastutr[temp2],file=tempf ,names=tab[,"orgs"])
+				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf,"",sep="")
+				alignment<-parse_fasta(system(ca, intern=T))
+				file.remove(tempf)
+				datp<-as.DNAbin(alignment)
 				dis<-dist.dna(datp, model = "F81",pairwise.deletion = T)
 				dis<-as.matrix(dis)
 				ooip<-match(ooi, colnames(dis))
@@ -301,4 +291,4 @@ build_anno<-function(ooi="NC_000911",own_alignment=F){
 	save(order_table, file="order_table_all.Rdata")
 }
 
-build_anno(ooi=ooi,own_alignment=F)
+build_anno(ooi=ooi)
