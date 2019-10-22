@@ -12,8 +12,9 @@ $BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 
 if (! $skip_sort) {
 	## eliminate comment lines (when using blastall -m 9)
-	$infile = "egrep -v '^#' $infile | " .
-	## excahnge name1 and name2, and also start and end positions
+	$infile = ($infile =~ m/.+\.gz/ ? "z" : "") .
+				"grep -v -P '^#' $infile | " .
+	## exchange name1 and name2, and also start and end positions
 	q{awk ' BEGIN {OFS="\t"}
 		$1<=$2 {print}
 		$1>$2 {print $2,$1,$3,$4,$5,$6,$9,$10,$7,$8,$11,$12}' | } .

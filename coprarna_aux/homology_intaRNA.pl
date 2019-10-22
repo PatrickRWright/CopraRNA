@@ -85,18 +85,6 @@ my $ooi_filt = getOptionValue("ooifilt");
 open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); 
 
 
-##########################################################################################
-sub stopFurtherProcessing
-##########################################################################################
-# @param 0 error message to be displayed before exiting this script
-# @param 1 exit code
-##########################################################################################
-{
-	print ERRORLOG $_[0];
-	exit( $_[1] );
-}
-######################################################################## END OF SUBROUTINE
-
 
 ##########################################################################################
 sub removeInvalidGenomeFiles
@@ -167,7 +155,7 @@ sub downloadGenomeAndLink
 
 
 ####################################
-# create kegg 2 refseq mapping
+print "create kegg 2 refseq mapping\n" if ($verbose);
 ####################################
 
 my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
@@ -259,7 +247,7 @@ while($consistencyswitch) {
  
              if($limitloops > 100) { 
                 $consistencyswitch = 0;
-				stopFurtherProcessing( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
+				die( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
              }
 	# extract genome ID from genome file name
              my $accNr = $gbFile;
@@ -280,9 +268,12 @@ while($consistencyswitch) {
 
 ### refseq correct DL check kill job 
 if ( 0 < removeInvalidGenomeFiles("Genome file did not download correctly. This is probably due to a connectivity issue with the NCBI servers. Please retry later..") ) {
-	stopFurtherProcessing( "Not all RefSeq *gb files downloaded correctly. Restart your job.\n", 1 );
+	die( "Not all RefSeq *gb files downloaded correctly. Restart your job.\n", 1 );
 }
 
+###########################################
+print "check sanity of CDS features\n" if ($verbose);
+###########################################
 foreach my $gbFile (@gbFiles) {
 
 	## fixing issue with CONTIG and ORIGIN both in gb file (can't parse without this) 
@@ -297,8 +288,6 @@ foreach my $gbFile (@gbFiles) {
     system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $gbFile >> gene_CDS_exception.txt";
 
 }
-
-# check sanity of CDS features
 { 
     open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
         my @exception_lines = <MYDATA>;
@@ -316,8 +305,10 @@ foreach my $gbFile (@gbFiles) {
 ## end CDS gene exception check
 
 
-## get cluster.tab with DomClust
 unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
+###########################################
+print "get cluster.tab with DomClust\n" if ($verbose);
+###########################################
 
     ### get AA fasta for homolog clustering
 
@@ -326,13 +317,16 @@ unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
     }
 
     # prep for DomClust
-    system "formatdb -i all.fas" unless (-e "all.fas.blast"); 
+	print "formatdb for all.fas\n" if ($verbose);
+    system "formatdb -i all.fas" unless (-e "all.fas.blast.gz"); 
     # blast sequences
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2>> $OUT_ERR" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage 
+	print "blastall for all.fas\n" if ($verbose);
+    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 2>> $OUT_ERR | gzip -9 > all.fas.blast.gz " unless (-e "all.fas.blast.gz"); # change the -a parameter to qdjust core usage 
     # remove empty error file
-    system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; 
+    system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast.gz > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
+	print "domclust for all.fas.*\n" if ($verbose);
     my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> ".$OUT_ERR;
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
@@ -446,7 +440,9 @@ my $ooi_refseq_id = $split[0];
 
 
 unless ($cop1) {
-    # compute phylogenetic distances to the ooi UTRs
+	######################################################
+    print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
+	######################################################
     system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; 
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR >> $OUT_STD"; 
     # perform actual CopraRNA 2 p-value combination
@@ -465,8 +461,10 @@ unless ($cop1) {
     #system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; 
 }
 
-# filtering for ooi single p-value
 if ($ooi_filt) {
+	######################################################
+	print "filtering for ooi single p-value\n" if ($verbose);
+	######################################################
 
     my @not_filtered_list = (); # values below the p-value threshold
     my @filtered_list = ();     # values empty or above the p-value threshold
@@ -542,7 +540,10 @@ unless ($cop1) {
      system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
 }
 
-if ($websrv) { # only if webserver output is requested via -websrv 
+if ($websrv) { 
+	#######################################################
+	print "generate webserver output\n" if ($verbose); 
+	#######################################################
 
     my $allrefs = $refseqaffiliations{$ARGV[4]};
     my @splitallrefs = split(/\s/,$allrefs);
@@ -579,8 +580,10 @@ if ($websrv) { # only if webserver output is requested via -websrv
 system $PATH_COPRA_SUBSCRIPTS . "print_archive_README.pl > README.txt";
 
 if ($enrich) { 
+	#######################################################
+	print "create DAVID enrichment table\n" if ($verbose); 
+	#######################################################
 
-    ##### create DAVID enrichment table
     ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
     system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; 
     system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ##  only removing obsolete spaces and keeping others
@@ -611,5 +614,6 @@ if ($enrich) {
 
 
 # close error stream and be done
-stopFurtherProcessing("",0);
+close ERRORLOG;
+exit(0);
 
