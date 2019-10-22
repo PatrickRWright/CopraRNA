@@ -63,7 +63,7 @@ exit
 print (client)
 
 #authenticate user email 
-print (client.service.authenticate('patrickrw@gmx.net'))
+print (client.service.authenticate('rna@inforamtik.uni-freiburg.de'))
 
 # add enrichment_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'

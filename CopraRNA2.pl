@@ -45,51 +45,7 @@ my $COPRARNA_VERSION="2.1.3";
 
 #####################################################
 
-#### dependencies: (specified versions are tested and functional)
-
-# bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
-# gawk 4.1.3                                                           // conda install gawk
-# sed 4.2.2.165-6e76-dirty                                             // conda install sed
-# grep 2.14                                                            // conda install grep
-# GNU coreutils 8.25                                                   // conda install coreutils
-
-### Bio Software
-
-# IntaRNA 2.1.0                                                        // conda install intarna
-# EMBOSS package 6.5.7 - distmat (creates distance matix from msa)     // conda install emboss
-# embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
-# ncbiblast-2.2.22                                                     // conda install blast-legacy
-# DomClust 1.2.8a                                                      // conda install domclust
-# MAFFT 7.310                                                          // conda install mafft
-# clustalo 1.2.3                                                       // conda install clustalo
-# phantomjs 2.1.1-0                                                    // conda install phantomjs
-
-### Perl (5.22.0) Module(s):                                           // conda install perl
-
-# List::MoreUtils 0.413                                                // conda install perl-list-moreutils
-# Parallel::ForkManager 1.17                                           // conda install perl-parallel-forkmanager
-# Getopt::Long 2.45                                                    // conda install perl-getopt-long
-# Bio::SeqIO (bioperl 1.6.924)                                         // conda install perl-bioperl
-# Bio::DB::EUtilities 1.75                                             // conda install perl-bio-eutilities
-# Cwd 3.56                                                             // included in the conda perl installation	
-
-### R Package(s):
-
-# R statistics 3.2.2                                                   // conda install r-base==3.2.2
-# seqinr 3.1_3                                                         // conda install r-seqinr 
-# robustrankaggreg 1.1                                                 // conda install r-robustrankaggreg
-# pheatmap 1.0.8                                                       // conda install r-pheatmap
-
-### python 2.7.13                                                      // conda install python
-
-## packages:
-# sys                                                                  // available from conda python
-# logging                                                              // available from conda python
-# traceback                                                            // available from conda python 
-# suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
-# suds         (suds-jurko 0.6)                                        // conda install suds-jurko
-# suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
-# datetime                                                             // available from conda python
+#### dependencies: see file CopraRNA2-deps.yml
 
 #####################################################
 
@@ -416,8 +372,10 @@ chomp $organismOfInterest;
 my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . "_opt.intarna.csv";
 
 if ($enrich) {
-    # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
+	############################################################
     print "Performing auxiliary enrichment\n" if ($verbose);
+	############################################################
+    # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
     system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
     system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
     system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## aux einrich for same amout as regular enrichment
@@ -449,7 +407,7 @@ if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\
 
 # create regions plots
 print "Preparing interaction plots\n" if ($verbose);
-system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## echanged input file and piping command line output to /dev/null for silencing // 
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## changed input file and piping command line output to /dev/null for silencing // 
 
 # convert postscript files to PNG
 
@@ -468,20 +426,20 @@ unless ($noclean) {
 
     print "Cleaning run directory\n" if ($verbose);
 
-    system "rm enrichment.txt *DAVID* IntaRNA* intarna*" if ($enrich);
-    system "rm *IntaRNA1_ui* *top_targets*" if ($websrv);
-    system "rm *.gb";
-    system "rm *pvsample*" if ($cop1);
-    system "rm compatible.distmat.mapped";
-    system "rm err.log *anno* padj.csv";
+    system "rm -f enrichment.txt *DAVID* IntaRNA* intarna*" if ($enrich);
+    system "rm -f *IntaRNA1_ui* *top_targets*" if ($websrv);
+    system "rm -f *.gb *.gb.gz";
+    system "rm -f *pvsample*" if ($cop1);
+    system "rm -f compatible.distmat.mapped";
+    system "rm -f err.log *anno* padj.csv";
 	system "rm -r *ncRNA*";
-    system "rm *pvalues*";
-    system "rm *.fa.intarna.sorted.csv *opt.intarna.csv";
-    system "rm gene_CDS_exception.txt find_gaps.txt distmat.out";
-    system "rm merged_refseq_ids.txt";    
-    system "rm CopraRNA2_prep*";
-    system "rm fasta_temp_file fasta_temp_file_out";
-    #system "rm conservation_table.Rdata" unless ($cop1);
+    system "rm -f *pvalues*";
+    system "rm -f *.fa.intarna.sorted.csv *opt.intarna.csv";
+    system "rm -f gene_CDS_exception.txt find_gaps.txt distmat.out";
+    system "rm -f merged_refseq_ids.txt";    
+    system "rm -f CopraRNA2_prep*";
+    system "rm -f fasta_temp_file fasta_temp_file_out";
+    #system "rm -f conservation_table.Rdata" unless ($cop1);
 
     # fix warning "rm: missing operand Try 'rm --help' for more information."
     my $temp_fasta_check = `find -regex ".*fa[0-9]+\$"`;
@@ -490,17 +448,10 @@ unless ($noclean) {
     }
 
     # blast files
-    system "rm all.fas" if (-e "all.fas");
-    system "rm all.fas.blast" if (-e "all.fas.blast");
-    system "rm all.fas.hom" if (-e "all.fas.hom");
-    system "rm all.fas.pin" if (-e "all.fas.pin");
-    system "rm all.fas.phr" if (-e "all.fas.phr");
-    system "rm all.fas.tit" if (-e "all.fas.tit");
-    system "rm all.fas.psq" if (-e "all.fas.psq");
-    system "rm all.fas.gene" if (-e "all.fas.gene");
-    system "rm error.log" if (-e "error.log");
-    system "rm formatdb.log" if (-e "formatdb.log");
-    system "rm N_chars_in_CDS.txt" if (-e "N_chars_in_CDS.txt");
+    system "rm -f all.fas*" ;
+    system "rm -f error.log" ;
+    system "rm -f formatdb.log";
+    system "rm -f duplicated_CDS.txt";
 
     # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots
     system "mkdir -p IntaRNA";
@@ -511,9 +462,10 @@ unless ($noclean) {
     system "mv 16s_sequences.* Phylogeny";
 
     system "mkdir -p FASTA";
-    system "rm aligned_sRNA.fa" unless ($cop1);
-    system "rm ncrna_aligned.fa";
+    system "rm -f aligned_sRNA.fa" unless ($cop1);
+    system "rm -f ncrna_aligned.fa";
     system "mv *.fa FASTA";
+    system "mv FASTA/input_sRNA.fa ." if ($websrv); # move input file back to root folder
 
     system "mkdir -p Regions_plots";
     system "mv *regions* Regions_plots";
@@ -525,7 +477,7 @@ unless ($noclean) {
         system "mv copraRNA.json Enrichment";
         system "mv enriched_heatmap_big* Enrichment";
         system "mv termClusterReport.txt Enrichment";
-        system "rm org_of_interest_aux_enrichment.txt";
+        system "rm -f org_of_interest_aux_enrichment.txt";
         system "mv aux_table.csv Enrichment";
     }
 
@@ -540,12 +492,12 @@ unless ($noclean) {
     # zip evo_alignments folder to reduce file number
     system "if [ -d evo_alignments ]; then zip -rmq evo_alignments evo_alignments 2>&1; fi";
 
-    # remove weights.warning if its empty
-    system "rm weights.warning" if (-z "weights.warning");
+    # remove weights.warning 
+    system "rm -f weights.warning";
     # remove target_alignments
-    system "rm -r target_alignments" unless ($cop1);
+    system "rm -rf target_alignments" unless ($cop1);
     # remove CopraRNA 1 non generic name
-    system "rm CopraRNA1_final_all.csv CopraRNA1_final.csv" if ($cop1);
+    system "rm -f CopraRNA1_final_all.csv CopraRNA1_final.csv" if ($cop1);
 
 }
 
