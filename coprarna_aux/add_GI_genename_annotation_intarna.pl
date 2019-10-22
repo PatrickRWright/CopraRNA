@@ -14,7 +14,7 @@ close MYDATA;
 
 open(WRITETABLE, ">intarna_websrv_table_ncbi.csv");
 
-my @gbks = <*gb>;
+my @gbks = <*gb.gz>;
 my %ltagToRestHash = ();
 
 foreach(@gbks) {
