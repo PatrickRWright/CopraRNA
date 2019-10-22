@@ -55,7 +55,7 @@ for(my $i=4;$i<=scalar(@ARGV) - 1;$i++) {
 
     my @splitarg = split(/,/, $ARGV[$i]);
 
-    if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb/) { 
+    if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb(\.gz)?/) { 
         $refseqid = $1;
     }
 
@@ -76,7 +76,7 @@ my @files = ();
 my @rfids = ();
 
 foreach (@files) {
-    if ($_ =~ m/(N[ZC]_.+?)\.gb/) { 
+    if ($_ =~ m/(N[ZC]_.+?)\.gb(\.gz)?/) { 
         push (@rfids, $1)
     }
 }

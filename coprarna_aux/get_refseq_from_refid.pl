@@ -23,6 +23,7 @@ my $factory = Bio::DB::EUtilities->new(-eutil => 'esearch',
                                        -field => 'Accession',
                                        -term => $acc_number,
                                        -tool => 'coprarna',
+                                       -email => 'rna@informatik.uni-freiburg.de',
                                        -verbose => -1); # no warnings
 my ($id) = $factory->get_ids;
 die "no genome with accession number '$acc_number' found\n" unless ($id);
@@ -46,13 +47,20 @@ $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                     -db => 'nuccore',
                                     -id => $id,
                                     -tool => 'coprarna',
+                                    -email => 'rna@informatik.uni-freiburg.de',
                                     -rettype => 'gbwithparts'); # gbwithparts to get full sequence
-$factory->get_Response(-file => $genome_file); 
+# pipe download into file (and compress if needed)
+if ($genome_file =~ m/(.+)\.gz$/) {
+	$factory->get_Response(-file => "$1"); 
+	system("gzip -9 $1");
+} else {
+	$factory->get_Response(-file => $genome_file); 
+}
 
 
 #####################################################################################################################################
 
 sub usage {
-   die("\nUsage: ./get_refseq_from_refid.pl -acc accession-number -g genome genome-file \n\n");
+   die("\nUsage: ./get_refseq_from_refid.pl -acc accession-number -g genome-file \n\n");
 }
 

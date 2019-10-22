@@ -2,7 +2,10 @@
 
 use strict;
 use warnings;
-
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
 use Bio::SeqIO;
 
 open(MYDATA, "intarna_websrv_table.csv") or die("Error: cannot open file intarna_websrv_table.csv\n");
@@ -18,7 +21,14 @@ foreach(@gbks) {
         my $gbkFile = $_;
         chomp $gbkFile;
 
-        my $in  = Bio::SeqIO->new(-file => $gbkFile , '-format' => 'genbank');
+        my $fileHandle = undef;
+        if ($gbkFile =~ m/.+\.gz$/) {
+        	$fileHandle = new IO::Uncompress::Gunzip $gbkFile or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+        } else {
+        	$fileHandle = IO::File->new($gbkFile, "r");
+        }
+
+        my $in  = Bio::SeqIO->new(-fh => $fileHandle , '-format' => 'genbank');
         while ( my $seq = $in->next_seq() ) {
             foreach my $sf ( $seq->get_SeqFeatures() ) {
                 if( $sf->primary_tag eq 'CDS' ) {

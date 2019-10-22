@@ -113,9 +113,9 @@ sub removeInvalidGenomeFiles
     my $deletedFiles = 0;
     
     # iterate all "gb" files
-    foreach my $gbFile (<*gb>) {
+    foreach my $gbFile (<*.gb.gz>) {
     
-    	my $lastTwoLines = `tail -n 2 $gbFile | tr -d "\n"`;
+    	my $lastTwoLines = `zcat $gbFile | tail -n 2 | tr -d "\n"`;
     
     	# proper gb file ends with "//" line
     	unless ( $lastTwoLines =~ m/.*\/\/\s*$/ ) {
@@ -148,7 +148,7 @@ sub downloadGenomeAndLink
 {
 	my $accessionnumber = $_[0];
 
-    my $refseqoutputfile = "$accessionnumber.gb";
+    my $refseqoutputfile = "$accessionnumber.gb.gz";
 
   	# download genome file if needed
 	unless ( -e "$genomePath/$refseqoutputfile" ) {
@@ -225,7 +225,7 @@ foreach(@split_RefIds) {
     my @replikons = split(/\s/, $presplitreplicons);
     
     foreach my $accessionnumber (@replikons) {
-        $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb" . ",";
+        $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb.gz" . ",";
 		downloadGenomeAndLink( $accessionnumber );
     }
 	# remove trailing comma
@@ -248,7 +248,7 @@ my $limitloops = 0;
 
 my $sleeptimer = 30; 
 while($consistencyswitch) {
-    @gbFiles = <*gb>;
+    @gbFiles = <*.gb.gz>;
     foreach my $gbFile (@totalrefseqFiles) {
         chomp $gbFile;
         if(grep( /^$gbFile$/, @gbFiles )) { 
@@ -261,11 +261,11 @@ while($consistencyswitch) {
                 $consistencyswitch = 0;
 				stopFurtherProcessing( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
              }
+	# extract genome ID from genome file name
              my $accNr = $gbFile;
-			# cut off last three characters of file name
-             chop $accNr;
-             chop $accNr;
-             chop $accNr;
+	     if ($gbFile =~ m/^(.+)\.gb(\.gz)?$/) {
+		$accNr = $1;
+	     }
              sleep $sleeptimer; 
              $sleeptimer = $sleeptimer * 1.1; 
 			# try downloading
@@ -287,10 +287,10 @@ foreach my $gbFile (@gbFiles) {
 
 	## fixing issue with CONTIG and ORIGIN both in gb file (can't parse without this) 
 	# check if gbFile has to be corrected
-	my $gbContainsCONTIG = `grep -m 1 -c -P "^CONTIG" $gbFile`;
+	my $gbContainsCONTIG = `zgrep -m 1 -c -P "^CONTIG" $gbFile`;
 	if ($gbContainsCONTIG > 0) {
 		# remove "CONTIG" string
-    	system "sed -i '/^CONTIG/d' $gbFile"; ## d stands for delete
+    	system "zcat $gbFile | sed '/^CONTIG/d' | gzip -9 > tmp.gz; mv -f tmp.gz $gbFile"; ## d stands for delete
 	}
 
 	# check for CDS features
@@ -401,12 +401,24 @@ print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
 system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
 
 # make annotations
-system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA1_with_pvsample_sorted.csv opt_tags.clustered_rcsize $GenBankFiles > CopraRNA1_anno.csv" if ($cop1); 
-system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv";
+my $annotateCall = undef;
+if ($cop1) {
+  $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA1_with_pvsample_sorted.csv opt_tags.clustered_rcsize $GenBankFiles > CopraRNA1_anno.csv";
+} else {
+  $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv";
+}
+print "$annotateCall\n" if ($verbose);
+system $annotateCall; 
 
 # get additional homologs in cluster.tab
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv" if ($cop1); 
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv"; 
+my $parseHomologsCall = undef;
+if ($cop1) {
+	$parseHomologsCall = $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv";
+} else {
+	$parseHomologsCall = $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv";
+}
+print "$parseHomologsCall\n" if ($verbose);
+system $parseHomologsCall; 
 
 # add corrected p-values (padj) - first column
 system "awk -F',' '{ print \$1 }' CopraRNA1_anno_addhomologs.csv > CopraRNA1_pvalues.txt" if ($cop1); 

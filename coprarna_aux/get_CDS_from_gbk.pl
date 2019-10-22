@@ -2,9 +2,12 @@
 
 use strict;
 use warnings;
-
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
 use Bio::SeqIO;
-use Cwd 'abs_path'; ## edit 2.0.5.1
+use Cwd 'abs_path';
 
 # ./get_CDS_from_gbk.pl NC_003197.gb > stm.fas
 
@@ -29,11 +32,17 @@ open(MYDATA, $kegg2refseq) or die("\nError: cannot open file $kegg2refseq in get
     my @kegg2refseq = <MYDATA>;
 close MYDATA;
 
+# check if file provided
+if (scalar @ARGV == 0) { die("\nError: no genome file provided\n\n"); }
+
+# get and check genome file
 my $refid = $ARGV[0];
-my $refidchopped = $refid;
-chop $refidchopped;
-chop $refidchopped;
-chop $refidchopped;
+my $refidchopped = $refid; # will hold file name without file extension
+if ($refid =~ m/^(.+)\.gb(\.gz)?/) {
+	$refidchopped = $1;
+} else {
+	die("\nProvided input file '$refid' does not end in '.gb' or '.gb.gz'\n\n");
+}
 
 my $keggcode = "";
 
@@ -45,7 +54,13 @@ foreach(@kegg2refseq) {
     }
 }
 
-my $seqin = Bio::SeqIO->new( -format => 'genbank', -file => $refid);
+my $fileHandle = undef;
+if ($refid =~ m/.+\.gz$/) {
+	$fileHandle = new IO::Uncompress::Gunzip $refid or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+} else {
+	$fileHandle = IO::File->new($refid, "r");
+}
+my $seqin = Bio::SeqIO->new( -format => 'genbank', -fh => $fileHandle );
 
 # we will hash all printed CDS to avoid duplicated output for subsequences of transpliced Genes
 # see https://www.ncbi.nlm.nih.gov/genbank/genomesubmit_annotation/

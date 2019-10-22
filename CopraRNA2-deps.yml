@@ -10,6 +10,7 @@ channels:
 dependencies:
 
   - bzip2
+  - gzip
   - gawk
   - sed
   - grep
@@ -32,6 +33,9 @@ dependencies:
   - perl-getopt-long
   - perl-bioperl
   - perl-bio-eutilities
+  - perl-io-uncompress-gunzip 
+  - perl-io-gzip 
+  - perl-io-all
   
   - r-base==3.6.0
   - r-seqinr 
