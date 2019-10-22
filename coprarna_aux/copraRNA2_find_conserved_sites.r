@@ -34,26 +34,20 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-co2<-grep("core count:", co)
-max_cores<-as.numeric(gsub("core count:","",co[co2]))
+max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
 
 # number of top predictions which should be investigated
-top<-grep("top count:", co)
-top<-as.numeric(gsub("top count:","",co[top]))
+top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 
 # IntaRNA parameters
-winsize<-grep("win size:", co)
-winsize<-as.numeric(gsub("win size:","",co[winsize]))
+winsize<-as.numeric(gsub("win size:","",co[grep("win size:", co)]))
 
-maxbpdist<-grep("max bp dist:", co)
-maxbpdist<-as.numeric(gsub("max bp dist:","",co[maxbpdist]))
+maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
 
-maxbpdist<-grep("max bp dist:", co)
-maxbpdist<-as.numeric(gsub("max bp dist:","",co[maxbpdist]))
+maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
 
-temperature<-grep("temperature:", co)
-temperature<-as.numeric(gsub("temperature:","",co[temperature]))
+temperature<-as.numeric(gsub("temperature:","",co[grep("temperature:", co)]))
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
 weight_method="clustal"
@@ -710,10 +704,10 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			fasta_s<-fasta_s[-short]
 		}
 		if(length(fasta_temp2)>1){
-			tempfi<-tempfile()
-			tempfi2<-tempfile()
+			tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
+			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
-			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > dev.null")
+			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " >> CopraRNA2_subprocess.out 2>> CopraRNA2_subprocess.err")
 			system(command)
 			fasta_temp2<-read.fasta(tempfi2)
 			s2=max(1,coo1[3]-2)
@@ -731,7 +725,7 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			}
 			if(length(fasta_s2)>1){
 				write.fasta(fasta_s2, names=tab_comb[cands,"name"], file.out=tempfi)
-				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > dev.null")
+				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " >> CopraRNA2_subprocess.out 2>> CopraRNA2_subprocess.err")
 				system(command)
 				fasta_s2<-read.fasta(tempfi2)
 				unlink(tempfi)
@@ -1099,6 +1093,10 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 
+	# generate a temp file per thread to prepare mafft input file
+	thread2tmpfile = c();
+	for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="CopraRNA2.findConservedSites.")); }
+
 	# start parallel processing of site conservation
 	vari<-foreach(ji=1:max_cores)  %dopar% {
 		dat<-dat_all[count_vect1[ji]:count_vect2[ji],]
@@ -1146,12 +1144,11 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				pos<-as.numeric(names(sort(table(poslist), decreasing=T))[1])
 							
 				# create alignments 
-				tempf2<-tempfile()
+				tempf2<-thread2tmpfile[ji];
 				temp2<-na.omit(match(tolower(tab[,10]), fastnames))
 				write.fasta(fastutr[temp2],file=tempf2 ,names=tab[,"name2"])
 				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf2,"",sep="")
 				alignment<-parse_fasta(system(ca, intern=T))
-				file.remove(tempf2)
 				m_names<-na.omit( match(orgs, names(dat[i,3:(e-1)])))
 				s_names2<-na.omit(match(orgs, s_names))
 				sRNA_alignment2<-sRNA_alignment[s_names2]
@@ -1319,6 +1316,10 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 		temp_out<-list(int_sites,peak_list)
 		temp_out
 	}
+
+	# cleanup temp files
+	file.remove(thread2tmpfile); 
+
 	dat<-dat_old
 	int_sites<-vector("list", nrow(dat))
 	peak_list<-vector("list", nrow(dat))

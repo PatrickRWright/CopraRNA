@@ -15,8 +15,7 @@ suppressPackageStartupMessages(require(doMC))
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-co2<-grep("core count:", co)
-max_cores <- min( detectCores(), as.numeric(gsub("core count:","",co[co2])), na.rm = TRUE)
+max_cores <- min( detectCores(), as.numeric(gsub("core count:","",co[grep("core count:", co)])), na.rm = TRUE)
 registerDoMC(max_cores)
 
 
@@ -195,6 +194,10 @@ count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 count_vect2<-cumsum(jobs)
 
 
+# generate a temp file per thread to prepare mafft input file
+thread2tmpfile = c();
+for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="CopraRNA2.refineClusterTab.")); }
+
 # start parallel processing
 vari<-foreach(ji=1:max_cores)  %dopar% {
 	clus<-clus2[count_vect1[ji]:count_vect2[ji],]
@@ -230,11 +233,10 @@ vari<-foreach(ji=1:max_cores)  %dopar% {
 				pos<-match(locus,names(fasta1))
 				temp_fasta<-fasta1[pos]
 				temp_fasta<-fasta_text(temp_fasta)
-				tempf<-tempfile()
+				tempf<-thread2tmpfile[ji]
 				write.fasta(fasta1[pos],names=names(locus), file.out=tempf)
 				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf,"",sep="")
 				align<-parse_fasta(system(ca, intern=T))
-				file.remove(tempf)
 				dis<-dist_hamming(align)
 				#  do the densitity based clustering
 				clust_tmp<-cluster(dis,eps=0.40,1)
@@ -274,6 +276,10 @@ vari<-foreach(ji=1:max_cores)  %dopar% {
 	}
 	out_clus
 }
+
+# cleanup temp files
+file.remove(thread2tmpfile); 
+
 
 final_clus1<-list()
 for(i in 1:length(vari)){

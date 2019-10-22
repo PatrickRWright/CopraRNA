@@ -5,8 +5,8 @@ inputFile <- args[1] ## edit 2.0.5.1
 
 ####################### retrieve cov matrix from max clusters
 
-options <- read.table("CopraRNA_option_file.txt", sep=":")
-root <- as.numeric(as.character(options$V2[14]))
+options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character")
+root <- as.numeric(options$V2[grep("root", options$V1)])
 
 fasta <- read.table("ncrna.fa")
 orgcnt <- length(grep("^>", fasta$V1))

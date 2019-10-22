@@ -27,8 +27,7 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-co2<-grep("core count:", co)
-max_cores<-as.numeric(gsub("core count:","",co[co2]))
+max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
 
 
@@ -213,6 +212,11 @@ build_anno<-function(ooi="NC_000911"){
 	jobs[1]<-jobs[1]+rest
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
+
+	# generate a temp file per thread to prepare mafft input file
+	thread2tmpfile = c();
+	for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="CopraRNA2.phyloSort.")); }
+
 	
 	# start parallel processing of phylogenetic order
 	vari<-foreach(ji=1:max_cores)  %dopar% {	
@@ -240,12 +244,11 @@ build_anno<-function(ooi="NC_000911"){
 				tab<-cbind(tab,paste(genename, "_", query,sep=""),query,opt[pos_opt,"p.value"],orgs)
 				colnames(tab)<-c("start","end","start_seed", "end_seed","start_sRNA","end_sRNA","start_seed_sRNA", "end_seed_sRNA","name" ,"name2","pvalue","orgs")
 				
-				tempf<-tempfile()
+				tempf<-thread2tmpfile[ji]
 				temp2<-na.omit(match(tolower(tab[,10]), fastnames))
 				write.fasta(fastutr[temp2],file=tempf ,names=tab[,"orgs"])
 				ca<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", tempf,"",sep="")
 				alignment<-parse_fasta(system(ca, intern=T))
-				file.remove(tempf)
 				datp<-as.DNAbin(alignment)
 				dis<-dist.dna(datp, model = "F81",pairwise.deletion = T)
 				dis<-as.matrix(dis)
@@ -280,6 +283,10 @@ build_anno<-function(ooi="NC_000911"){
 		temp_out<-order_table
 		temp_out
 	}
+
+	# cleanup temp files
+	file.remove(thread2tmpfile); 
+
 	dat<-dat_old
 	order_table<-dat[,3:(e-1)]
 	colnames(order_table)<-colnames(dat)[3:(e-1)]

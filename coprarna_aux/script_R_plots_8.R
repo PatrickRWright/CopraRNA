@@ -13,7 +13,12 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 inputFile <- args[1]
-numplot2 <- as.numeric(args[2])
+numplot2arg <- as.numeric(args[2])
+
+# get number of lines in input file
+nrowInput <- as.numeric(system(paste("wc -l",inputFile," | cut -d' ' -f1"), intern = TRUE))
+# correct output to available data in input if needed
+numplot2 <- min( numplot2arg, (nrowInput-1) )
 
 map<-function(y){
 se<-y
@@ -139,7 +144,6 @@ mRNAalign<-function(x, nu, le) {
 pred_results<-x[[1]]
 sequences<-x[[2]]
 
-
 # bn<- matrix(,Anzahl von geplotteten predictions(num), Anzahl von Organismen (le)) Inhalt: Locustag´s 
 #   [,1]      [,2]     [,3]        
 #1  "mm_2442" "NA"     "mbar_a3378"
@@ -148,9 +152,9 @@ sequences<-x[[2]]
 #4  "mm_1574" "ma0314" "NA"    
 
 bn<-matrix(,nu,1)
-	for(j in 1: le){
+for(j in 1:le){
 	bn<-cbind(bn,pred_results[[j+1]][1:nu,1])
-	}
+}
 bn<-bn[,2:ncol(bn)]
 
 for(i in 1:ncol(bn)){
@@ -691,10 +695,10 @@ if(numdens>numplot2){
 	numdens<-numplot2
 }
 require(seqinr)
-options <- read.table("CopraRNA_option_file.txt", sep=":") ## edit 2.0.4 // removed coprarna_pars.txt
-up <- as.numeric(as.character(options$V2[2])) ## edit 2.0.4 // removed coprarna_pars.txt
-down <- as.numeric(as.character(options$V2[3])) ## edit 2.0.4 // removed coprarna_pars.txt
-type <- as.character(options$V2[4]) ## edit 2.0.4 // removed coprarna_pars.txt
+options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character") 
+up <- as.numeric(as.character(options$V2[grep("nt upstream", options$V1)]))
+down <- as.numeric(options$V2[grep("nt downstream", options$V1)])
+type <- as.character(options$V2[grep("region", options$V1)])
 if(type=="CDS"){
 	fulllength<-TRUE
 	}

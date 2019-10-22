@@ -21,9 +21,7 @@ dat<-read.csv(inputfile, sep=",")
 	
 # number of top predictions which should be investigated
 co<-readLines("CopraRNA_option_file.txt") 
-top<-grep("top count:", co)
-top<-as.numeric(gsub("top count:","",co[top]))
-num<-top
+num<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 
 # markdown template path
 markdown<-paste(path,"mardown_template.Rmd",sep="")

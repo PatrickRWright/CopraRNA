@@ -24,9 +24,9 @@ min_length<-2			# minimal number of homologs for combining a p_value
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-co2<-grep("core count:", co)
-max_cores<-as.numeric(gsub("core count:","",co[co2]))
+max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
+root<-as.numeric(gsub("root:","",co[grep("root:", co)])))
 
 
 # transforming arguments into valid variables 
@@ -45,9 +45,6 @@ rholimit<-as.logical(rholimit)
 rho_weights<-as.numeric(rho_weights)
 mnum<-as.numeric(mnum)
 min_length<-as.numeric(min_length)
-
-option<- read.table("CopraRNA_option_file.txt", sep=":") 
-root<-as.numeric(as.character(option[14,2]))
 
 tree_weights<-function(tree, method="clustal"){
 	tip<-Ntip(tree)

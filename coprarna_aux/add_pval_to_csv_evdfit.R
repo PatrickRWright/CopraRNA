@@ -81,8 +81,8 @@ pgev <- function (q, xi = 1, mu = 0, sigma = 1)
 # end insert new functions
 
 # read options ## edit 2.0.5.1
-options <- read.table("CopraRNA_option_file.txt", sep=":")
-region <- as.character(options$V2[4])
+options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character")
+region <- as.character(options$V2[grep("region", options$V1)])
 
 files_opt <- list.files(pattern="_opt.intarna.csv")
 files_subopt <- list.files(pattern="_subopt.intarna.csv")

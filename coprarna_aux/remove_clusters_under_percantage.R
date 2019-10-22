@@ -1,7 +1,7 @@
 # get input parameter
-## edit 2.0.4 // changing to use of CopraRNA_option_file.txt
-options <- read.table("CopraRNA_option_file.txt", sep=":")
-relSize <- as.numeric(as.character(options$V2[5]))
+
+options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character")
+relSize <- as.numeric(options$V2[grep("relative clustersize", options$V1)])
 
 # get the maximum cluster size
 fasta <- read.table("16s_sequences.fa")
