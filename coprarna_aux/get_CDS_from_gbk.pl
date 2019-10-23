@@ -20,10 +20,10 @@ use Cwd 'abs_path';
 # Aminoacid sequence
 
 # get absolute path
-my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
+my $ABS_PATH = abs_path($0);
 # remove script name at the end
 # match all non slash characters at the end of the string
-$ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
+$ABS_PATH =~ s|[^/]+$||g;
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
 my $kegg2refseq = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";

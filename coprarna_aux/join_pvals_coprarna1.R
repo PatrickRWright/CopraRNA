@@ -1,7 +1,7 @@
-## edit 2.0.4 // changed script name to join_pvals_coprarna1.R
 
-args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
-inputFile <- args[1] ## edit 2.0.5.1
+
+args <- commandArgs(trailingOnly = TRUE)
+inputFile <- args[1]
 
 ####################### retrieve cov matrix from max clusters
 
@@ -15,14 +15,14 @@ therna <- "ncrna_"
 
 # read weights
 weightdata <- read.table("zscore.weight", sep=";", header=FALSE)
-weight <- ((as.numeric(weightdata$V2))**(1/(root))) ## edit 2.0.5.1 // parametrized root function
+weight <- ((as.numeric(weightdata$V2))**(1/(root))) ## parametrized root function
 weightdata <- cbind(weightdata,weight)
 weightdata <- weightdata[order(weightdata$V1),]
 rownames(weightdata)<-NULL
 refids <- as.character(weightdata$V1)
 
 # read clusters
-data <- read.table(inputFile, sep=";", header=TRUE) # get data from hash clusters output // ## edit 2.0.5.1 // generic input file
+data <- read.table(inputFile, sep=";", header=TRUE) # get data from hash clusters output //
 
 # find full clusters
 int <- data$clusternumber # get the clusternumbers as vect
@@ -37,7 +37,7 @@ for (i in 1:int[length(int)]) { # fuer jede clusternumber
 maxclustdata <- data[data$clusternumber %in% maxnums, ]
 
 #get the organism names (refseqs)
-names <- unique(maxclustdata$id2) ## edit 2.0.5.1 // changed to id2
+names <- unique(maxclustdata$id2)
 
 #re-sort names vector to be the same as refids vector
 namesresorted <- c()
@@ -47,7 +47,7 @@ for(i in 1:length(refids)) {
 }
 
 # do it for first as specific to initialize the dataframe
-trueindices <- which(maxclustdata$id2==namesresorted[1]) ## edit 2.0.5.1 // changed to id2
+trueindices <- which(maxclustdata$id2==namesresorted[1])
 truelines <- maxclustdata[trueindices, ]
 thename <- sub(therna, "", namesresorted[1])
 # transform the p-values to a normal distribution
@@ -56,7 +56,7 @@ names(newframe)[1]<-paste(thename)
 
 for (i in 2:orgcnt) {
     # extract line indices from dataframe for org i
-    trueindices <- which(maxclustdata$id2==namesresorted[i]) ## edit 2.0.5.1 // changed to id2
+    trueindices <- which(maxclustdata$id2==namesresorted[i])
     # put the actual lines in a vector
     truelines <- maxclustdata[trueindices, ]
     thename <- sub(therna, "", namesresorted[i])
@@ -104,10 +104,10 @@ compute_rho <- function(interval, data, weightdata, means, covmatrix) {  # left:
         all_pvalues <- c()
         final.out_lines_temp <- c()
         # for every cluster
-        for (i in unique(data$clusternumber)) { ## edit 2.0.0
+        for (i in unique(data$clusternumber)) {
             curr_cluster<-data[which(data$clusternumber==i),]
-            curr_cluster$id2<-sub("ncrna_", "", curr_cluster$id2) ## edit 2.0.5.1 // changed to id2
-            curr_cluster <- curr_cluster[order(curr_cluster$id2),] ## edit 2.0.5.1 // changed to id2
+            curr_cluster$id2<-sub("ncrna_", "", curr_cluster$id2)
+            curr_cluster <- curr_cluster[order(curr_cluster$id2),]
             rownames(curr_cluster)<-NULL
             p <- curr_cluster$p.value
            
@@ -131,14 +131,14 @@ compute_rho <- function(interval, data, weightdata, means, covmatrix) {  # left:
                 if(is.nan(cp) == TRUE) { cp <- 0 } #############################  workaround for the NaN problem (usually for artifact predictions)
                 all_pvalues <- c(all_pvalues,cp)
 
-                line<-paste(cp,paste(curr_cluster$d1, collapse=";"), sep=";") ## edit 2.0.5.1 // changed to d1
+                line<-paste(cp,paste(curr_cluster$d1, collapse=";"), sep=";")
                 line<-paste(line,";",sep="")
                 final.out_lines_temp <- c(final.out_lines_temp,line)
 
             } else {
 
-                indices_missing <- which(! weightdata$V1 %in% curr_cluster$id2) ## edit 2.0.5.1 // changed to id2
-                indices_available <- which(weightdata$V1 %in% curr_cluster$id2) ## edit 2.0.5.1 // changed to id2
+                indices_missing <- which(! weightdata$V1 %in% curr_cluster$id2)
+                indices_available <- which(weightdata$V1 %in% curr_cluster$id2)
      
                 p <- qnorm(p, lower.tail = FALSE)
                 cNresult <- condNormal(p, means, covmatrix, indices_available, indices_missing)
@@ -157,7 +157,7 @@ compute_rho <- function(interval, data, weightdata, means, covmatrix) {  # left:
                 if(is.nan(cp) == TRUE) { cp <- 0 } #############################  workaround for the NaN problem (usually for artifact predictions)
                 all_pvalues <- c(all_pvalues,cp)
                
-                line<-paste(cp,paste(curr_cluster$d1, collapse=";"), sep=";") ## edit 2.0.5.1 // changed to d1
+                line<-paste(cp,paste(curr_cluster$d1, collapse=";"), sep=";")
                 line<-paste(line,";",sep="")
                 final.out_lines_temp <- c(final.out_lines_temp,line)
             }
@@ -181,8 +181,6 @@ prelim_rho <- prelim_rho_output[[1]]
 if (prelim_rho == 0) {
     prelim_rho <- 0.1
 }
-
-## edit 2.0.6 // removed rhodevelopment.txt
 
 final_rho_output<-compute_rho(seq((prelim_rho-0.1),(prelim_rho+0.1),by=0.01), data, weightdata, means, covmatrix)
 final_rho <- final_rho_output[[1]]

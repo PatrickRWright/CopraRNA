@@ -228,14 +228,14 @@ sub get_region
                     if (($pos - $downstream) < 1) {
                         my $printseq = reverse($seq_obj->subseq(1, ($pos + $upstream)));
                         $printseq =~ tr/[g,a,t,c,G,A,T,C]/[c,t,a,g,C,T,A,G]/;
-                        if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                        if (length($printseq) >= 150) {
                             return ">$ltag\n$printseq\n";
                         } else { return; }
                     }
                     if (($pos + $upstream) > $genomelength) {
                         my $printseq = reverse($seq_obj->subseq(($pos - $downstream + 1), $genomelength));
                         $printseq =~ tr/[g,a,t,c,G,A,T,C]/[c,t,a,g,C,T,A,G]/;
-                        if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                        if (length($printseq) >= 150) {
                             return ">$ltag\n$printseq\n";
                         } else { return; }
                     }
@@ -266,13 +266,13 @@ sub get_region
                 unless($circularTest) { # only do this if genome is not curcular
                      if (($pos - $upstream) < 1) {
                          my $printseq = $seq_obj->subseq(1, ($pos + $downstream - 1));
-                         if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                         if (length($printseq) >= 150) {
                              return ">$ltag\n$printseq\n";
                          } else { return; }
                      }
                      if (($pos + $downstream) > $genomelength) {
                          my $printseq = $seq_obj->subseq(($pos - $upstream), $genomelength);
-                         if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                         if (length($printseq) >= 150) {
                              return ">$ltag\n$printseq\n";
                          } else { return; }
                      }

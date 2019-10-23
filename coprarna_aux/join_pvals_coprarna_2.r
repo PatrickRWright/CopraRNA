@@ -138,7 +138,7 @@ myfun<-function(da2){
 	int_table<-gsub("\\|.*","",int_table)
 	int_table
 }
-da<-read.csv("CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv") ## edit prw changed file name 
+da<-read.csv("CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv")
 en<-grep("Annotation", colnames(da))
 da2<-da[,3:(en-1)]
 namegenomes<-colnames(da2)

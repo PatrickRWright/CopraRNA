@@ -542,7 +542,7 @@ lgd = Legend(labels = leg, title = 'site\nconservation',title_position = "topcen
 lgd_list = list(lgd)
 
 # draw combined heatmap
-pdf("conservation_heatmap.pdf", width = 2.3+ncol(int_opt)*0.2, height = 3.4+nrow(int_opt)*0.2,useDingbats=F) ## edit prw // onefile=FALSE fix for two page pdf
+pdf("conservation_heatmap.pdf", width = 2.3+ncol(int_opt)*0.2, height = 3.4+nrow(int_opt)*0.2,useDingbats=F)
 col_col<-rep("black", ncol(int_opt))
 col_col[clus[[3]][match(oois, clus[[4]])]]<-"orangered"
 c_lty<-rep(1, ncol(int_opt))
@@ -601,7 +601,7 @@ for(jj in 1:length(selection)){
 	e<-match(max(int_sub2),se)
 	my_palette4<-my_palette2[s:e]
 	na3<-paste("./evo_alignments2/",row.names(int_opt)[jj],"/",row.names(int_opt)[jj],"_conservation_heatmap.pdf",sep="")
-	pdf(na3, width = 2.3+ncol(int_opt2)*0.2, height = 3.4+nrow(int_opt2)*0.2,useDingbats=F) ## edit prw // onefile=FALSE fix for two page pdf
+	pdf(na3, width = 2.3+ncol(int_opt2)*0.2, height = 3.4+nrow(int_opt2)*0.2,useDingbats=F)
 	a<-Heatmap(	int_opt2,
 				col=my_palette3,
 				cluster_rows = F, 

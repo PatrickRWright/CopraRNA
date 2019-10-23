@@ -1,10 +1,10 @@
-## edit 1.2.8 new script
+
 ## script by Jens Georg
 
-args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
-inputFile_CopraRNA <- args[1] ## edit 2.0.5.1
-inputFile_DAVID <- args[2] ## edit 2.0.5.1
-output_file <- args[3] ## edit 2.0.5.1
+args <- commandArgs(trailingOnly = TRUE)
+inputFile_CopraRNA <- args[1]
+inputFile_DAVID <- args[2]
+output_file <- args[3]
 
 
 # number of top predictions which should be investigated
@@ -13,7 +13,7 @@ top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 
 
 
-x<-read.delim(inputFile_DAVID, header=FALSE) ## edit 2.0.5.1
+x<-read.delim(inputFile_DAVID, header=FALSE)
 
 y<-grep("Enrichment Score", x[,2])
 kk<-c()
@@ -83,7 +83,7 @@ id<-c()
 		}
 	id1<-c()
 	for(i in 1:length(id)){
-		id1<-c(id1,as.numeric(strsplit(id[i],",")[[1]])) ## edit 2.0.3.1 # removed space in separator
+		id1<-c(id1,as.numeric(strsplit(id[i],",")[[1]]))
 		}
 	id1<-unique(id1)
 	}
@@ -117,7 +117,7 @@ for(i in 1:nrow(res)){
 #res<-rbind(terms,res)
 	
 #----------------	
-x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",") ## edit 2.0.5.1
+x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",")
 
 l<-(strsplit(as.character(x[1:top,4]), "\\|"))
 

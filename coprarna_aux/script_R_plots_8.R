@@ -66,7 +66,7 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa"){
 #daten preprozessierung
 
 pre<-function(up=200,down=100){
-da<-read.csv(inputFile) ## edit 2.0.2
+da<-read.csv(inputFile)
 
 #danc<-read.fasta("ncrna.fa")
 #d<-clustalW(danc,clustal.path="clustalw")

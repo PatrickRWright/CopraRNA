@@ -2,8 +2,6 @@
 
 use warnings;
 use strict;
-
-## edit 2.0.4 // major changes to adjust the entire script
 # to UPGMA tree -> no more triple root
 
 my $treefile = $ARGV[0];
@@ -23,7 +21,7 @@ foreach(@treefilelines) {
     chomp $_;
     my @splitarray = split(/[:\(\),]/, $_);
     foreach(@splitarray) {
-        if($_ =~ m/^(\d+\.\d+)$/) {  ## edit 1.3.0 fixed regex for double digit branchlengths (i.e. 95.0381)
+        if($_ =~ m/^(\d+\.\d+)$/) {  ## regex for double digit branchlengths (i.e. 95.0381)
             $treelength = $treelength + $1;
         }
     }
@@ -52,12 +50,12 @@ my $switch = 0;
 # on the branch lengths
 foreach(@fneighfilelines) {
     chomp $_;
-    if($_ =~ m/From\s+To\s+Length\s+Height/) { ## edit 2.0.4
+    if($_ =~ m/From\s+To\s+Length\s+Height/) {
         $switch = 1;  
     }
     if($switch) {
         if($_ =~ m/\d/) {
-            $_ =~ s/-//g; ## edit 2.0.6 // remove negative branch lengths
+            $_ =~ s/-//g; ## remove negative branch lengths
             push @lastlines, $_;
         }
     }
@@ -123,7 +121,7 @@ my @refseqarray = ();
 
 for my $key (keys %tree) {
     for my $key2 (keys %{$tree{$key}}) {
-        if($key2 =~ m/n[zc]/) { ## edit 2.0.2
+        if($key2 =~ m/n[zc]/) {
             push @refseqarray, $key2;
         }
     }
@@ -131,7 +129,6 @@ for my $key (keys %tree) {
 
 my %subtreelengthhash = ();
 
-# edit the substring here ## edit 1.2.3
 foreach(@lastlines) {
     my @split = split(/\s+/, $_);
     my $nodenum = $split[0];
@@ -156,7 +153,7 @@ sub subtreelength
     my $subtreelength = 0;
     my %localhash = %{$hashref};
     for my $key (keys %{$localhash{$nodenum}}) {
-        if($key =~ m/n[zc]/) { ## edit 2.0.2 ## if an internal node points at a leaf we are done
+        if($key =~ m/n[zc]/) { ## if an internal node points at a leaf we are done
             $subtreelength = $subtreelength + $localhash{$nodenum}{$key};
         } else { ## if an internal node points at an internal node we need to continue
             $subtreelength = $subtreelength + $localhash{$nodenum}{$key} + &subtreelength($key, \%localhash);
@@ -167,7 +164,7 @@ sub subtreelength
 
 
 sub calctree
-{ ## edit 1.2.8 added orgcnt to input arguments for division by zero error  
+{
     (my $root, my $branchlength, my $treeref, my $rootlength, my $subtreelengthsref, my $treelength, my $orgcnt) = @_;
     my $result = 1;
     my %localtree = %{$treeref};
@@ -178,7 +175,7 @@ sub calctree
             for my $thenextroot (keys %{$localtree{$nextroot}}) {
                 $nextrootlength = $localtree{$nextroot}{$thenextroot};
             }
-            unless ($treelength == 0) { ## edit 1.2.8 fix divide by zero bug for treelength 0
+            unless ($treelength == 0) { ## fix divide by zero bug for treelength 0
                 $result = ($branchlength + ($localtree{$root}{$nextroot}/2))/($localsubtree{$root}+$localtree{$root}{$nextroot}) *
                 &calctree($nextroot, $nextsubtree, \%localtree, $nextrootlength, \%localsubtree, $treelength, $theorgcnt);
             } else {

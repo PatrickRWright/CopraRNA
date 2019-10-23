@@ -80,7 +80,7 @@ foreach(@gbks) {
 foreach my $line (@intarna_websrv_lines) {
     chomp $line;
     print WRITETABLE $line;
-    if ($line =~ m/id1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;/) { ## edit 2.0.5.1 // correct header
+    if ($line =~ m/id1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;/) {
         print WRITETABLE ";genename;entrez_gene_id;annotation\n";
         next;
     }

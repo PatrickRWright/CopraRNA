@@ -13,7 +13,7 @@ use Bio::SeqIO;
 # input to annotate IntaRNA result parts
 
 my $finallist = $ARGV[0];
-my $tags_clusterd = $ARGV[1]; ## edit 2.0.6
+my $tags_clusterd = $ARGV[1];
 my %ltaggennamehash = ();
 my $ltag = "";
 my $genname = "";
@@ -27,7 +27,7 @@ my $argofinterestswitch = 1;
 
 print "p-value,";
 
-for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) { ## edit 2.0.6
+for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) {
         $columncount++;
         my @splitarg = split(/,/, $ARGV[$i]);
         if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb(\.gz)?/) {
@@ -86,9 +86,9 @@ for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) { ## edit 2.0.6
                 $ltagcolumnhash{$ltag} = $columncount; 
             }
             if ($ltag ne "N/A" and $genname ne "N/A") {
-                $genname =~ s/,/;/g; ## edit 1.2.0
-                $genname =~ s/\(//g; ## edit 1.2.7
-                $genname =~ s/\)//g; ## edit 1.2.7 
+                $genname =~ s/,/;/g;
+                $genname =~ s/\(//g;
+                $genname =~ s/\)//g; 
                 $ltaggennamehash{$ltag} = $genname;
             }
             if ($ltag ne "N/A" and $genid ne "N/A" and $genid =~ m/GeneID:/) {
@@ -121,14 +121,14 @@ close DATA;
 foreach my $line (@datalines) {
     my @splitarg = split(/;/, $line);
     foreach(@splitarg) { chomp $_; }
-    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-2] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11]; ## edit 2.0.6 // changed indices to accomodate for tags.clustered file
+    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-2] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11];
     chomp $pvalenergy;
     $pvalenergyhash{lc($splitarg[0])} = $pvalenergy;
 }
 
 my %annotationhash = (); #locustags -> annotation
 
-my @splitThirdArgv = split(/,/,$ARGV[2]); ## edit 2.0.6
+my @splitThirdArgv = split(/,/,$ARGV[2]);
 
 foreach my $genomeFile (@splitThirdArgv) {
     my $fileHandle = undef;
@@ -140,7 +140,7 @@ foreach my $genomeFile (@splitThirdArgv) {
     my $in  = Bio::SeqIO->new(-fh => $fileHandle, '-format' => 'genbank');
     while ( my $seq = $in->next_seq() ) {
         foreach my $sf ( $seq->get_SeqFeatures() ) {
-            if( $sf->primary_tag eq 'CDS' ) { ## edit 1.2.0
+            if( $sf->primary_tag eq 'CDS' ) {
             # add exception for "hypothetical protein" annotation
             my $product = "";
             my @products = ();
@@ -170,7 +170,7 @@ foreach my $genomeFile (@splitThirdArgv) {
                 my $func = $funclist[0];
                 $annotationhash{$ltag} = $func;
             }
-            } ## edit 1.2.0
+            }
         }
     }    
 }
@@ -232,7 +232,7 @@ foreach (@finallistlines) {
 $nscount++;
 }
 # print annotation
-for(my $i=$commacount; $i < (scalar(@ARGV)-1); $i++) { ## edit 2.0.6
+for(my $i=$commacount; $i < (scalar(@ARGV)-1); $i++) {
         print ",";
 }
 
