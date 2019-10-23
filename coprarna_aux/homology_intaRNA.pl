@@ -443,7 +443,6 @@ unless ($cop1) {
 	######################################################
     print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
 	######################################################
-    system "ln -s " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; 
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR >> $OUT_STD"; 
     # perform actual CopraRNA 2 p-value combination
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR >> $OUT_STD"; 
@@ -507,12 +506,9 @@ if ($ooi_filt) {
 
 # plot CopraRNA 2 evo heatmap, jalview files for selection and prepare CopraRNA2 html output
 unless ($cop1) {
-
-
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR >> $OUT_STD";
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR >> $OUT_STD"; 
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR >> $OUT_STD";
-    system "rm -f CopraRNA_available_organisms.txt"; 
 }
 
 # check for run fail CopraRNA
@@ -587,29 +583,33 @@ if ($enrich) {
     ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
     system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; 
     system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ##  only removing obsolete spaces and keeping others
-    system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; 
-
-    open(MYDATA, "termClusterReport.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-        my @enrichment_lines = <MYDATA>;
-    close MYDATA;
-
-    unless($enrichment_lines[0]) {
-        system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-    }
+	# ensure there is some enrichment output
+	if( -s "DAVID_enrichment_grepped_temp.txt" ) {
+        system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; 
+    	if ( -s "termClusterReport.txt" ) {
+	        open(MYDATA, "termClusterReport.txt");
+            my @enrichment_lines = <MYDATA>;
+       		close MYDATA;
+            ## enrichment visualization
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; 
+            system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R --args CopraRNA_result_all.csv termClusterReport.txt enrichment.txt";
+            system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; 
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; 
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; 
+            system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; 
+            system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; 
+            system "rm index-thumb.html"; 
+            system "rm index-pdf.html"; 
+            ## end add enrichment vis
+        } else {
+			system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+		}
+    } else {
+		system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+	}
 
     ##### end DAVID enrichment
 
-    ## enrichment visualization
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; 
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R --args CopraRNA_result_all.csv termClusterReport.txt enrichment.txt";
-    system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; 
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; 
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; 
-    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; 
-    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; 
-    system "rm index-thumb.html"; 
-    system "rm index-pdf.html"; 
-    ## end add enrichment vis
 }
 
 
