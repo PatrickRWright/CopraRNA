@@ -26,7 +26,7 @@ min_length<-2			# minimal number of homologs for combining a p_value
 co<-readLines("CopraRNA_option_file.txt") 
 max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
-root<-as.numeric(gsub("root:","",co[grep("root:", co)])))
+root<-as.numeric(gsub("root:","",co[grep("root:", co)]))
 
 
 # transforming arguments into valid variables 
