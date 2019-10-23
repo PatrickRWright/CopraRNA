@@ -3,7 +3,7 @@
 #Call:
 # R --slave -f ./CopraRNA2html.r
 
-require(seqinr)
+suppressPackageStartupMessages(require(seqinr))
 
 # get absolute path
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -13,7 +13,6 @@ path<-sub("CopraRNA2html.r","",path)
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
-#jalprops<-"/media/cyano_share/data/GLASSgo_postprocessing/jalview_props.txt"
 
 # CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
@@ -25,11 +24,9 @@ num<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 
 # markdown template path
 markdown<-paste(path,"mardown_template.Rmd",sep="")
-#markdown<-"/home/jens/.conda/envs/cop/bin/coprarna_aux/mardown_template.Rmd"
 
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
-#copref_path<-"/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt"
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])

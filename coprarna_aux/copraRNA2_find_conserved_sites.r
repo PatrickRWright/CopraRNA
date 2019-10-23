@@ -12,10 +12,12 @@
 ### jalview_props.txt
 
 #call:
-# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r 
-require(phangorn)
-require(seqinr)
-require(doMC)
+# R --slave -f copraRNA2_find_conserved_sites.r 
+
+
+suppressPackageStartupMessages(require(phangorn))
+suppressPackageStartupMessages(require(seqinr))
+suppressPackageStartupMessages(require(doMC))
 
 # get absolute path
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -25,9 +27,7 @@ path<-sub("copraRNA2_find_conserved_sites.r","",path)
 
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
-#copref_path<-"/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt"
 dialign_conf<-paste(path,"dialign_conf/",sep="")
-#dialign_conf<-"/home/jens/For_CopraRNA2.0/dialign_conf/"
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
@@ -232,7 +232,6 @@ cluster<-function(dm,eps,minpts){
 
 # combine all UTR sequences in one fasta file (needed if alignmenta are not available)
 fast<-function(){
-	require(seqinr)
 	falist1<-dir()
 	int<-grep("intarna", falist1)
 	falist1<-falist1[-int]
@@ -1228,7 +1227,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					temp_locus<-tab_aligned[j,"name2"]
 					
 					# run IntaRNA for spot probabilities
-					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --out dev.null --out=SpotProb:STDOUT", sep="")
+					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --out /dev/null --out=SpotProb:STDOUT", sep="")
 					temp_table<-as.matrix(read.csv(textConnection(system(temp_table,intern=T)),sep=";", row.names=1,comment.char = "#"))
 					temp_align_table2<-temp_align_table
 					mRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_mRNA"],")",sep="") ))

@@ -19,15 +19,15 @@ y<-grep("Enrichment Score", x[,2])
 kk<-c()
 
 for(i in 1:length(y)){
-k<-as.character(x[y[i],2])
-k<-sub("Enrichment Score: ","",k)
-kk<-c(kk,k)
+    k<-as.character(x[y[i],2])
+    k<-sub("Enrichment Score: ","",k)
+    kk<-c(kk,k)
 }
 
 kk<-as.numeric(kk)
 ks<-which(kk >= 1)
 if(length(ks)<1){
-ks<-1
+	ks<-1
 }
 
 
@@ -37,9 +37,7 @@ ks<-seq(1,length(ks)+1)
 scores<-kk[ka]
 
 if(length(y)==(length(ks)-1)){
-
-y<-c(y,nrow(x)+1)
-
+	y<-c(y,nrow(x)+1)
 }
 
 kk<-cbind(paste(as.character(x[y[ks]+2,1]),as.character(x[y[ks]+2,2]),sep=": "),kk[ks])

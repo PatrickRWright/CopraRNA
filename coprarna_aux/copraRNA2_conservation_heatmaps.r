@@ -1,21 +1,22 @@
 
 # script by Jens Georg
 
-# Dependencies:
-
-## clustalo 
-## mafft
-require(ComplexHeatmap)
-require(RColorBrewer)
-require(phangorn)
-require(seqinr)
-require(parallel)
-
 #call
 # R --slave -f ./copraRNA2_conservation_heatmaps.r --args top=50
 
-# CopraRNA result file 
+# Dependencies:
+## clustalo 
+## mafft
+## CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
+
+
+suppressPackageStartupMessages(require(ComplexHeatmap))
+suppressPackageStartupMessages(require(RColorBrewer))
+suppressPackageStartupMessages(require(phangorn))
+suppressPackageStartupMessages(require(seqinr))
+suppressPackageStartupMessages(require(parallel))
+
 
 # get absolute path
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -24,8 +25,7 @@ path<-sub("copraRNA2_conservation_heatmaps.r","",path)
 print(path)
 
 # preset path to required files, path can also be specified as argument
-copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
-#copref_path<-"/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt"
+coprarna_reference_file<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
@@ -42,9 +42,6 @@ genelist="genelist.txt"
 
 # Defines if the tree for the heatmap is calcualted based on the ribosomal RNAs or on the sRNA sequences
 clustering="ribosomal" # alternative: "sRNA"
-
-# preset path to required files, path can also be specified as argument
-coprarna_reference_file="/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt"
 
 # empiric threshold for not being a target in the single organisms target prediction
 # if the IntaRNA p-Vale is smaller than "int_p_thres" a black box is drawn in the heatmap

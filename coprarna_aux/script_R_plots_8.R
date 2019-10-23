@@ -11,6 +11,8 @@
 #                       mRNA_regions_with_histogram.pdf file (default = 15)
 # numdens:              The number of predictions that are represented in the histogram (default = 100).
 
+suppressPackageStartupMessages(require(seqinr))
+
 args <- commandArgs(trailingOnly = TRUE)
 inputFile <- args[1]
 numplot2arg <- as.numeric(args[2])
@@ -60,7 +62,6 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa"){
 }	
 	
 	
-require(seqinr)
 
 #daten preprozessierung
 
@@ -694,7 +695,7 @@ if(numplot2<numplot){
 if(numdens>numplot2){
 	numdens<-numplot2
 }
-require(seqinr)
+
 options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character") 
 up <- as.numeric(as.character(options$V2[grep("nt upstream", options$V1)]))
 down <- as.numeric(options$V2[grep("nt downstream", options$V1)])

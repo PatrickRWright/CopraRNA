@@ -1,16 +1,4 @@
-## edit 2.0.4
-# this script replaces the old
-# add_pval_to_csv_evdfit.pl and 
-# makes the Statistics::R dependency obsolete
 
-# library(evir) ## edit 2.0.5 removed this dependency
-# now sourcing gev and pgev locally here
-
-# gev and pgev functions
-# from the evir R package
-# https://CRAN.R-project.org/package=evir
-# ## edit 2.0.5 added this source locally 
-# ## to be independent of evir
 
 # start insert new functions
 

@@ -7,9 +7,9 @@
 #call:
 # R --slave -f ./copraRNA2_phylogenetic_sorting.r 
 
-require(phangorn)
-require(seqinr)
-require(doMC)
+suppressPackageStartupMessages(require(phangorn))
+suppressPackageStartupMessages(require(seqinr))
+suppressPackageStartupMessages(require(doMC))
 
 # get absolute path
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -19,7 +19,6 @@ print(path)
 
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
-#copref_path<-"/home/jens/For_CopraRNA2.0/CopraRNA_available_organisms.txt"
 
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.

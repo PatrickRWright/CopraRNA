@@ -4,9 +4,9 @@
 #R --slave -f ./join_pvals_coprarna_2.r 
  
 #Dependencies:
-require(phangorn)
-require(seqinr)
-require(doMC)
+suppressPackageStartupMessages(require(phangorn))
+suppressPackageStartupMessages(require(seqinr))
+suppressPackageStartupMessages(require(doMC))
 
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
