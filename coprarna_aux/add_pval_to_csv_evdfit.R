@@ -119,12 +119,12 @@ for (i in 1:length(files_opt)) {
     # add pvals to data frame
     data_opt <- cbind(data_opt, opt_pvals)
     data_subopt <- cbind(data_subopt, subopt_pvals)
-    # change p-value column name 
-    colnames(data_opt)[ncol(data_opt)]<-"p-value" 
-    colnames(data_subopt)[ncol(data_subopt)]<-"p-value" 
     # sort by pvalue
     data_opt <- data_opt[order(data_opt$opt_pvals),]
     data_subopt <- data_subopt[order(data_subopt$subopt_pvals),]
+    # change p-value column name 
+    colnames(data_opt)[ncol(data_opt)]<-"p-value" 
+    colnames(data_subopt)[ncol(data_subopt)]<-"p-value" 
     # write output
     # this overwrites the input files
     write.table(data_opt, file=curr_opt_file, sep=";", quote=F, row.names=F)
