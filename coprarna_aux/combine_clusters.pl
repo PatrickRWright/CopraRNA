@@ -43,7 +43,7 @@ for (my $i=1;$i<scalar(@distmat_lines);$i++) {
     }
 }
 
-system "fneighbor -datafile compatible.distmat.mapped -outfile compatible.fneighbor.mapped -treetype u > CopraRNA2_subprocess.out 2> CopraRNA2_subprocess.err";
+system "fneighbor -datafile compatible.distmat.mapped -outfile compatible.fneighbor.mapped -treetype u 2> CopraRNA2_subprocess.oe 1>&2";
 system "sed -i 's/0.00000/0.00001/g' compatible.fneighbor.mapped"; ## fix zero dist between org issue
 system "sed -i 's/0.00000/0.00001/g' distmat.treefile"; ## fix zero dist between org issue
 

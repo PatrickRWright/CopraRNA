@@ -12,8 +12,7 @@ $ABS_PATH =~ s|[^/]+$||g;
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
 # files dedicated to capture output of subcalls for debugging
-my $OUT_STD = "CopraRNA2_subprocess.out";
-my $OUT_ERR = "CopraRNA2_subprocess.err";
+my $OUT_ERR = "CopraRNA2_subprocess.oe";
 
 my $ncrnas = $ARGV[0]; # input_sRNA.fa
 my $upfromstartpos = $ARGV[1]; # 200
@@ -443,9 +442,9 @@ unless ($cop1) {
 	######################################################
     print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
 	######################################################
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR >> $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR 1>&2"; 
     # perform actual CopraRNA 2 p-value combination
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR >> $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR 1>&2"; 
     
 }
 
@@ -509,11 +508,11 @@ unless ($cop1) {
 	print "plot CopraRNA 2 evo heatmap, jalview files for selection and prepare CopraRNA2 html output\n" if ($verbose);
 	#######################################################
 	print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR >> $OUT_STD";
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR 1>&2";
 	print "copraRNA2_conservation_heatmaps.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR >> $OUT_STD"; 
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR 1>&2"; 
 	print "CopraRNA2html.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR >> $OUT_STD";
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR 1>&2";
 }
 
 # check for run fail CopraRNA

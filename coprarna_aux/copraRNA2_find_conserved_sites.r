@@ -707,7 +707,7 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
 			# avoid massive information output of dialign-tx (> /dev/null)
-			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.err")
+			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
 			system(command)
 			fasta_temp2<-read.fasta(tempfi2)
 			s2=max(1,coo1[3]-2)
@@ -726,7 +726,7 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 			if(length(fasta_s2)>1){
 				write.fasta(fasta_s2, names=tab_comb[cands,"name"], file.out=tempfi)
 				# avoid massive information output of dialign-tx (> /dev/null)
-				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.err")
+				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
 				system(command)
 				fasta_s2<-read.fasta(tempfi2)
 				unlink(tempfi)

@@ -5,6 +5,14 @@
   - gzip removed (obsolete)
 - CopraRNA2html.r
   - ensure num to plot does not exceed available rows in output
+- copraRNA2_conservation_heatmaps.r
+  - fix max_cores 
+  - fix genename check
+- copraRNA2_find_conserved_sites.r
+  - send crazy dialign-tx STDOUT output to hell (/dev/null)
+- renamed CopraRNA2_subprocess.err to CopraRNA2_subprocess.oe
+  - removed output to CopraRNA2_subprocess.out 
+  - redirecting STDOUT to STDERR where not captured explicitely
 
 ### 191023 Martin Raden
 
