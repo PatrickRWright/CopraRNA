@@ -1,4 +1,11 @@
 
+### 191024 Martin Raden
+
+- CopraRNA2-deps.yml
+  - gzip removed (obsolete)
+- CopraRNA2html.r
+  - ensure num to plot does not exceed available rows in output
+
 ### 191023 Martin Raden
 
 - new file 
