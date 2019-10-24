@@ -504,10 +504,15 @@ if ($ooi_filt) {
     system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv";
 }
 
-# plot CopraRNA 2 evo heatmap, jalview files for selection and prepare CopraRNA2 html output
 unless ($cop1) {
+	#######################################################
+	print "plot CopraRNA 2 evo heatmap, jalview files for selection and prepare CopraRNA2 html output\n" if ($verbose);
+	#######################################################
+	print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR >> $OUT_STD";
+	print "copraRNA2_conservation_heatmaps.r\n" if ($verbose);
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR >> $OUT_STD"; 
+	print "CopraRNA2html.r\n" if ($verbose);
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR >> $OUT_STD";
 }
 
