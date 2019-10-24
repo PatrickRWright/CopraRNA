@@ -22,14 +22,14 @@ suppressPackageStartupMessages(require(parallel))
 initial.options <- commandArgs(trailingOnly = FALSE)
 path<-initial.options [4]
 path<-sub("copraRNA2_conservation_heatmaps.r","",path)
-print(path)
+#print(path)
 
 # preset path to required files, path can also be specified as argument
 coprarna_reference_file<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores<-as.numerix(gsub("core count:","",co[grep("core count:", co)]))
+max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 
 # number of top predictions which should be investigated
 top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
@@ -408,7 +408,7 @@ for(i in 1:length(selection)){
 		genename<-gsub(".*\\(","",as.character(temp))
 		genename<-gsub("\\|.*", "", genename)
 		genename<-gsub("\\/", "", genename)
-		if(genename=="NA" ){
+		if(length(genename)==1 && genename[1]=="NA" ){
 			genename<-evo_analysis[selection[i], "Annotation"]
 			genename<-substr(genename,1,min(nchar(genename),20))
 		}
