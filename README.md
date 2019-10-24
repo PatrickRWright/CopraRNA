@@ -60,8 +60,14 @@ We provide a [list of dependencies](CopraRNA2-deps.yml) within the file [CopraRN
 
 You can easily create a [`conda` environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) using the following command (after installing `conda`)
 ```bash
-conda env create --file ~/Temp/CopraRNA2-deps.yml
+# within CopraRNA project folder
+# once
+conda env create --file CopraRNA2-deps.yml
+chmod a+x CopraRNA2.pl
+# always once within a shell session
 conda activate CopraRNA2-deps
+# call CopraRNA
+./CopraRNA2.pl -help
 ```
 
 <br /><br />
