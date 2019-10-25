@@ -426,9 +426,8 @@ unless ($cop1) {
 	print "prepare html output\n" if ($verbose);
 	#######################################################
 	print "CopraRNA2html.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR 1>&2";
+    system "R --slave -f " . $PATH_COPRA . "coprarna_aux/CopraRNA2html.r 2>>  /dev/null > /dev/null";
 }
-
 
 
 # clean up
