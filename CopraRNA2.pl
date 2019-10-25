@@ -421,6 +421,16 @@ if ($websrv) {
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
+unless ($cop1) {
+	#######################################################
+	print "prepare html output\n" if ($verbose);
+	#######################################################
+	print "CopraRNA2html.r\n" if ($verbose);
+    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA2html.r 2>> $OUT_ERR 1>&2";
+}
+
+
+
 # clean up
 unless ($noclean) {
 
