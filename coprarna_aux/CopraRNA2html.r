@@ -3,6 +3,7 @@
 #Call:
 # R --slave -f ./CopraRNA2html.r
 
+
 suppressPackageStartupMessages(require(seqinr))
 suppressPackageStartupMessages(require(doMC))
 
@@ -160,14 +161,14 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 	
 	# divide the data in subsets for parallel processing 
 	max_cores<-min(number, max_cores)
-	jobs<-nrow(dat)%/%max_cores
-	rest<-nrow(dat)-max_cores*jobs
+	jobs<-number%/%max_cores
+	rest<-number-max_cores*jobs
 	jobs<-rep(jobs,max_cores)
 	jobs[1:rest]<-jobs[1:rest]+1
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 
-	foreach(ji=1:max_cores)  %dopar% {
+	dump1<-foreach(ji=1:max_cores)  %dopar% {
 		for(i in count_vect1[ji]:count_vect2[ji]){
 			pos<-grep(selection[i],d)
 			na<-d[pos]
@@ -181,9 +182,6 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 		}
 	}
 }
-
-
-
 
 html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 
@@ -283,7 +281,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	ma<-c(ma,prefix,aux2,suffix)
 	ints<-paste("./evo_alignments2/",selection,"/interactions.html",sep="")
 	ints<- paste0("[interaction](",ints,"){target='_blank'}")
-	#d<-dir("./jalview")
+	d<-dir("./evo_alignments2")
 	na<-which(is.na(d[match(selection,d)]))
 	mrna<-paste("./evo_alignments2/",d[match(selection,d)],"/",d[match(selection,d)],"_mRNA.PNG",sep="")
 	mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
