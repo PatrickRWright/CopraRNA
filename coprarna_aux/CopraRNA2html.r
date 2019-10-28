@@ -164,7 +164,9 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 	jobs<-number%/%max_cores
 	rest<-number-max_cores*jobs
 	jobs<-rep(jobs,max_cores)
-	jobs[1:rest]<-jobs[1:rest]+1
+	if(rest>0){
+		jobs[1:rest]<-jobs[1:rest]+1
+	}
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 
@@ -266,13 +268,32 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 		enrich2<-""
 	}
 	
-	mrna_reg<-paste0("[mRNA regions plot](",mrna_reg1,"){target='_blank'}")
-	mrna_reg2<-paste0("![mRNA regions plot](",mrna_reg1,"){width=100% height=600}")
-	srna_reg<-paste0("[sRNA regions plot](",srna_reg1,"){target='_blank'}")
-	srna_reg2<-paste0("![sRNA regions plot](",srna_reg1,"){width=100% height=600}")
-	cons<-paste0("[Phylogenetic target conservation](",cons1,"){target='_blank'}")
-	cons2<-paste0("![Phylogenetic target conservation](",cons1,"){width=100% height=600}")
-	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons,"\n",cons2,"\n","### Functional enrichment",enrich,"\n",enrich2,"\n","### mRNA regions plota",mrna_reg,"\n",mrna_reg2,"\n","### sRNA regions plots",srna_reg,"\n",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
+	if(file.exists(mrna_reg1)){
+		mrna_reg<-paste0("[mRNA regions plot](",mrna_reg1,"){target='_blank'}")
+		mrna_reg2<-paste0("![mRNA regions plot](",mrna_reg1,"){width=100% height=600}")
+	} else{
+		mrna_reg<-""
+		mrna_reg2<-""
+	}
+	
+	if(file.exists(srna_reg1)){
+		srna_reg<-paste0("[sRNA regions plot](",srna_reg1,"){target='_blank'}")
+		srna_reg2<-paste0("![sRNA regions plot](",srna_reg1,"){width=100% height=600}")
+	} else{
+		srna_reg<-""
+		srna_reg2<-""
+	}
+	
+	if(file.exists(cons1)){
+		cons<-paste0("[Phylogenetic target conservation](",cons1,"){target='_blank'}")
+		cons2<-paste0("![Phylogenetic target conservation](",cons1,"){width=100% height=600}")
+	} else{
+		cons<-""
+		cons2<-""
+	}
+	
+
+	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons,"\n",cons2,"\n","### Functional enrichment",enrich,"\n",enrich2,"\n","### mRNA regions plots",mrna_reg,"\n",mrna_reg2,"\n","### sRNA regions plots",srna_reg,"\n",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
 	
 	prefix<-paste("```{r,echo=F}","wd<-getwd()",sep="\n")
 	suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")

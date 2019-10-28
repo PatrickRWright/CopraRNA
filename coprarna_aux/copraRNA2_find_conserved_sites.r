@@ -12,7 +12,7 @@
 ### jalview_props.txt
 
 #call:
-# R --slave -f copraRNA2_find_conserved_sites.r 
+# R --slave -f ./copraRNA2_find_conserved_sites.r 
 
 
 suppressPackageStartupMessages(require(phangorn))
@@ -112,6 +112,11 @@ jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation
 		peaks<-unlist(unique(c(ooi_int,peaks)))
 		colo4<-colo3
 		colo3<-gsub("#","",unique(c(colo3[ooi_int],colo3)))
+	}
+	na<-which(is.na(peaks))
+	if(length(na)>0){
+		peaks<-peaks[-na]
+		colo3<-colo3[-na]
 	}
 	anno_mRNA<-paste(peaks, "\t", colo3, sep="")
 	anno_sRNA<-anno_mRNA
@@ -1090,7 +1095,9 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	jobs<-nrow(dat)%/%max_cores
 	rest<-nrow(dat)-max_cores*jobs
 	jobs<-rep(jobs,max_cores)
-	jobs[1]<-jobs[1]+rest
+	if(rest>0){
+		jobs[1:rest]<-jobs[1:rest]+1
+	}
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 
