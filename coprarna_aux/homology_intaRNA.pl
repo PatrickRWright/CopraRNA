@@ -384,10 +384,10 @@ print $prepare_intarna_out_call . "\n" if ($verbose);
 system $prepare_intarna_out_call;
 ## end
 
-# re-cluster based on 5'UTRs
-my $refineClusterCall = $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; 
-print "$refineClusterCall\n";
-system "Rscript --slave $refineClusterCall"; 
+# # re-cluster based on 5'UTRs
+# my $refineClusterCall = $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; 
+# print "$refineClusterCall\n";
+# system "Rscript --slave $refineClusterCall"; 
 
 # do CopraRNA combination 
 print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);

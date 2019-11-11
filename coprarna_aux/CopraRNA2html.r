@@ -343,7 +343,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	}
 	
 	writeLines(ma, con = "markdown_final.Rmd", sep = "\n", useBytes = FALSE)
-	rmarkdown::render(paste(getwd(),"/markdown_final.Rmd",sep=""),output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
+	rmarkdown::render("./markdown_final.Rmd",output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
 }
 
 interactions()	

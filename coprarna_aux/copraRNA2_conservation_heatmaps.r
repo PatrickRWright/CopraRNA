@@ -4,6 +4,7 @@
 #call
 # R --slave -f ./copraRNA2_conservation_heatmaps.r --args top=50
 
+
 # Dependencies:
 ## clustalo 
 ## mafft
@@ -159,6 +160,7 @@ if(select==T){
 }
 if(select==F){
 	res<-read.csv(inputfile, sep=",")
+	num<-min(num,nrow(res))
 	selection<-as.character(res[1:num,4])
 	selection<-as.numeric(as.character(res[1:num,"initial_sorting"]))
 	genelist<-gsub("\\(.*","",res[1:num,4])
@@ -601,37 +603,39 @@ for(jj in 1:length(selection)){
 	e<-match(max(int_sub2),se)
 	my_palette4<-my_palette2[s:e]
 	na3<-paste("./evo_alignments2/",row.names(int_opt)[jj],"/",row.names(int_opt)[jj],"_conservation_heatmap.pdf",sep="")
-	pdf(na3, width = 2.3+ncol(int_opt2)*0.2, height = 3.4+nrow(int_opt2)*0.2,useDingbats=F)
-	a<-Heatmap(	int_opt2,
-				col=my_palette3,
-				cluster_rows = F, 
-				cluster_columns =clus, 
-				column_title=rownames(int_opt)[jj],
-				show_heatmap_legend = F,
-				column_names_gp = gpar( rot = 30, cex=0.7, col = col_col, font=c_lty),
-				row_names_gp = gpar( rot = 0, cex=0.75),
-				cell_fun=function(j, i, x, y, width=width, height=width, fill){
-					s = min(unit.c(convertWidth(width, "cm"), convertHeight(height, "cm")))
-					x1<-as.numeric(x)
-					y1<-as.numeric(y)
-					w1<-as.numeric(width)
-					h1<-as.numeric(height)
-					rect_gp = gpar(col = "lightgrey", lty = 1, lwd = 0.15)
-					if(int_sub2[i,j]>-1){
-						grid.polygon(x = c(x1-0.45*w1,x1+0.45*w1,x1-0.45*w1), y = c(y1-0.45*h1,y1+0.45*h1,y1+0.45*h1),  
-						gp = gpar(fill=my_palette4[int_sub2[i,j]+2], col=my_palette4[int_sub2[i,j]+2]))
-					}
-					if((int_sub2[i,j]>=1 &  int_sub4[i,j]=="++") ){
-						grid.polygon(x = c(x1-0.42*w1,x1+0.42*w1,x1+0.42*w1,x1-0.42*w1), y = c(y1-0.42*h1,y1-0.42*h1,y1+0.42*h1,y1+0.42*h1),  
-						gp = gpar( col=1, lwd=0.9))
-					}
-					if( int_opt2[i,j]>=0 & int_opt4[i,j]=="++"  ){
-						grid.polygon(x = c(x1-0.42*w1,x1+0.42*w1,x1+0.42*w1,x1-0.42*w1), y = c(y1-0.42*h1,y1-0.42*h1,y1+0.42*h1,y1+0.42*h1),  
-						gp = gpar( col=1, lwd=0.9))
-					}
-				},
-				rect_gp=gpar(col=c("grey77"),lwd=c(1),lty=c(1))
-				)
-	draw(a, annotation_legend_list = lgd_list)
-	dev.off()
+	if(file.exists(paste("./evo_alignments2/",row.names(int_opt)[jj],"/",sep=""))){
+		pdf(na3, width = 2.3+ncol(int_opt2)*0.2, height = 3.4+nrow(int_opt2)*0.2,useDingbats=F)
+		a<-Heatmap(	int_opt2,
+					col=my_palette3,
+					cluster_rows = F, 
+					cluster_columns =clus, 
+					column_title=rownames(int_opt)[jj],
+					show_heatmap_legend = F,
+					column_names_gp = gpar( rot = 30, cex=0.7, col = col_col, font=c_lty),
+					row_names_gp = gpar( rot = 0, cex=0.75),
+					cell_fun=function(j, i, x, y, width=width, height=width, fill){
+						s = min(unit.c(convertWidth(width, "cm"), convertHeight(height, "cm")))
+						x1<-as.numeric(x)
+						y1<-as.numeric(y)
+						w1<-as.numeric(width)
+						h1<-as.numeric(height)
+						rect_gp = gpar(col = "lightgrey", lty = 1, lwd = 0.15)
+						if(int_sub2[i,j]>-1){
+							grid.polygon(x = c(x1-0.45*w1,x1+0.45*w1,x1-0.45*w1), y = c(y1-0.45*h1,y1+0.45*h1,y1+0.45*h1),  
+							gp = gpar(fill=my_palette4[int_sub2[i,j]+2], col=my_palette4[int_sub2[i,j]+2]))
+						}
+						if((int_sub2[i,j]>=1 &  int_sub4[i,j]=="++") ){
+							grid.polygon(x = c(x1-0.42*w1,x1+0.42*w1,x1+0.42*w1,x1-0.42*w1), y = c(y1-0.42*h1,y1-0.42*h1,y1+0.42*h1,y1+0.42*h1),  
+							gp = gpar( col=1, lwd=0.9))
+						}
+						if( int_opt2[i,j]>=0 & int_opt4[i,j]=="++"  ){
+							grid.polygon(x = c(x1-0.42*w1,x1+0.42*w1,x1+0.42*w1,x1-0.42*w1), y = c(y1-0.42*h1,y1-0.42*h1,y1+0.42*h1,y1+0.42*h1),  
+							gp = gpar( col=1, lwd=0.9))
+						}
+					},
+					rect_gp=gpar(col=c("grey77"),lwd=c(1),lty=c(1))
+					)
+		draw(a, annotation_legend_list = lgd_list)
+		dev.off()
+	}
 }

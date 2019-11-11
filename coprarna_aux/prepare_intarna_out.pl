@@ -197,6 +197,14 @@ system $PATH_COPRA_SUBSCRIPTS . "disentangle_sorted_intarna_CSV.pl";
 ## adds pvalues to *_opt.intarna.csv and *_subopt.intarna.csv files // file names stay the same
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "add_pval_to_csv_evdfit.R"; 
                                                                               ## makes add_pval_to_csv_evdfit.pl obsolete
+																			  
+																			  
+# re-cluster based on 5'UTRs
+my $refineClusterCall = $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; 
+print "$refineClusterCall\n";
+system "Rscript --slave $refineClusterCall"; 																			  
+																			  
+																			  
 ## create opt_tags.clustered
 system $PATH_COPRA_SUBSCRIPTS . "cluster_intarna_csv.pl > opt_tags.clustered"; 
 

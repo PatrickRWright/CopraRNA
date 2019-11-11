@@ -186,10 +186,14 @@ clus_in<-clus
 clus2<-clus[mult,]
 
 # divide the data in subsets for parallel processing 
+max_cores<-min(max_cores,length(mult))
 jobs<-length(mult)%/%max_cores
 rest<-length(mult)-max_cores*jobs
 jobs<-rep(jobs,max_cores)
-jobs[1]<-jobs[1]+rest
+if(length(rest)>0){
+	jobs[1:rest]<-jobs[1:rest]+1
+}
+
 count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 count_vect2<-cumsum(jobs)
 
