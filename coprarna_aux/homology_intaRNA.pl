@@ -365,8 +365,8 @@ foreach (@sixteenSseqs) {
         $temp_16s_ID = $_; 
         chomp $temp_16s_ID;
         $sixteenScounter++;
-    } else {
-        if ($_ =~ m/N/) { print ERRORLOG "\nError: 'N' characters present in 16s_sequences.fa. Remove $temp_16s_ID from the input for the job to execute correctly.\n"; }
+    #} else {
+       # if ($_ =~ m/N/) { print ERRORLOG "\nError: 'N' characters present in 16s_sequences.fa. Remove $temp_16s_ID from the input for the job to execute correctly.\n"; }
     }
 }
 
