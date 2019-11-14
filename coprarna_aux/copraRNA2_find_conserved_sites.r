@@ -710,8 +710,6 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 		if(length(fasta_temp2)>1){
 			tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
-			tempfi<-tempfile()
-			tempfi2<-tempfile()
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
 			# avoid massive information output of dialign-tx (> /dev/null)
 			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
