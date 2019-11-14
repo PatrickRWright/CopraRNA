@@ -80,6 +80,52 @@ if(length(args)>0){
 	}
 }
 top<-as.numeric(top)
+#####################
+for(i in 1:nrow(int_opt)){
+		peaks1<-peaks[[i]]
+		exist<-which(homologs[i,]!="")
+		if(length(exist)>0){
+			int_o[i,exist]<-0
+		}
+		temp1<-na.omit(unique(c(int_opt[i,])))
+		temp2<-na.omit(unique(c(int_sub[i,])))
+		temp<-unique(sort(c(temp1,temp2)))
+		
+		ooi_peak<-int_opt[i,ooi_pos]
+		
+		if(is.na(ooi_peak)==F){
+			ooi_p2<-grep(ooi_peak,peaks1)
+			peaks1<-c(peaks1[ooi_p2],peaks1[-ooi_p2])
+			
+		}
+		le<-length(temp)
+		if(length(peaks1)>0){
+			colo3<-c()
+			for(j in 1:length(peaks1)){
+				fc <- colorRampPalette(c(colo[j], colo2[j]))
+				tmp<-fc(length(peaks1[[j]]))
+				names(tmp)<-peaks1[[j]]
+				colo3<-c(colo3,tmp)
+			}
+			no_ex<-which(is.element(colo3, names(color_vect))==F)
+			if(length(no_ex)>0){
+				tmp<-(max(color_vect)+1):(max(color_vect)+length(no_ex))
+				names(tmp)<-colo3[no_ex]
+				color_vect<-c(color_vect,tmp)
+			}
+			for(j in 1:le){
+				tmp<-match(temp[j],names(colo3))
+				tmp<-match(colo3[tmp],names(color_vect))
+				tmp<-color_vect[tmp]
+				pos<-which(int_opt[i,]==temp[j])
+				
+				int_o[i,pos]<-tmp
+				pos<-which(int_sub[i,]==temp[j])
+				int_s[i,pos]<-tmp
+			}
+		}
+	}
+################################	
 
 # function to create alignment annotation files for alignment drawing/visualization with jalview
 jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name="srna", type="png"){
@@ -710,6 +756,8 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 		if(length(fasta_temp2)>1){
 			tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
+			tempfi<-tempfile()
+			tempfi2<-tempfile()
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
 			# avoid massive information output of dialign-tx (> /dev/null)
 			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
@@ -1294,6 +1342,14 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				if(length(test[[3]])>0){
 					# if a peak overlaps with another peak and both peaks are assigned to the same interaction site, the smaller peak is assigned a subpeak of the larger peak
 					peaks1<-condense_peak2(test)
+					ooi_peak<-test[[1]][1,"cluster_id"]
+					ooi_peak<-gsub("\\|.*","",ooi_peak)
+					if(is.na(ooi_peak)==F){
+						ooi_p2<-grep(ooi_peak,peaks1)
+						peaks1<-c(peaks1[ooi_p2],peaks1[-ooi_p2])
+						
+					}
+					
 				}
 				tab_aligned<-as.matrix(test[[1]])
 				tabsub_aligned<-as.matrix(test[[2]])
