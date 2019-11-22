@@ -1,0 +1,24 @@
+---
+title: "CopraRNA result"
+author: 
+ - 
+ - Georg RNA-Lab / Freiburg Bioinformatics Group / Cyanolab
+date: "`r format(Sys.time(), '%d %B %Y')`" 
+output:
+  html_document:
+    theme: yeti
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(DT)
+```
+
+
+# {.tabset .tabset-fade .tabset-pills}
+
+
+
+
+
