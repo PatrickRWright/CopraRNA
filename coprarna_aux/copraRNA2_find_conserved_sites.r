@@ -12,7 +12,7 @@
 ### jalview_props.txt
 
 #call:
-# R --slave -f ./copraRNA2_find_conserved_sites.r 
+#R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r 
 
 
 suppressPackageStartupMessages(require(phangorn))
@@ -1295,8 +1295,11 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					# if a peak overlaps with another peak and both peaks are assigned to the same interaction site, the smaller peak is assigned a subpeak of the larger peak
 					peaks1<-condense_peak2(test)
 					ooi_peak<-test[[1]][1,"cluster_id"]
+					if(ooi_peak=="NA"){
+						ooi_peak<-test[[2]][1,"cluster_id"]
+					}
 					ooi_peak<-gsub("\\|.*","",ooi_peak)
-					if(is.na(ooi_peak)==F){
+					if(ooi_peak!="NA"){
 						ooi_p2<-grep(ooi_peak,peaks1)
 						peaks1<-c(peaks1[ooi_p2],peaks1[-ooi_p2])
 						

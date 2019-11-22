@@ -1,4 +1,4 @@
-name: CopraRNA2-deps
+name: CopraRNA2
 
 channels:
   - bioconda
@@ -42,9 +42,9 @@ dependencies:
   - r-phangorn
   - bioconductor-complexheatmap
   - r-domc
-  - r-kableextra
   - r-knitr
   - r-rmarkdown
+  - r-dt
       
   - python
   - suds-jurko

@@ -31,9 +31,12 @@ numMax<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 # ensure number does not exceed available data
 num <- min(numMax, nrow(dat))
 
+#bibliography
+bib<-paste0(path,"bibliography.bib")
+
 
 # markdown template path
-markdown<-paste(path,"mardown_template.Rmd",sep="")
+markdown<-paste(path,"markdown_template.Rmd",sep="")
 
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
@@ -65,6 +68,7 @@ interactions<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num, outn
 	selection_name2<-gsub("\\|.*","",dat[1:number,match(ooi, colnames(dat))])
 	selection_name2<-gsub(".*\\(","",selection_name2)
 	selection_name<-paste(selection_name2,selection_name1,sep="_")
+	selection_name<-gsub("N/A","NA",selection_name)
 	
 	for(ji in 1:number){
 		temp<-dat[ji,4:(e-1)]
@@ -188,11 +192,19 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 
 	ma<-readLines(markdown)
+	
+	opt<-readLines("CopraRNA_option_file.txt")
+	ver<-grep("version:", opt)
+	ver<-gsub("version:","", opt[ver])
+	ver<-paste0("Version: ",ver)
+	ma<-append(ma,ver, after=6)	
 	tab<-read.csv(inpfile, sep=",")
 	selection_name1<-gsub("\\(.*","",dat[1:number,match(ooi, colnames(dat))])
 	selection_name2<-gsub("\\|.*","",dat[1:number,match(ooi, colnames(dat))])
 	selection_name2<-gsub(".*\\(","",selection_name2)
 	selection<-paste(selection_name2,selection_name1,sep="_")
+	
+	selection<-gsub("N/A","NA",selection)
 	copref<-read.delim(copref_path, sep="\t", header=T,comment.char = "#")	
 	tab<-as.matrix(tab)
 	e<-grep("Annotation", colnames(dat))
@@ -212,13 +224,13 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 		}
 		nam2<-c(nam2,temp)
 	}
-
+	
 	orgs<-colnames(dat)[4:(e-1)]
 	tabs<-vector("list",length(orgs))
 	names(tabs)<-orgs
 	nam2<-paste(nam2,orgs,sep="_")
 	Annotation<-tab[1:number,e]
-	
+	ooi_nam<-paste(nam[1],orgs[1])
 	for(i in 1:length(orgs)){
 		tab2<-tab[1:number,orgs[i]]
 		tab2<-gsub("\\(","\\|",tab2)
@@ -233,7 +245,8 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 		tab2<-gsub("GeneID:","",tab2)
 		
 		tab3<-cbind(1:number,tab[1:number,c(1,2)],tab2, Annotation)
-		colnames(tab3)<-c("Rank","CopraRNA_FDR","CopraRNA_p-value","Locus_tag","Gene_name","Energy","IntaRNA_p-value","start_mRNA","end_mRNA","start_sRNA","end_sRNA","GeneID","Annotation")
+		colnames(tab3)<-c("#","FDR","pVal.","Locus_tag","Name","Energy","Int.pVal.","st","en","start_sRNA","end_sRNA","GeneID","Annotation")
+		tab3<-tab3[,-c(10,11,12)]
 		tabs[[i]]<-tab3
 	}
 	
@@ -262,7 +275,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	if(file.exists(enrich1)){
 		enrich<- paste0("[Functional enrichment](",enrich1,"){target='_blank'}")
-		enrich2<- paste0("![Functional enrichment](",enrich1,"#zoom=75){width=100% height=600}")
+		enrich2<- paste0("<object data='",enrich1,"#zoom=75' type='application/pdf' width='100%' height='600'><embed src='",enrich1,"#zoom=75' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
 	} else{
 		enrich<-""
 		enrich2<-""
@@ -270,7 +283,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	if(file.exists(mrna_reg1)){
 		mrna_reg<-paste0("[mRNA regions plot](",mrna_reg1,"){target='_blank'}")
-		mrna_reg2<-paste0("![mRNA regions plot](",mrna_reg1,"){width=100% height=600}")
+		mrna_reg2<-paste0("<object data='",mrna_reg1,"' type='application/pdf' width='100%' height='600'><embed src='",mrna_reg1,"#' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
 	} else{
 		mrna_reg<-""
 		mrna_reg2<-""
@@ -278,7 +291,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	if(file.exists(srna_reg1)){
 		srna_reg<-paste0("[sRNA regions plot](",srna_reg1,"){target='_blank'}")
-		srna_reg2<-paste0("![sRNA regions plot](",srna_reg1,"){width=100% height=600}")
+		srna_reg2<-paste0("<object data='",srna_reg1,"' type='application/pdf' width='100%' height='600'><embed src='",srna_reg1,"#' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
 	} else{
 		srna_reg<-""
 		srna_reg2<-""
@@ -286,34 +299,43 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	if(file.exists(cons1)){
 		cons<-paste0("[Phylogenetic target conservation](",cons1,"){target='_blank'}")
-		cons2<-paste0("![Phylogenetic target conservation](",cons1,"){width=100% height=600}")
+		cons2<-paste0("<object data='",cons1,"' type='application/pdf' width='100%' height='600'><embed src='",cons1,"#' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
 	} else{
 		cons<-""
 		cons2<-""
 	}
 	
 
-	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons,"\n",cons2,"\n","### Functional enrichment",enrich,"\n",enrich2,"\n","### mRNA regions plots",mrna_reg,"\n",mrna_reg2,"\n","### sRNA regions plots",srna_reg,"\n",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
+
+	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### Functional enrichment",enrich2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
 	
 	prefix<-paste("```{r,echo=F}","wd<-getwd()",sep="\n")
-	suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")
+	#suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")
+	suffix<-paste("datatable(tab, escape = FALSE,rownames= FALSE, extensions = 'FixedHeader',options = list(fixedHeader = TRUE),class = 'cell-border stripe',width='100%')","  ```"," ",sep="\n")
 	aux2<-c("tab<-read.csv(",aux,",sep=',')")
 	
+	
+	#<a href="http://rstudio.com">RStudio</a>
 	ma<-c(ma,prefix,aux2,suffix)
 	ints<-paste("./evo_alignments2/",selection,"/interactions.html",sep="")
-	ints<- paste0("[interaction](",ints,"){target='_blank'}")
+	#ints<- paste0("[interaction](",ints,"){target='_blank'}")
+	ints<- paste0("<a href='",ints,"' target='popup' onclick=\"window.open('",ints,"','popup','width=600,height=600'); return false;\">Interactions</a>")
 	d<-dir("./evo_alignments2")
 	na<-which(is.na(d[match(selection,d)]))
 	mrna<-paste("./evo_alignments2/",d[match(selection,d)],"/",d[match(selection,d)],"_mRNA.PNG",sep="")
-	mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
+	#mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
+	mrna<-paste0("<a href='",mrna,"' target='popup' onclick=\"window.open('",mrna,"','popup','width=600,height=600'); return false;\">mRNA_alignment</a>")
 	srna<-paste("./evo_alignments2/",d[match(selection,d)],"/",d[match(selection,d)],"_sRNA.PNG",sep="")
-	srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
+	#srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
+	srna<-paste0("<a href='",srna,"' target='popup' onclick=\"window.open('",srna,"','popup','width=600,height=600'); return false;\">sRNA_alignment</a>")
 
 	heat<-paste("./evo_alignments2/",selection,"/",selection,"_conservation_heatmap.pdf",sep="")
 	#heat<-paste("./heatmaps/",selection,".pdf",sep="")
-	heat<- paste0("[conservation](",heat,"){target='_blank'}")
+	#heat<- paste0("[conservation](",heat,"){target='_blank'}")
+	heat<- paste0("<a href='",heat,"' target='popup' onclick=\"window.open('",heat,"','popup','width=600,height=600'); return false;\">conservation</a>")
 	probcons<-paste("./evo_alignments2/",selection,"/spot_probabilities.png",sep="")
-	probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
+	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
+	probcons<- paste0("<a href='",probcons,"' target='popup' onclick=\"window.open('",probcons,"','popup','width=600,height=600'); return false;\">conserved_peaks</a>")
 	#Links<-paste(heat,mrna,srna,ints, sep=", ")
 	Links<-paste(heat,mrna, srna,ints,probcons, sep=", ")
 	
@@ -325,23 +347,42 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	
 	tab<-cbind(tabs[[1]][,1], Links,tabs[[1]][,2:ncol(tabs[[1]])])
-	colnames(tab)[1]<-"Rank"
+	colnames(tab)[1]<-" "
 	write.table(tab, file=paste(ind_tables,"/",names(tabs)[1],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
 	tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[1],".txt'",sep="")
-	tmp<-c("tab<-read.csv(",tmp,",sep='\\t')")
-	ma<-c(ma,"\n", paste("## Prediction organisms of interest",paste("### ", nam2[1],sep=""),sep="\n"),prefix,tmp,suffix, "## Predictions other organisms {.tabset .tabset-fade .tabset-pills}")
+	tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,4]<-formatC(as.numeric(tab[,4]), format = 'e', digits = 2)", "\n","tab[,8]<-formatC(as.numeric(tab[,8]), format = 'e', digits = 2)" )
+	ma<-c(ma,"\n", paste("## Prediction organisms of interest",paste("### ", ooi_nam,sep=""),sep="\n"),prefix,tmp,suffix, "## Predictions other organisms {.tabset .tabset-fade .tabset-pills}")
 	
 	if(length(tabs)>1){
 		for(i in 2:length(tabs)){
 			tab<-cbind(tabs[[i]][,1], Links,tabs[[i]][,2:ncol(tabs[[i]])])
-			colnames(tab)[1]<-"Rank"
+			colnames(tab)[1]<-" "
 			write.table(tab, file=paste(ind_tables,"/",names(tabs)[i],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
 			tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[i],".txt'",sep="")
-			tmp<-c("tab<-read.csv(",tmp,",sep='\\t')")
+			tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,4]<-formatC(as.numeric(tab[,4]), format = 'e', digits = 2)", "\n","tab[,8]<-formatC(as.numeric(tab[,8]), format = 'e', digits = 2)" )
 			ma<-c(ma,"\n", paste("### ", nam2[i],sep=""),prefix,tmp,suffix)
 		}
 	}
+	ma<-c(ma, "## When using CopraRNA please cite:
 	
+				<font size='-1'>
+				
+				Patrick R. Wright, Andreas S. Richter, Kai Papenfort, Martin Mann, Joerg Vogel, Wolfgang R. Hess, Rolf Backofen and Jens Georg  
+				[Comparative genomics boosts target prediction for bacterial small RNAs](https://www.pnas.org/content/110/37/E3487){target='_blank'}  
+				Proc Natl Acad Sci USA, 2013, 110 (37), E3487-E3496.
+
+				Patrick R. Wright, Jens Georg, Martin Mann, Dragos A. Sorescu, Andreas S. Richter, Steffen Lott, Robert Kleinkauf, Wolfgang R. Hess, and Rolf Backofen  
+				[CopraRNA and IntaRNA: predicting small RNA targets, networks and interaction domains](https://academic.oup.com/nar/article/42/W1/W119/2435325){target='_blank'}  
+				Nucleic Acids Research, 2014, 42 (W1), W119-W123.
+
+				Martin Raden, Syed M Ali, Omer S Alkhnbashi, Anke Busch, Fabrizio Costa, Jason A Davis, Florian Eggenhofer, Rick Gelhausen, Jens Georg, Steffen Heyne, Michael Hiller, Kousik Kundu, Robert Kleinkauf, Steffen C Lott, Mostafa M Mohamed, Alexander Mattheis, Milad Miladi, Andreas S Richter, Sebastian Will, Joachim Wolff, Patrick R Wright, and Rolf Backofen  
+				[Freiburg RNA tools: a central online resource for RNA-focused research and teaching](https://academic.oup.com/nar/article/46/W1/W25/5000013){target='_blank'}  
+				Nucleic Acids Research, 46(W1), W25-W29, 2018.
+
+				</font>"
+		)
+	
+	ma<-c(ma,"\n", "## CopraRNA parameter", "\n", paste(opt,"\n",sep=""))
 	writeLines(ma, con = "markdown_final.Rmd", sep = "\n", useBytes = FALSE)
 	rmarkdown::render("./markdown_final.Rmd",output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
 }
@@ -349,3 +390,15 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 interactions()	
 jalview()
 html_table()
+
+
+
+
+
+
+
+
+
+
+
+

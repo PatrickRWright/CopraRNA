@@ -401,6 +401,7 @@ selection<-na.omit(selection)
 
 
 gene_anno<-c()
+gene_anno2<-c()
 evo_analysis<-as.matrix(evo_analysis)
 for(i in 1:length(selection)){
 	co<-grep(genelist[i],evo_analysis[selection[i],])
@@ -410,15 +411,18 @@ for(i in 1:length(selection)){
 		genename<-gsub(".*\\(","",as.character(temp))
 		genename<-gsub("\\|.*", "", genename)
 		genename<-gsub("\\/", "", genename)
+		genename2<-genename
 		if(length(genename)==1 && genename[1]=="NA" ){
 			genename<-evo_analysis[selection[i], "Annotation"]
 			genename<-substr(genename,1,min(nchar(genename),20))
 		}
 		na<-paste(genename, locus_tag,sep="_")
+		na2<-paste(genename2, locus_tag,sep="_")
 	} else{
 		na<-selection[i]
 	}
 	gene_anno<-c(gene_anno, na)
+	gene_anno2<-c(gene_anno2, na2)
 }
 
 l<-2
@@ -602,8 +606,8 @@ for(jj in 1:length(selection)){
 	s<-match(min(int_sub2),se)
 	e<-match(max(int_sub2),se)
 	my_palette4<-my_palette2[s:e]
-	na3<-paste("./evo_alignments2/",row.names(int_opt)[jj],"/",row.names(int_opt)[jj],"_conservation_heatmap.pdf",sep="")
-	if(file.exists(paste("./evo_alignments2/",row.names(int_opt)[jj],"/",sep=""))){
+	na3<-paste("./evo_alignments2/",gene_anno2[jj],"/",gene_anno2[jj],"_conservation_heatmap.pdf",sep="")
+	if(file.exists(paste("./evo_alignments2/",gene_anno2[jj],"/",sep=""))){
 		pdf(na3, width = 2.3+ncol(int_opt2)*0.2, height = 3.4+nrow(int_opt2)*0.2,useDingbats=F)
 		a<-Heatmap(	int_opt2,
 					col=my_palette3,
