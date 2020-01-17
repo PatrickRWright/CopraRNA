@@ -190,7 +190,7 @@ max_cores<-min(max_cores,length(mult))
 jobs<-length(mult)%/%max_cores
 rest<-length(mult)-max_cores*jobs
 jobs<-rep(jobs,max_cores)
-if(length(rest)>0){
+if(rest>0){
 	jobs[1:rest]<-jobs[1:rest]+1
 }
 
