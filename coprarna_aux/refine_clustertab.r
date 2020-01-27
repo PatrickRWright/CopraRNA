@@ -205,6 +205,9 @@ for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="Co
 # start parallel processing
 vari<-foreach(ji=1:max_cores)  %dopar% {
 	clus<-clus2[count_vect1[ji]:count_vect2[ji],]
+	if(is.vector(clus)){
+		clus<-t(as.matrix(clus))
+	}
 	out_clus<-vector("list",nrow(clus))
 	names(out_clus)<-clus[,1]
 	# check each cluster if re-clustering is neccessary (two or more genes of the ooi in one cluster) and perform re-clustering
