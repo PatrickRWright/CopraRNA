@@ -16,10 +16,14 @@ for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
     curr_line = CopraRNA_lines[i]
     split = curr_line.split(",")
     orgOfIntEntry = split[3]
-    if orgOfIntEntry:
+    if orgOfIntEntry and orgOfIntEntry.find(":") > -1:
         splitOrgOfInt = orgOfIntEntry.split(":")
         entrezID = splitOrgOfInt[1][:-1]
         backgroundList.append(entrezID)
+
+if not backgroundList:
+    print ("could not extract background geneIDs of organism of interest from "+CopraRNA_result);
+    sys.exit(-1);
 
 backgroundList = list(map(str,backgroundList))
 
