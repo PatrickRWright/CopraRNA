@@ -5,7 +5,7 @@
 ## Mafft
 
 #call:
-# R --slave -f ./copraRNA2_phylogenetic_sorting.r 
+# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_phylogenetic_sorting.r 
 
 suppressPackageStartupMessages(require(phangorn))
 suppressPackageStartupMessages(require(seqinr))
@@ -197,21 +197,23 @@ build_anno<-function(ooi="NC_000911"){
 	
 	#identify the column postion of the organism of interest (ooi) and exclude rows without a homolog from the ooi 
 	ooi_pos<-grep(ooi, colnames(dat))
-	ex<-which(dat[,ooi]!="")
+	#ex<-which(dat[,ooi]!="")
 	align_pos<-1:nrow(dat)
 	dat_old<-dat
-	dat<-dat[ex,]
-	align_pos<-ex
-	dat_all<-dat
+	#dat<-dat[ex,]
+	#align_pos<-ex
+	dat_all<-cbind(dat,align_pos)
 		
+	
 	# divide the data in subsets for parallel processing 
 	jobs<-nrow(dat)%/%max_cores
 	rest<-nrow(dat)-max_cores*jobs
 	jobs<-rep(jobs,max_cores)
-	jobs[1]<-jobs[1]+rest
+	if(rest>0){
+		jobs[1:rest]<-jobs[1:rest]+1
+	}
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
-
 	# generate a temp file per thread to prepare mafft input file
 	thread2tmpfile = c();
 	for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="CopraRNA2.phyloSort.")); }
@@ -224,7 +226,9 @@ build_anno<-function(ooi="NC_000911"){
 		order_table<-dat[,3:(e-1)]
 		colnames(order_table)<-colnames(dat)[3:(e-1)]
 		order_table[]<-NA
-			
+		positions<-dat[,"align_pos"]
+		order_table_list<-rep(list(order_table),length(all_orgs))
+		names(order_table_list)<-all_orgs
 		for(i in  1:nrow(dat)){
 			e<-grep("Annotation", colnames(dat))
 			temp<-dat[i,3:(e-1)]
@@ -251,35 +255,41 @@ build_anno<-function(ooi="NC_000911"){
 				datp<-as.DNAbin(alignment)
 				dis<-dist.dna(datp, model = "F81",pairwise.deletion = T)
 				dis<-as.matrix(dis)
-				ooip<-match(ooi, colnames(dis))
 				
-				if(is.na(ooip)==F){
-					ord<-sort(dis[,ooip],na.last=T)
-					ord[which(is.na(ord))]<-1
-					ord<-ord[2:length(ord)]
-					dup<-which(duplicated(ord))
+				for(jj in 1:length(orgs)){
+					ooip<-match(orgs[jj], colnames(dis))
 					
-					order_table[i,match(names(sort(dis[,ooip],na.last=T)), colnames(order_table))]<-seq(1,nrow(dis))
-					order_table[i,ooi]<-1
-					while(length(dup)>0){
+					if(is.na(ooip)==F){
+						ord<-sort(dis[,ooip],na.last=T)
+						ord[which(is.na(ord))]<-1
+						ord<-ord[2:length(ord)]
+						dup<-which(duplicated(ord))
 						
-						tmp<-which(ord==ord[dup[1]])
-						tmpd<-which(ord[dup]==ord[dup[1]])
-						tmp2<-as.numeric(tab[match(names(tmp), tab[,"orgs"]),"pvalue"])
-						names(tmp2)<-names(tmp)
-						tmp2<-sort(tmp2)
-						st<-min(as.numeric(order_table[i,match(names(tmp2),colnames(order_table))]))
-						tmp3<-match(names(tmp2), colnames(order_table))
-						order_table[i,tmp3]<-seq(st,length(tmp3)+st-1)
-						
-						dup<-dup[-tmpd]
+						order_table_list[[orgs[jj]]][i,match(names(sort(dis[,ooip],na.last=T)), colnames(order_table_list[[jj]]))]<-seq(1,nrow(dis))
+						order_table_list[[orgs[jj]]][i,orgs[jj]]<-1
+						while(length(dup)>0){
+							
+							tmp<-which(ord==ord[dup[1]])
+							tmpd<-which(ord[dup]==ord[dup[1]])
+							tmp2<-as.numeric(tab[match(names(tmp), tab[,"orgs"]),"pvalue"])
+							names(tmp2)<-names(tmp)
+							tmp2<-sort(tmp2)
+							st<-min(as.numeric(order_table_list[[orgs[jj]]][i,match(names(tmp2),colnames(order_table_list[[orgs[jj]]]))]), na.rm=T)
+							tmp3<-match(names(tmp2), colnames(order_table_list[[jj]]))
+							order_table_list[[orgs[jj]]][i,tmp3]<-seq(st,length(tmp3)+st-1)
+							
+							dup<-dup[-tmpd]
+						}
 					}
+					
 				}
 			}
 		}
 		
-		row.names(order_table)<-dat[,ooi_pos]
-		temp_out<-order_table
+		for(jj in 1:length(order_table_list)){
+			row.names(order_table_list[[jj]])<-positions
+		}
+		temp_out<-order_table_list
 		temp_out
 	}
 
@@ -287,14 +297,24 @@ build_anno<-function(ooi="NC_000911"){
 	file.remove(thread2tmpfile); 
 
 	dat<-dat_old
+	dat<-cbind(dat,align_pos)
 	order_table<-dat[,3:(e-1)]
 	colnames(order_table)<-colnames(dat)[3:(e-1)]
 	order_table[]<-NA
+	order_table_list<-rep(list(order_table),length(all_orgs))
 	for(i in 1:length(vari)){
-		tmp<-match(rownames(vari[[i]]),dat[,3])
-		order_table[tmp,]<-vari[[i]]
+		for(ii in 1:length(vari[[i]])){
+			tmp<-match(rownames(vari[[i]][[ii]]),dat[,"align_pos"])
+			tmp2<-match(colnames(vari[[i]][[ii]]), colnames(order_table))
+			order_table_list[[ii]][tmp,tmp2]<-vari[[i]][[ii]]
+		}
 	}
-	save(order_table, file="order_table_all.Rdata")
+	order_table<-order_table_list
+	names(order_table)<-colnames(dat_old)[3:(e-1)]
+	order_table_all_orgs<-order_table
+	save(order_table_all_orgs, file="order_table_all_orgs.Rdata")
+	
+	
 }
 
 build_anno(ooi=ooi)
