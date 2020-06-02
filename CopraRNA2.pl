@@ -1,8 +1,6 @@
 #!/usr/bin/env perl
-
 use strict;
 use warnings;
-
 use Getopt::Long;
 use Cwd 'abs_path';
 
@@ -138,6 +136,7 @@ my $enrich = 0; ## functional enrichment needs to be specifically turned on
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
 my $temperature = 37; # temperature for prediction
+my $intarnaParamFile = "NA";
 
 # get absolute path
 my $ABS_PATH = abs_path($0);
@@ -168,6 +167,7 @@ GetOptions (
     'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
     'temperature:f'		=> \$temperature,
     'genomePath:s'		=> \$genomePath,
+    'intarnaOptions:s'		=> \$intarnaParamFile
 );
 
 if ($help) {
@@ -329,6 +329,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
     print WRITETOOPTIONS "genomePath:$genomePath\n";
 	print WRITETOOPTIONS "temperature:$temperature\n";
+    print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
 close WRITETOOPTIONS;
 # end write options
 
@@ -342,6 +343,14 @@ $sRNAs_fasta = "input_sRNA.fa";
 system $PATH_COPRA . "coprarna_aux/format_fasta.pl $sRNAs_fasta" . " > $sRNAs_fasta.temp";
 system "mv $sRNAs_fasta.temp $sRNAs_fasta";
 
+# defining intarna options
+if($intarnaParamFile ne 'NA') {
+    $intarnaParamFile = `readlink -f $intarnaParamFile`;
+} else {
+    $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
+}
+chomp $intarnaParamFile;
+
 # build RefSeq input based on the sRNA input fasta (can only contain refseq IDs in header)
 my $RefSeqIds = `grep '>' $sRNAs_fasta | sed 's/>//g' | tr '\n' ' '`;
 
@@ -354,8 +363,10 @@ if ($verbose) {
     print "\nOrganism of interest: $full_ooi\n\n";
 }
 
-my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+# my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
+my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA3.pl $sRNAs_fasta $upstream $downstream $region $core_count $intarnaParamFile $RefSeqIds";
 print $homology_intaRNA_call . "\n" if ($verbose);
+
 my $homology_intaRNA_exitStatus = system $homology_intaRNA_call;
 $homology_intaRNA_exitStatus /= 256; # get original exit value
 # check exit status
