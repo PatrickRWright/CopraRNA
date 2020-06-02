@@ -329,10 +329,12 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	#srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
 	srna<-paste0("<a href='",srna,"' target='popup' onclick=\"window.open('",srna,"','popup','width=600,height=600'); return false;\">sRNA_alignment</a>")
 
+	#heat<-paste("./evo_alignments2/",selection,"/tree.pdf",sep="")
 	heat<-paste("./evo_alignments2/",selection,"/",selection,"_conservation_heatmap.pdf",sep="")
 	#heat<-paste("./heatmaps/",selection,".pdf",sep="")
 	#heat<- paste0("[conservation](",heat,"){target='_blank'}")
 	heat<- paste0("<a href='",heat,"' target='popup' onclick=\"window.open('",heat,"','popup','width=600,height=600'); return false;\">conservation</a>")
+	#probcons<-paste("./evo_alignments2/",selection,"/", selection,".html",sep="")
 	probcons<-paste("./evo_alignments2/",selection,"/spot_probabilities.png",sep="")
 	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
 	probcons<- paste0("<a href='",probcons,"' target='popup' onclick=\"window.open('",probcons,"','popup','width=600,height=600'); return false;\">conserved_peaks</a>")
