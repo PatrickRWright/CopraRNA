@@ -1,14 +1,12 @@
 name: CopraRNA2
-
 channels:
   - bioconda
   - conda-forge
   - r
   - defaults
   - conda
-
+  - genomedk
 dependencies:
-
   - bzip2
   - gawk
   - sed
@@ -23,9 +21,7 @@ dependencies:
   - domclust
   - mafft
   - clustalo
-  
-  - intarna >=3.1.1
-  
+  - intarna >=3.1.5
   - perl
   - perl-list-moreutils
   - perl-parallel-forkmanager
@@ -35,7 +31,6 @@ dependencies:
   - perl-io-uncompress-gunzip 
   - perl-io-gzip 
   - perl-io-all
-  
   - r-base >=3.6.0
   - r-seqinr 
   - libopenblas
@@ -44,8 +39,10 @@ dependencies:
   - r-domc
   - r-knitr
   - r-rmarkdown
-  - r-dt
-      
+  - r-dt  
+  - r-ggplot2
+  - bioconductor-ggtree
+  - r-cowplot
+  - r-rgl
   - python
   - suds-jurko
-  
