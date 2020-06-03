@@ -1,7 +1,7 @@
 # script by Jens Georg
 
 #call:
-#R --slave -f /home/jens/CopraRNA-git/coprarna_aux/join_pvals_coprarna_2.r 
+#R --slave -f /home/jens/CopraRNA-git/coprarna_aux/join_pvals_coprarna_2.r --args ooi_only=FALSE prediction_on_subset=TRUE	outlier_removal=TRUE maxorgs=15	 
  
 #Dependencies:
 suppressPackageStartupMessages(require(phangorn))
@@ -17,13 +17,16 @@ name="result_all"
 mnum=40000
 weight_method<-"clustal"		# organism weights caluclated by the CopraRNA1 method (copra) or the ClustalW method (clustal)
 weight_tree<-"upgma"			# "ML" , "upgma"
+outlier_removal=TRUE			# Should p-value outliers be removed prior to p-value combination
 rholimit<-TRUE					# if TRUE rho can take only values between  0 and 1 even if the fit suggests higher rho values
 rho_weights<-2					# Controls if the fit for the dependency in the data should run on all data (rho_weights=1) or on the 1/x lowest p-Values (rho_weights=x).
 min_length<-2					# minimal number of homologs for combining a p_value
-ooi_only=TRUE					# prediction for all included organisms or only the ooi
-prediction_on_subset=FALSE		# Should the p-value combination be done on all organisms or on an optimized subsets. Only if ooi_only=FALSE. Requires to calculate the optimized subsets. 
-outlier_removal=FALSE			# Should p-value outliers be removed prior to p-value combination
-
+ooi_only=FALSE					# prediction for all included organisms or only the ooi
+prediction_on_subset=TRUE		# Should the p-value combination be done on all organisms or on an optimized subsets. Only if ooi_only=FALSE. Requires to calculate the optimized subsets. 
+# For organisms subset selection
+mindis=0						# minimal required distance to the respective ooi
+maxorgs=15						# number of selected organisms, if possible
+maxdis=0.5						# maximal allowed distance to the ooi to be considered
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
@@ -62,13 +65,16 @@ min_length<-as.numeric(min_length)
 prediction_on_subset<-as.logical(prediction_on_subset)
 ooi_only<-as.logical(ooi_only)
 outlier_removal<-as.logical(outlier_removal)
+mindis<-as.numeric(mindis)
+maxorgs<-as.numeric(maxorgs)
+maxdis<-as.numeric(maxdis)
 
 if(ooi_only==T){
 	prediction_on_all_orgs=FALSE
 }
 
 if(prediction_on_subset==T){
-	system(paste("R --slave -f ", path, "coprarna_selection_fast.r --args mindis=0 maxorgs=15 maxdis=0.5", sep=""))
+	system(paste("R --slave -f ", path, "coprarna_selection_fast.r --args mindis=",mindis," maxorgs=",maxorgs, " maxdis=",maxdis, sep=""))
 	load("orgs_selection.Rdata") 
 }
 

@@ -13,11 +13,16 @@
 
 #call:
 #R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r 
-
-
+#R --slave -f /home/jens/media/jens@margarita/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r
+#path="/home/jens/media/jens@margarita/CopraRNA-git/coprarna_aux/"
+#path="/home/jens/CopraRNA-git/coprarna_aux/"
 suppressPackageStartupMessages(require(phangorn))
 suppressPackageStartupMessages(require(seqinr))
 suppressPackageStartupMessages(require(doMC))
+suppressPackageStartupMessages(require(ggplot2))
+suppressPackageStartupMessages(require(ggtree))
+suppressPackageStartupMessages(require(cowplot))
+#suppressPackageStartupMessages(require(rgl))
 
 # get absolute path
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -28,6 +33,7 @@ path<-sub("copraRNA2_find_conserved_sites.r","",path)
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 dialign_conf<-paste(path,"dialign_conf/",sep="")
+par_file<-paste(path,"intarna_options.cfg",sep="")
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
@@ -42,12 +48,10 @@ top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 
 # IntaRNA parameters
 winsize<-as.numeric(gsub("win size:","",co[grep("win size:", co)]))
-
 maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
-
 maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
-
 temperature<-as.numeric(gsub("temperature:","",co[grep("temperature:", co)]))
+
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
 weight_method="clustal"
@@ -58,13 +62,6 @@ ribosomal_rna="16s_sequences.fa"
 
 # path to CopraRNA result file (in order to investigate the top predictions)
 copra_result<-"CopraRNA_result_all.csv"
-
-
-
-
-# perform Mafft alignment if not already present (default alignments are present)
-own_alignment=FALSE
-
 
 conservation_oois=ooi
 
@@ -82,7 +79,7 @@ if(length(args)>0){
 top<-as.numeric(top)
 
 # function to create alignment annotation files for alignment drawing/visualization with jalview
-jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name="srna", type="png"){
+jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name="srna", type="png", suboptimals=TRUE){
 	peaks_all<-test[[3]]
 	if(length(peaks_all)>0){
 		peaks<-unlist(lapply(peaks1, function(x){return(x[1])}))
@@ -120,7 +117,11 @@ jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation
 	}
 	anno_mRNA<-paste(peaks, "\t", colo3, sep="")
 	anno_sRNA<-anno_mRNA
-	tab<-rbind(tab_aligned,tabsub_aligned)
+	tab<-tab_aligned
+	if(suboptimals==T){
+		tab<-rbind(tab_aligned,tabsub_aligned)
+	}
+	
 	an<-match(tab[,"orgs"],all_orgs)
 	an<-nam2[an]
 	ntab<-paste(an,tab[,"name2"],tab[,"orgs"],sep="/")
@@ -278,7 +279,7 @@ seqle <- function(x,incr=1) {
        values = x[head(c(0L,i)+1L,-1L)]) 
 } 
 
-# extrat sub-alignment based on given alignment positions fro alignment in fasta format
+# extract sub-alignment based on given alignment positions from alignment in fasta format
 cutalign<-function(x,s,e){
 	x<-x[s:e]
 	x
@@ -473,8 +474,30 @@ check_length<-function(summ2, min_length=6){
 	out
 }
 
+# calculate relevance of peak based on probability landscape
+peak_rel<-function(summ2, align_table,posprobs,tab_comb, out_comb){
+	levs<-rep(NA,length(summ2))
+	sites<-unlist(lapply(out_comb,paste, collapse=","))
+	for(i in 1:length(summ2)){
+		cords<-as.numeric((strsplit(names(summ2)[i],split="_"))[[1]])
+		p<-grep(names(summ2)[i], sites)
+		p<-tab_comb[p,"orgs"]
+		tmp<-0
+		for(j in 1:length(p)){
+			tmp<-tmp+sum(posprobs[[p[j]]][cords[1]:cords[2],cords[3]:cords[4]])/((cords[2]-cords[1])*(cords[4]-cords[3]))
+		}
+		levs[i]<-tmp
+		
+	}
+	levs<-levs/sum(align_table)
+	levs<-levs/max(levs)
+	levs
+}
+
+
+
 # function to identify peaks and assign interactions to peaks
-peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_alignment2, min_thres=2, perc=0.1, min_length=6,eps=0.4,ooi=ooi, ooi_force=TRUE, posprobs=posprobs)	{
+peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_alignment2,perc2=0.05, min_thres=0.2, perc=0.03, min_length=6,eps=0.55,ooi=ooi, ooi_force=TRUE, posprobs=posprobs)	{
 	fun3<-function(x, se="|"){
 		if(is.null(x[1])==FALSE & is.na(x[1])==F){
 			y<-strsplit(x,"_")
@@ -488,7 +511,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 		x
 	}
 	o<-nrow(tab_aligned)
-	thres<-max(2, nrow(tab_aligned)*0.1)
+	thres<-max(2, nrow(tab_aligned)*perc2)
 	peaks<-c()
 	summ2<-c()
 	tab_aligned2<-tab_aligned
@@ -498,6 +521,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 	tabsub_aligned2[,"name"]<-paste(tabsub_aligned[,"name"],"sub",sep="_")
 	con<-contourLines(x=1:nrow(align_table),y=1:ncol(align_table),z=align_table)#, levels=perc)
 	if(length(con)>0){
+		#identify peaks in probability landscape
 		peaks<-list()
 		for(i in 1:length(con)){
 			m<-c(min(con[[i]][[2]]),max(con[[i]][[2]]))
@@ -508,16 +532,20 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 			}
 		}
 		if(length(peaks)>0){
+			# condense peaks that largely overlap into one peak
 			peaks<-condense_peak(peaks,ov=20)
-		
+			
+			# pre-assign interaction sites to peaks defined by the site probability landscape
 			out_opt<-assign_int3(peaks,tab_aligned, alignment,sRNA_alignment2, ov_thres=0.3 )
 			out_sub<-list()
 			if(nrow(tabsub_aligned)>0){
 				out_sub<-assign_int3(peaks,tabsub_aligned, alignment,sRNA_alignment2, ov_thres=0.3 )
 			}
+			#peak_rel<-function(summ2, align_table,posprobs,tab_comb, out_comb){
 			out<-c(unlist(out_opt),unlist(out_sub))
 			summ<-table(out)
-			summ2<-names(summ)[which(summ>=thres)]
+			levs<-peak_rel(summ, align_table,posprobs,rbind(tab_aligned2,tabsub_aligned2), c(out_opt,out_sub))
+			summ2<-names(summ)[which(levs>=perc & summ >= thres) ]
 			if(length(summ2)>0){
 				peaks<-lapply(summ2,function(x){return(as.numeric(strsplit(x,"_")[[1]]))})
 				out_opt<-assign_int3(peaks,tab_aligned, alignment,sRNA_alignment2, ov_thres=0.3 )
@@ -527,7 +555,8 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 				}
 				out<-c(unlist(out_opt),unlist(out_sub))
 				summ<-table(out)
-				summ2<-names(summ)[which(summ>=thres)]
+				levs<-peak_rel(summ, align_table,posprobs,rbind(tab_aligned2,tabsub_aligned2), c(out_opt,out_sub))
+				summ2<-names(summ)[which(levs>=perc & summ >= thres)]
 				if(length(summ2)>0){				
 					out_opt<-lapply(out_opt, function(x){
 							tmp<-na.omit(match(summ2,x ))
@@ -552,14 +581,20 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 					out_comb<-c(out_opt,out_sub)
 					tab_comb<-rbind(tab_aligned2,tabsub_aligned2)
 					if(length(out_comb)>0){
+						# function to modify the borders of conserved interaction sites based interactions assigned to the site
+						# uses longest and shortes interaction to define borders	
 						out_comb<-refine_site(out_comb, tab_comb)
 					}
 					summ2<-na.omit(unique(unlist(out_comb)))
+					# identify peaks that are wider than the min_length
 					summ2<-check_length(summ2, min_length=min_length)
 					out_comb_old<-1
 					count<-1
+					
+					
 					while(identical(out_comb_old,out_comb)==F & length(summ2)>0){
 						out_comb_old<-out_comb
+						#compare interaction sites that are assigned to a peak in the site probability landscape based on positional overlap and sequence identity for mRNA and sRNA 
 						out_comb<-comb_peaks3(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=2, eps=eps)
 						nu<-which(unlist(lapply(out_comb,is.null)))
 						if(length(nu)<length(out_comb)){
@@ -567,7 +602,8 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 							out_comb<-refine_consensus_site(out_comb, tab_comb, posprobs=posprobs, thres_m=0.2, thres_s=0.5)
 						}	
 						summ2<-table(unlist(out_comb))
-						summ2<-names(summ2)[which(summ2>=thres)]
+						levs<-peak_rel(summ2, align_table,posprobs,tab_comb, out_comb)
+						summ2<-names(summ2)[which(levs>=0.01 & summ2 >= thres)]
 						summ2<-check_length(summ2, min_length=min_length)
 						if(length(summ2)>0){
 							out_comb<-lapply(out_comb, function(x){
@@ -588,7 +624,7 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 							summ2<-names(summ2)
 							summ2<-check_length(summ2, min_length=min_length)
 							if(length(summ2)>0){
-								out_comb<-assign_int_fin(summ2, out_comb,tab_comb, alignment,sRNA_alignment2, ov_thres=0.60, ov_thres2=0.45)
+								out_comb<-assign_int_fin(summ2, out_comb,tab_comb, alignment,sRNA_alignment2, ov_thres=0.50, ov_thres2=0.45)
 								summ2<-names(table(unlist(out_comb)))
 								summ2<-check_length(summ2, min_length=min_length)
 							}
@@ -742,10 +778,11 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 					a_i<-match(tab_comb[cands[i],"name2"],names(fasta_temp))
 					for(j in i:length(cands)){
 						if(i!=j){
+					
 							a_j<-match(tab_comb[cands[j],"name2"],names(fasta_temp))
-							a<-as.numeric(strsplit(tab_comb[cands[i],"int_mrna"],",")[[1]])
+							a<-as.numeric(strsplit(unlist(tab_comb[cands[i],"int_mrna"]),",")[[1]])
 							a<-a-s+1
-							as<-as.numeric(strsplit(tab_comb[cands[i],"int_srna"],",")[[1]])
+							as<-as.numeric(strsplit(unlist(tab_comb[cands[i],"int_srna"]),",")[[1]])
 							as<-as-s2+1
 							ga<-which(fasta_temp[[a_i]]!="-")
 							a<-match(a,ga)
@@ -762,9 +799,9 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 								temp<-temp[-na]
 							}
 							b<-a
-							a<-as.numeric(strsplit(tab_comb[cands[j],"int_mrna"],",")[[1]])
+							a<-as.numeric(strsplit(unlist(tab_comb[cands[j],"int_mrna"]),",")[[1]])
 							a<-a-s+1
-							as<-as.numeric(strsplit(tab_comb[cands[j],"int_srna"],",")[[1]])
+							as<-as.numeric(strsplit(unlist(tab_comb[cands[j],"int_srna"]),",")[[1]])
 							as<-as-s2+1
 							ga<-which(fasta_temp[[a_j]]!="-")
 							a<-match(a,ga)
@@ -801,7 +838,7 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 						}
 					}
 				}
-				m<-(m*m_id)**0.5  # geometric mean between positional overlap and sequence identity
+				m<-((m**1)*(m_id**2))**(1/3)  # weighted geometric mean between positional overlap and sequence identity, identity has the weight 2
 				m<-1-m # similarity to distance
 				diag(m)<-0
 				clus<-cluster(m, eps=eps,minpts=minpts)
@@ -1012,14 +1049,468 @@ parse_fasta<-function(x){
 	seqs
 }
 
-#mafft("16s_sequences.fa", outname="16s_sequences_mafft_align.fas", mode="accurate")
-ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
-dm <- dist.ml(ribo, model="F81")
-tree_rib<- NJ(dm)
+
+
+#phylogentic tree with peak annotation
+peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name="srna",fit2, type="png",na3=na3){
+
+
+	dat2<-read.FASTA(paste(na3,"/",tab_aligned[1,"name"],"_mRNA_alignment.fasta",sep=""),type="DNA")
+	dat<-as.phyDat(dat2)
+	dm2<-dist.dna(dat2, model = "F81")
+	#dm2 <- dist.ml(dat2, model="F81")
+	treeNJ2<-"a"
+	tryCatch({
+		treeNJ2 <- njs(dm2)
+	}, error = function(e) {
+    print("e")})
+	
+	if(treeNJ2=="a"){
+		return()
+	}
+	#fitStart2 = pml(treeNJ2, dat, k=4)
+	#fitJC2 = optim.pml(fitStart2, model="GTR", optGamma=T, rearrangement="stochastic",ratchet.par = list(iter = 5L, maxit = 20L, prop = 1/3),control = pml.control(epsilon = 1e-08, maxit = 10,
+	#trace = 1L))
+	
+	nu<-which(treeNJ2[[2]]<0)
+	if(length(nu)>0){
+		treeNJ2[[2]][nu]<-0
+	}
+	fit4<-treeNJ2
+	fit4$tip.label<-gsub(".*/","",fit4$tip.label)
+	
+	peaks_all<-test[[3]]
+	if(length(peaks_all)>0){
+		peaks<-unlist(lapply(peaks1, function(x){return(x[1])}))
+		peaks<-sort(peaks)
+		tab_aligned[,"cluster_id"]<-unlist(lapply(tab_aligned[,"cluster_id"] ,function(x){return(strsplit(as.character(x), split="\\|")[[1]][1])}))
+		tabsub_aligned[,"cluster_id"]<-unlist(lapply(tabsub_aligned[,"cluster_id"] ,function(x){return(strsplit(as.character(x), split="\\|")[[1]][1])}))
+		colo2<-c("#caff70","#7aa9df","#cf97bb" ,"#fede7e","#fc9187","#d3648f","#4c9998","#988377","#576e81","#9fe1e5")
+		colo<-c("#799943","#5680b0","#9c6488","#e4c054","#e26a5f","#b43768","#006362","#614736","#294258","#77b1b5")
+		colo3<-c()
+		for(i in 1:length(peaks1)){
+			fc <- colorRampPalette(c(colo[i], colo2[i]))
+			tmp<-fc(length(peaks1[[i]]))
+			names(tmp)<-peaks1[[i]]
+			colo3<-c(colo3,tmp)
+		}
+		colo3<-c(colo3,"#b0b0b0")
+		names(colo3)[length(colo3)]<-"not_conserved"
+		peaks<-names(colo3)
+	} else {
+		peaks<-"not_conserved"
+		colo3<-"#b0b0b0"
+		names(colo3)<-"not_conserved"
+	}
+	ooi_pos<-grep(ooi[1], tab_aligned[,"orgs"])
+	if(length(ooi_pos)>0){
+		ooi_int<-as.character(tab_aligned[ooi_pos,"cluster_id"])
+		peaks<-unlist(unique(c(ooi_int,peaks)))
+		colo4<-colo3
+		colo3<-gsub("#","",unique(c(colo3[ooi_int],colo3)))
+	}
+	na<-which(is.na(peaks))
+	if(length(na)>0){
+		peaks<-peaks[-na]
+		colo3<-colo3[-na]
+	}
+	colo3<-paste("#",colo3, sep="")
+	#fit2<-(fitJC$tree)
+	#fit3<-fit2
+	
+	
+	peak_mat<-matrix(,length(all_orgs),length(peaks))
+	peak_mat2<-peak_mat
+	#peak_mat[]<-0
+	for(i in 1:length(peaks)){
+		tmp<-grep(peaks[i],tab_aligned[,"cluster_id"])
+		tmp2<-grep(peaks[i],tabsub_aligned[,"cluster_id"])
+		if(length(tmp)>0){
+			tmp<-tab_aligned[tmp,"orgs"]
+		}
+		if(length(tmp2)>0){
+			tmp2<-tabsub_aligned[tmp2,"orgs"]
+		}
+		#tmp<-c(tmp,tmp2)
+		p<-match(tmp, fit2$tip.label)
+		p2<-match(tmp2, fit2$tip.label)
+		#if(length(na.omit(p))>0){
+			peak_mat[p,i]<-"A"
+		#}
+		#if(length(na.omit(p2))>0){
+			peak_mat2[p2,i]<-"A"
+		#}
+	}
+	na<-which(is.na(tab_aligned[,"cluster_id"]))
+	na2<- which(is.na(tabsub_aligned[,"cluster_id"]))
+	if(length(na)>0){
+			na<-tab_aligned[na,"orgs"]
+	}
+	if(length(na2)>0){
+			na2<-tabsub_aligned[na2,"orgs"]
+	}
+	
+	
+	#na<-unlist(intersect(na,na2))
+	if(is.null(na)==F){
+		na<-match(na, fit2$tip.label)
+		peak_mat[na,ncol(peak_mat)]<-"A"
+	}
+	if(is.null(na2)==F){
+		na2<-match(na2, fit2$tip.label)
+		peak_mat2[na2,ncol(peak_mat2)]<-"A"
+	}
+	
+	
+	colnames(peak_mat)<-1:ncol(peak_mat)
+	colnames(peak_mat2)<-paste(1:ncol(peak_mat2),"sub",sep="_")
+	
+	# p<-match(fit2$tip.label,all_orgs)
+	# nam3<-gsub("/","",nam2)
+	# nam3<-paste(nam3,all_orgs,sep="_")
+	# fit2$tip.label=nam3[p]
+	
+	
+	p<-match(fit2$tip.label,all_orgs)
+	nam3<-gsub("/","",nam2)
+	nam3<-paste(nam3,all_orgs,sep="_")
+	fit2$tip.label=nam3[p]
+	d<-data.frame(lab=fit2$tip.label, peak_mat)
+	d2<-d
+	d2_sub<-data.frame(lab=fit2$tip.label, peak_mat2)
+	###################
+	
+	peak_mat<-matrix(,nrow(tab_aligned),length(peaks))
+	peak_mat2<-peak_mat
+	#peak_mat[]<-0
+	for(i in 1:length(peaks)){
+		tmp<-grep(peaks[i],tab_aligned[,"cluster_id"])
+		tmp2<-grep(peaks[i],tabsub_aligned[,"cluster_id"])
+		if(length(tmp)>0){
+			tmp<-tab_aligned[tmp,"orgs"]
+		}
+		if(length(tmp2)>0){
+			tmp2<-tabsub_aligned[tmp2,"orgs"]
+		}
+		#tmp<-c(tmp,tmp2)
+		p<-match(tmp, fit4$tip.label)
+		p2<-match(tmp2, fit4$tip.label)
+		#if(length(na.omit(p))>0){
+			peak_mat[p,i]<-"A"
+		#}
+		#if(length(na.omit(p2))>0){
+			peak_mat2[p2,i]<-"A"
+		
+	}
+	na<-which(is.na(tab_aligned[,"cluster_id"]))
+	na2<- which(is.na(tabsub_aligned[,"cluster_id"]))
+	if(length(na)>0){
+			na<-tab_aligned[na,"orgs"]
+	}
+	if(length(na2)>0){
+			na2<-tabsub_aligned[na2,"orgs"]
+	}
+	
+	
+	#na<-unlist(intersect(na,na2))
+	if(is.null(na)==F){
+		na<-match(na, fit4$tip.label)
+		peak_mat[na,ncol(peak_mat)]<-"A"
+	}
+	if(is.null(na2)==F){
+		na2<-match(na2, fit4$tip.label)
+		peak_mat2[na2,ncol(peak_mat2)]<-"A"
+	}
+	colnames(peak_mat)<-1:ncol(peak_mat)
+	colnames(peak_mat2)<-paste(1:ncol(peak_mat2),"sub",sep="_")
+	
+	# p<-match(fit2$tip.label,all_orgs)
+	# nam3<-gsub("/","",nam2)
+	# nam3<-paste(nam3,all_orgs,sep="_")
+	# fit2$tip.label=nam3[p]
+	
+	
+	p<-match(fit4$tip.label,all_orgs)
+	nam3<-gsub("/","",nam2)
+	nam3<-paste(nam3,all_orgs,sep="_")
+	fit4$tip.label=nam3[p]
+	d<-data.frame(lab=fit4$tip.label, peak_mat)
+	d_sub<-data.frame(lab=fit4$tip.label, peak_mat2)
+	
+	n1<-ggtree(fit2) + geom_tiplab()
+	n2<-ggtree(fit4) + geom_tiplab()
+	a<-ggplot_build(n1)
+	b<-ggplot_build(n2)
+	dis_a<-a[[1]][[3]][1,2]-a[[1]][[1]][1,7]
+	dis_b<-b[[1]][[3]][1,2]-b[[1]][[1]][1,7]
+	
+	command1<-paste("n1<-ggtree(fit2) %<+% d2 %<+% d2_sub + geom_tiplab(hjust=-",dis_a*36,", size=2) + coord_cartesian(clip = 'off') + theme_tree2(plot.margin=margin(6, 120, 6, 6))",sep="")
+	for(i in 1:ncol(peak_mat)){
+		tmp<-paste(" + geom_point(aes(shape=X",i,"),size=3,na.rm=T,color=colo3[",i,"],show.legend = F)",sep="")
+		command1<-paste(command1,tmp,sep="")
+	}
+	for(i in 1:ncol(peak_mat2)){
+		tmp<-paste(" + geom_point(aes(shape=X",i,"_sub,x=x+",dis_a*5,"),size=3,na.rm=T,color=colo3[",i,"],show.legend = F)",sep="")
+		command1<-paste(command1,tmp,sep="")
+	}
+	
+	command2<-paste("n2<-ggtree(fit4) %<+% d  %<+% d_sub + geom_tiplab(hjust=-",dis_b*36,", size=2) + coord_cartesian(clip = 'off') + theme_tree2(plot.margin=margin(6, 120, 6, 6))",sep="")
+	for(i in 1:ncol(peak_mat)){
+		tmp<-paste(" + geom_point(aes(shape=X",i,"),size=3,na.rm=T,color=colo3[",i,"],show.legend = F)",sep="")
+		command2<-paste(command2,tmp,sep="")
+	}
+	for(i in 1:ncol(peak_mat2)){
+		tmp<-paste(" + geom_point(aes(shape=X",i,"_sub,x=x+",dis_b*5,"),size=3,na.rm=T,color=colo3[",i,"],show.legend = F)",sep="")
+		command2<-paste(command2,tmp,sep="")
+	}
+	
+	eval(parse(text=command1))
+	eval(parse(text=command2))
+	#png(paste(na3,"/tree.png",sep=""))
+	#pdf(paste(na3,"/tree.pdf",sep=""),paper = "a4r", width = 0, height = 0)
+		#plot_grid(tr[[1]], tr[[2]], ncol=2, labels = c("16S ML-tree", paste(tab_aligned[1,"name"], " UTR ML-tree",sep="")))
+		plot_grid(n1, n2, ncol=2, labels = c("16S ML-tree", paste(tab_aligned[1,"name"], "-UTR NL-tree",sep="")))
+	#dev.off()
+	ggsave(paste(na3,"/tree.pdf",sep=""), width = 297, height = 210, units = "mm")
+	out<-list(n1,n2)
+	out
+} 
+
+
+
+# wrapper to call mafft
+mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa", mode="accurate"){
+	if(mode=="accurate"){
+		command<-paste("mafft --maxiterate 1000 --localpair --quiet --inputorder ", filename, " > ", outname, sep="" )
+	}
+	
+	if(mode=="fast"){
+		command<-paste("mafft --retree 2 --maxiterate 0 --quiet --inputorder ", filename, " > ", outname, sep="" )
+	}
+	if(mode=="very_fast"){
+		command<-paste("mafft --retree 1 --maxiterate 0 --quiet --inputorder ", filename, " > ", outname, sep="" )
+	}
+	system(command)
+	#fas<-read.fasta(outname)
+	#fas
+} 
+
+
+rgl_plot<-function(align_table_int_pos=align_table_int_pos, test=test, tab_aligned=tab_aligned,tabsub_aligned=tabsub_aligned,alignment=alignment,sRNA_alignment2=sRNA_alignment2,na3=na3,peaks1=peaks1,tab=tab){
+	peaks_all<-test[[3]]
+	if(length(peaks_all)>0){
+		peaks<-unlist(lapply(peaks1, function(x){return(x[1])}))
+		peaks<-sort(peaks)
+		tab_aligned[,"cluster_id"]<-unlist(lapply(tab_aligned[,"cluster_id"] ,function(x){return(strsplit(as.character(x), split="\\|")[[1]][1])}))
+		tabsub_aligned[,"cluster_id"]<-unlist(lapply(tabsub_aligned[,"cluster_id"] ,function(x){return(strsplit(as.character(x), split="\\|")[[1]][1])}))
+		colo2<-c("#caff70","#7aa9df","#cf97bb" ,"#fede7e","#fc9187","#d3648f","#4c9998","#988377","#576e81","#9fe1e5")
+		colo<-c("#799943","#5680b0","#9c6488","#e4c054","#e26a5f","#b43768","#006362","#614736","#294258","#77b1b5")
+		colo3<-c()
+		for(i in 1:length(peaks1)){
+			fc <- colorRampPalette(c(colo[i], colo2[i]))
+			tmp<-fc(length(peaks1[[i]]))
+			names(tmp)<-peaks1[[i]]
+			colo3<-c(colo3,tmp)
+		}
+		colo3<-c(colo3,"#b0b0b0")
+		names(colo3)[length(colo3)]<-"not_conserved"
+		peaks<-names(colo3)
+	} else {
+		peaks<-"not_conserved"
+		colo3<-"#b0b0b0"
+		names(colo3)<-"not_conserved"
+	}
+	ooi_pos<-grep(ooi[1], tab_aligned[,"orgs"])
+	if(length(ooi_pos)>0){
+		ooi_int<-as.character(tab_aligned[ooi_pos,"cluster_id"])
+		peaks<-unlist(unique(c(ooi_int,peaks)))
+		colo4<-colo3
+		colo3<-gsub("#","",unique(c(colo3[ooi_int],colo3)))
+	}
+	na<-which(is.na(peaks))
+	if(length(na)>0){
+		peaks<-peaks[-na]
+		colo3<-colo3[-na]
+	}
+	colo3<-paste("#",colo3, sep="")
+
+	x<-align_table_int_pos
+	x<-rbind(rep(0,ncol(x)),x,rep(0,ncol(x)))
+	x<-cbind(rep(0,nrow(x)),x,rep(0,nrow(x)))
+	x<-round(x, digits=2)
+	x<-x*100
+	col<-x
+	col[]<-"#A9A9A9"
+	
+	tab_all<-rbind(tab_aligned,tabsub_aligned)
+
+	cons<-vector("list",length(peaks)-1)				
+	for(i in 1:(length(peaks)-1)){
+	cands<-grep(peaks[i], tab_all[,"cluster_id"])
+	if(length(cands)>1){
+	m<-matrix(,length(cands),length(cands))
+	m[]<-0
+	colnames(m)<-tab_all[cands,"name"]
+	rownames(m)<-tab_all[cands,"name"]
+	m_id<-m
+	# cut the peak position from the alignment and re-align the sequences
+	# with the consistency based aligner dialign-tx
+	coo1<-as.numeric(strsplit(peaks[i],"_")[[1]][1:4])
+	fasta_temp<-alignment[as.character(unique(tab_all[cands,"name2"]))]
+	s=max(1,coo1[1]-2)
+	e=min(coo1[2]+2,length(fasta_temp[[1]]))
+	fasta_temp<-lapply(fasta_temp, cutalign, s=s, e=e)
+	fasta_temp2<-lapply(fasta_temp, remove_gaps)
+	short<-which(unlist(lapply(fasta_temp2,length))<2)
+	fasta_s<-sRNA_alignment2[as.character(unique(tab_all[cands,"orgs"]))]
+	if(length(short)>0){
+		fasta_temp<-fasta_temp[-short]
+		fasta_temp2<-fasta_temp2[-short]
+		short_cands<-match(names(fasta_temp2)[short],tab_all[cands,"name"])
+		cands<-cands[-short_cands]
+		fasta_s<-fasta_s[-short]
+	}
+	if(length(fasta_temp2)>1){
+				tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
+				tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
+				write.fasta(fasta_temp2, names=tab_all[cands,"name"], file.out=tempfi)
+				# avoid massive information output of dialign-tx (> /dev/null)
+				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
+				system(command)
+				fasta_temp2<-read.fasta(tempfi2)
+				s2=max(1,coo1[3]-2)
+				e2=min(coo1[4]+2,length(fasta_s[[1]]))
+				fasta_s<-lapply(fasta_s, cutalign, s=s2, e=e2)
+				fasta_s2<-lapply(fasta_s, remove_gaps)
+				short2<-which(unlist(lapply(fasta_s2,length))<2)
+				if(length(short2)>0){
+					fasta_s<-fasta_s[-short2]
+					fasta_s2<-fasta_s2[-short2]
+					short_cands2<-match(names(fasta_s2)[short], tab_all[cands,"name"])
+					cands<-cands[-short_cands2]
+					fasta_temp<-fasta_temp[-short2]
+					fasta_temp2<-fasta_temp2[-short2]
+				}
+				if(length(fasta_s2)>1){
+					write.fasta(fasta_s2, names=tab_all[cands,"name"], file.out=tempfi)
+					# avoid massive information output of dialign-tx (> /dev/null)
+					command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
+					system(command)
+					fasta_s2<-read.fasta(tempfi2)
+					unlink(tempfi)
+					unlink(tempfi2)
+	}
+	}
+	ints<-vector("list",length(cands))
+	for(j in 1:length(cands)){
+		a_i<-match(tab_all[cands[j],"name2"],names(fasta_temp))
+		a<-as.numeric(strsplit(unlist(tab_all[cands[j],"int_mrna"]),",")[[1]])
+		a<-a-s+1
+		as<-as.numeric(strsplit(unlist(tab_all[cands[j],"int_srna"]),",")[[1]])
+		as<-as-s2+1
+		ga<-which(fasta_temp[[a_i]]!="-")
+		a<-match(a,ga)
+		ga2<-which(fasta_temp2[[a_i]]!="-")
+		a<-ga2[a]
+		gas<-which(fasta_s[[a_i]]!="-")
+		as<-match(as,gas)
+		gas2<-which(fasta_s2[[a_i]]!="-")
+		as<-gas2[as]
+		as<-rev(as)
+		temp<-paste(a,as)
+		na<-grep("NA",temp)
+		if(length(na)>0){
+			temp<-temp[-na]
+		}
+		ints[[j]]<-temp
+	}
+
+	ints<-table(unlist(ints))
+	consensus<-which(ints>=length(cands)*0.5)
+	consensus<-names(ints[consensus])
+	consensus<-strsplit(consensus," ")
+	consensus<-lapply(consensus,as.numeric)
+	pos_x<-unlist(lapply(consensus, function(x) x[1]))
+	pos_y<-unlist(lapply(consensus, function(x) x[2]))
+	a_i<-match(tab_all[cands[1],"name2"],names(fasta_temp))
+	ga<-which(fasta_temp[[a_i]]!="-")
+	ga2<-which(fasta_temp2[[a_i]]!="-")
+	gas<-which(fasta_s[[a_i]]!="-")
+	gas2<-which(fasta_s2[[a_i]]!="-")
+	pos_x<-match(pos_x,ga2)
+	pos_x<-ga[pos_x]
+	pos_x<-pos_x+s-1
+	pos_y<-match(pos_y,gas2)
+	pos_y<-gas[pos_y]
+	pos_y<-pos_y+s2-1
+	cons_temp<-list(pos_x,pos_y)
+	cons[[i]]<-cons_temp
+	}
+	}
+
+	for(i in 1:(length(peaks)-1)){
+		tmp<-as.numeric(strsplit(peaks[i],"_")[[1]])
+		col[tmp[1]:tmp[2],tmp[3]:tmp[4]]<-colo3[i]
+	}
+	z<-x
+	zlim <- range(z)
+	zlen <- zlim[2] - zlim[1] + 1
+	fc <- colorRampPalette(c("#ffffff","#7FCDCD", "#98B4D4","#5B5EA6","#E15D44"))
+	tmp<-fc(100)
+	x <- (1:nrow(z))   
+	y <- (1:ncol(z))   
+	rgl.open()
+	rgl.bg(color = "white")
+	
+	surface3d(x, y, z, color=col, back="lines",main=tab_aligned[1,"name"])
+	
+	#view3d( theta = 0, phi = -15)
+	#par3d(windowRect = c(0,0,1000,500),zoom=0.6)
+	#rgl.snapshot( "sdhC.png", fmt = "png", top = TRUE )
+	
+	title3d(main=paste(tab_aligned[1,"name"],"weighted interaction probability landscape"), xlab="mRNA alignment", ylab="sRNA alignment", col=1)
+	box3d(col=1)
+	axes3d(c('x', 'y'), col=1)
+	axes3d('z+-',at=seq(0,100,by=10), labels=seq(0,1,by=0.1), col=1)
+	
+	aug<-which(alignment[[1]]!="-")[200]
+	axes3d(c('x'), at=aug, labels="start codon", col=1)
+	
+	for(i in 1:length(cons)){
+		if(is.null(cons[[i]])==F){
+			pos_x<-cons[[i]][[1]]
+			pos_y<-cons[[i]][[2]]
+			ord<-order(pos_x)
+			pos_z<-c()
+			for(jj in 1:length(pos_x)){
+				pos_z<-c(pos_z,z[pos_x[jj]+1,pos_y[jj]]+1)					
+			}
+			plot3d(pos_x, pos_y,pos_z+1,type="s",radius=2,col=colo3[i],add=T,lwd=5)
+			plot3d(pos_x[ord], (pos_y)[ord],pos_z[ord]+1,type="l",col=1,add=T,lwd=3)
+		}
+	}
+
+	writeWebGL(filename=paste(na3,"/",tab[1,"name"],".html",sep=""), width=1000,height=800)
+	rgl.close()
+}
+
+# create phylogentic ML-tree based on the 16S sequences
+mafft(filename="16s_sequences.fa")
+tempf<-read.fasta("ncrna_aligned.fa")
+write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
+dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+dm <- dist.ml(dat, model="F81")
+treeNJ <- NJ(dm)
+fitStart = pml(treeNJ, dat, k=4)
+fitJC = optim.pml(fitStart, model="GTR", optGamma=T, rearrangement="stochastic",ratchet.par = list(iter = 5L, maxit = 20L, prop = 1/3),control = pml.control(epsilon = 1e-08, maxit = 10,
+trace = 1L))
+fit2<<-(fitJC$tree)
+save(fit2, file="16S_tree.Rdata")
 weight1<-read.csv("weights.txt",skip=1, header=F, sep="\t")
 weight<-weight1[,2]
 names(weight)<-weight1[,1]
 
+					
 
 # function to map interaction positions to the alignments and wrapper for the other functions
 build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
@@ -1074,16 +1565,17 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 		}
 		nam2<-c(nam2,temp)
 	}
-	tree_rib[[3]]<-paste(nam2,tree_rib[[3]])
+	#tree_rib[[3]]<-paste(nam2,tree_rib[[3]])
 	
 	
 	#select top predictions for interaction site analysis
 	copra<-read.csv(copra_result, sep=",")
+	ex<-as.numeric(as.character(copra[1:top,"initial_sorting"]))
 	ooi_pos<-grep(ooi, colnames(copra))
 	ooi_pos2<-grep(ooi, colnames(dat))
 	copra<-copra[1:top,ooi_pos]
 	copra<-gsub("\\(.*","",copra)
-	ex<-na.omit(match(copra, gsub("\\(.*","",dat[,ooi_pos2])))
+	
 	align_pos<-1:nrow(dat)
 	dat_old<-dat
 	dat<-dat[ex,]
@@ -1098,6 +1590,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	if(rest>0){
 		jobs[1:rest]<-jobs[1:rest]+1
 	}
+	
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
 
@@ -1114,7 +1607,8 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 		all_orgs<-colnames(dat)[3:(e-1)]
 		int_sites<-vector("list", nrow(dat))
 		peak_list<-vector("list", nrow(dat))
-		for(i in  1:nrow(dat)){
+		ex2<-ex[count_vect1[ji]:count_vect2[ji]]
+		for(i in 1:nrow(dat)){
 			e<-grep("Annotation", colnames(dat))
 			temp<-dat[i,3:(e-1)]
 			temp<-temp[which(temp!="")]
@@ -1236,7 +1730,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					temp_locus<-tab_aligned[j,"name2"]
 					
 					# run IntaRNA for spot probabilities
-					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --out /dev/null --out=SpotProb:STDOUT", sep="")
+					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --parameterFile ", par_file, " --out /dev/null --out=SpotProb:STDOUT", sep="")
 					temp_table<-as.matrix(read.csv(textConnection(system(temp_table,intern=T)),sep=";", row.names=1,comment.char = "#"))
 					temp_align_table2<-temp_align_table
 					mRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_mRNA"],")",sep="") ))
@@ -1276,12 +1770,12 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				align_table_int_pos<-align_table_int_pos/max(align_table_int_pos)
 				
 				# identify conserved interaction regions and map the organism specific predicted sites to these regions 
-				test<-peak_find2D(align_table_int_pos, tab_aligned, tabsub_aligned,alignment,sRNA_alignment2, min_thres=0.2, perc=0.1, min_length=6,eps=0.55,ooi=conservation_oois, ooi_force=FALSE, posprobs=posprobs)
+				test<-peak_find2D(align_table_int_pos, tab_aligned, tabsub_aligned,alignment,sRNA_alignment2, min_thres=0.2, perc2=0.05,perc=0.03, min_length=6,eps=0.55,ooi=conservation_oois, ooi_force=FALSE, posprobs=posprobs)
 				na3<-paste("./evo_alignments2/",tab[1,"name"],sep="")
 				dir.create(na3)
 				
 				#plot Spot Probabilities heatmap based on normalized multiple alignment
-				x<-align_table
+				x<-align_table_int_pos
 				w<-2000
 				h<-ncol(x)/nrow(x)*w
 				png(paste(na3,"/spot_probabilities.png",sep=""), width = w, height = h)	
@@ -1295,8 +1789,9 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					# if a peak overlaps with another peak and both peaks are assigned to the same interaction site, the smaller peak is assigned a subpeak of the larger peak
 					peaks1<-condense_peak2(test)
 					ooi_peak<-test[[1]][1,"cluster_id"]
-					if(ooi_peak=="NA"){
-						ooi_peak<-test[[2]][1,"cluster_id"]
+					if(ooi_peak=="NA" & length(peaks1)>0){
+						#ooi_peak<-test[[2]][1,"cluster_id"]
+						ooi_peak<-peaks1[[1]][1]
 					}
 					ooi_peak<-gsub("\\|.*","",ooi_peak)
 					if(ooi_peak!="NA"){
@@ -1317,6 +1812,8 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				tab_aligned[,"name"]<-gsub("_opt","",tab_aligned[,"name"])
 				tabsub_aligned[,"name"]<-gsub("_sub","",tabsub_aligned[,"name"])
 				jalview_anno(tab_aligned, tabsub_aligned,peaks1, test,ooi, nam2=nam2,alignment,sRNA_alignment2 ,name=paste(na3,"/",tab[1,"name"],sep=""),all_orgs=all_orgs)
+				tr<-peak_tree(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name=name,fit2,na3=na3)
+				#rgl_plot(align_table_int_pos=align_table_int_pos, test=test, tab_aligned=tab_aligned,tabsub_aligned=tabsub_aligned,alignment=alignment,sRNA_alignment2=sRNA_alignment2,na3=na3,peaks1=peaks1,tab=tab)
 				if(length(test[[3]])>0){
 					op<-which(is.na(tab_aligned[,"cluster_id"])==F)
 					su<-which(is.na(tabsub_aligned[,"cluster_id"])==F)
@@ -1330,8 +1827,8 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				}
 			}
 		}
-		names(int_sites)<-dat[,ooi_pos2]
-		names(peak_list)<-dat[,ooi_pos2]
+		names(int_sites)<-ex2
+		names(peak_list)<-ex2
 		temp_out<-list(int_sites,peak_list)
 		temp_out
 	}
@@ -1343,7 +1840,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	int_sites<-vector("list", nrow(dat))
 	peak_list<-vector("list", nrow(dat))
 	for(i in 1:length(vari)){
-		tmp<-match(names(vari[[i]][[1]]),dat[,3])
+		tmp<-as.numeric(names(vari[[i]][[1]]))
 		int_sites[tmp]<-vari[[i]][[1]]
 		peak_list[tmp]<-vari[[i]][[2]]
 		
