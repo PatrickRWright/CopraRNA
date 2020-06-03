@@ -1,0 +1,47 @@
+name: CopraRNA2
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+  - conda
+dependencies:
+  - bzip2
+  - gawk
+  - sed
+  - grep
+  - coreutils 
+  - emboss
+  - embassy-phylip
+  - blast-legacy
+  - phantomjs
+  - dialign-tx
+  - jalview
+  - domclust
+  - mafft
+  - clustalo
+  - intarna >=3.1.5
+  - perl
+  - perl-list-moreutils
+  - perl-parallel-forkmanager
+  - perl-getopt-long
+  - perl-bioperl
+  - perl-bio-eutilities
+  - perl-io-uncompress-gunzip 
+  - perl-io-gzip 
+  - perl-io-all
+  - r-base >=3.6.0
+  - r-seqinr 
+  - libopenblas
+  - r-phangorn
+  - bioconductor-complexheatmap
+  - r-domc
+  - r-knitr
+  - r-rmarkdown
+  - r-dt  
+  - r-ggplot2
+  - bioconductor-ggtree
+  - r-cowplot
+  - r-rgl
+  - python
+  - suds-jurko
