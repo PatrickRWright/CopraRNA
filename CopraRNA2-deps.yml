@@ -5,7 +5,10 @@ channels:
   - r
   - defaults
   - conda
+<<<<<<< HEAD
   - genomedk
+=======
+>>>>>>> 4c74316706e82cde9333fe8814750e8811c74887
 dependencies:
   - bzip2
   - gawk
@@ -21,7 +24,11 @@ dependencies:
   - domclust
   - mafft
   - clustalo
+<<<<<<< HEAD
   - intarna >=3.1.5
+=======
+  - intarna >=3.1.1
+>>>>>>> 4c74316706e82cde9333fe8814750e8811c74887
   - perl
   - perl-list-moreutils
   - perl-parallel-forkmanager
@@ -40,9 +47,14 @@ dependencies:
   - r-knitr
   - r-rmarkdown
   - r-dt  
+<<<<<<< HEAD
   - r-ggplot2
   - bioconductor-ggtree
   - r-cowplot
   - r-rgl
   - python
   - suds-jurko
+=======
+  - python
+  - suds-jurko
+>>>>>>> 4c74316706e82cde9333fe8814750e8811c74887
