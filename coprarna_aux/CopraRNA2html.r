@@ -305,14 +305,17 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 		cons2<-""
 	}
 	
-
-
+	if(file.exists(aux)){
+		aux2<-c("tab<-read.csv(",aux,",sep=',')")
+	} else{
+		aux2<-""
+	}
+	
 	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### Functional enrichment",enrich2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
 	
 	prefix<-paste("```{r,echo=F}","wd<-getwd()",sep="\n")
 	#suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")
 	suffix<-paste("datatable(tab, escape = FALSE,rownames= FALSE, extensions = 'FixedHeader',options = list(fixedHeader = TRUE),class = 'cell-border stripe',width='100%')","  ```"," ",sep="\n")
-	aux2<-c("tab<-read.csv(",aux,",sep=',')")
 	
 	
 	#<a href="http://rstudio.com">RStudio</a>
@@ -339,7 +342,15 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
 	probcons<- paste0("<a href='",probcons,"' target='popup' onclick=\"window.open('",probcons,"','popup','width=600,height=600'); return false;\">conserved_peaks</a>")
 	#Links<-paste(heat,mrna,srna,ints, sep=", ")
-	Links<-paste(heat,mrna, srna,ints,probcons, sep=", ")
+	
+	tree<-paste("./evo_alignments2/",selection,"/tree.pdf",sep="")
+	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
+	tree<- paste0("<a href='",tree,"' target='popup' onclick=\"window.open('",tree,"','popup','width=600,height=600'); return false;\">tree</a>")
+	#Links<-paste(heat,mrna,srna,ints, sep=", ")
+	
+	
+	
+	Links<-paste(heat,mrna, srna,ints,probcons,tree, sep=", ")
 	
 	if(length(na)>0){
 		Links[na]<-""
@@ -355,33 +366,56 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,4]<-formatC(as.numeric(tab[,4]), format = 'e', digits = 2)", "\n","tab[,8]<-formatC(as.numeric(tab[,8]), format = 'e', digits = 2)" )
 	ma<-c(ma,"\n", paste("## Prediction organisms of interest",paste("### ", ooi_nam,sep=""),sep="\n"),prefix,tmp,suffix, "## Predictions other organisms {.tabset .tabset-fade .tabset-pills}")
 	
-	if(length(tabs)>1){
-		for(i in 2:length(tabs)){
-			tab<-cbind(tabs[[i]][,1], Links,tabs[[i]][,2:ncol(tabs[[i]])])
-			colnames(tab)[1]<-" "
-			write.table(tab, file=paste(ind_tables,"/",names(tabs)[i],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
-			tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[i],".txt'",sep="")
-			tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,4]<-formatC(as.numeric(tab[,4]), format = 'e', digits = 2)", "\n","tab[,8]<-formatC(as.numeric(tab[,8]), format = 'e', digits = 2)" )
-			ma<-c(ma,"\n", paste("### ", nam2[i],sep=""),prefix,tmp,suffix)
+	load("copra_results_all.Rdata")
+	
+	if(length(copra_results)>1){
+		for(i in 2:length(copra_results)){
+				fdr<-copra_results[[i]][1:number,1]
+				pval<-copra_results[[i]][1:number,2]
+				ranks<-1:number
+				annotation<-copra_results[[i]][1:number,"Annotation"]
+				tab2<-copra_results[[i]][1:number,names(copra_results)[i]]
+				tab2<-gsub("\\(","\\|",tab2)
+				tab2<-gsub("\\)","",tab2)
+				tab2<-strsplit(tab2,"\\|")
+				nu<-which(unlist(lapply(tab2,length))!=0)
+				tab3<-matrix(,number,9)
+				if(length(nu)>0){
+					tab3[nu,]<-do.call(rbind,tab2)
+				}
+				tab2<-tab3
+				tab2<-gsub("GeneID:","",tab2)
+		
+				tab3<-cbind(ranks,fdr,pval,tab2, annotation)
+				colnames(tab3)<-c("#","FDR","pVal.","Locus_tag","Name","Energy","Int.pVal.","st","en","start_sRNA","end_sRNA","GeneID","Annotation")
+				tab3<-tab3[,-c(10,11,12)]
+				tab<-tab3
+			
+				#tab<-cbind(ranks,fdr,pval,tab)
+				#colnames(tab)[1]<-" "
+				write.table(tab, file=paste(ind_tables,"/",names(tabs)[i],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
+				tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[i],".txt'",sep="")
+				tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,2]<-formatC(as.numeric(tab[,2]), format = 'e', digits = 2)", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,7]<-formatC(as.numeric(tab[,7]), format = 'e', digits = 2)" )
+				ma<-c(ma,"\n", paste("### ", nam2[i],sep=""),prefix,tmp,suffix)
 		}
 	}
 	ma<-c(ma, "## When using CopraRNA please cite:
 	
-				<font size='-1'>
+<font size='-1'>
 				
-				Patrick R. Wright, Andreas S. Richter, Kai Papenfort, Martin Mann, Joerg Vogel, Wolfgang R. Hess, Rolf Backofen and Jens Georg  
-				[Comparative genomics boosts target prediction for bacterial small RNAs](https://www.pnas.org/content/110/37/E3487){target='_blank'}  
-				Proc Natl Acad Sci USA, 2013, 110 (37), E3487-E3496.
+Patrick R. Wright, Andreas S. Richter, Kai Papenfort, Martin Mann, Joerg Vogel, Wolfgang R. Hess, Rolf Backofen and Jens Georg  
+[Comparative genomics boosts target prediction for bacterial small RNAs](https://www.pnas.org/content/110/37/E3487){target='_blank'}  
+Proc Natl Acad Sci USA, 2013, 110 (37), E3487-E3496.
 
-				Patrick R. Wright, Jens Georg, Martin Mann, Dragos A. Sorescu, Andreas S. Richter, Steffen Lott, Robert Kleinkauf, Wolfgang R. Hess, and Rolf Backofen  
-				[CopraRNA and IntaRNA: predicting small RNA targets, networks and interaction domains](https://academic.oup.com/nar/article/42/W1/W119/2435325){target='_blank'}  
-				Nucleic Acids Research, 2014, 42 (W1), W119-W123.
+Patrick R. Wright, Jens Georg, Martin Mann, Dragos A. Sorescu, Andreas S. Richter, Steffen Lott, Robert Kleinkauf, Wolfgang R. Hess, and Rolf Backofen  
+[CopraRNA and IntaRNA: predicting small RNA targets, networks and interaction domains](https://academic.oup.com/nar/article/42/W1/W119/2435325){target='_blank'}  
+Nucleic Acids Research, 2014, 42 (W1), W119-W123.
 
-				Martin Raden, Syed M Ali, Omer S Alkhnbashi, Anke Busch, Fabrizio Costa, Jason A Davis, Florian Eggenhofer, Rick Gelhausen, Jens Georg, Steffen Heyne, Michael Hiller, Kousik Kundu, Robert Kleinkauf, Steffen C Lott, Mostafa M Mohamed, Alexander Mattheis, Milad Miladi, Andreas S Richter, Sebastian Will, Joachim Wolff, Patrick R Wright, and Rolf Backofen  
-				[Freiburg RNA tools: a central online resource for RNA-focused research and teaching](https://academic.oup.com/nar/article/46/W1/W25/5000013){target='_blank'}  
-				Nucleic Acids Research, 46(W1), W25-W29, 2018.
+Martin Raden, Syed M Ali, Omer S Alkhnbashi, Anke Busch, Fabrizio Costa, Jason A Davis, Florian Eggenhofer, Rick Gelhausen, Jens Georg, Steffen Heyne, Michael Hiller, Kousik Kundu, Robert Kleinkauf, Steffen C Lott, Mostafa M Mohamed, Alexander Mattheis, Milad Miladi, Andreas S Richter, Sebastian Will, Joachim Wolff, Patrick R Wright, and Rolf Backofen  
+[Freiburg RNA tools: a central online resource for RNA-focused research and teaching](https://academic.oup.com/nar/article/46/W1/W25/5000013){target='_blank'}  
+Nucleic Acids Research, 46(W1), W25-W29, 2018.
 
-				</font>"
+</font>"
 		)
 	
 	ma<-c(ma,"\n", "## CopraRNA parameter", "\n", paste(opt,"\n",sep=""))
