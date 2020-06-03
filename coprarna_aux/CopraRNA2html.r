@@ -308,7 +308,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	if(file.exists(aux)){
 		aux2<-c("tab<-read.csv(",aux,",sep=',')")
 	} else{
-		aux2<-""
+		aux2<-"tab<-matrix('no auxiliary enrichment available',1,1)"
 	}
 	
 	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### Functional enrichment",enrich2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
