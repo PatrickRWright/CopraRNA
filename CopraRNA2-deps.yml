@@ -5,7 +5,9 @@ channels:
   - r
   - defaults
   - conda
+  - anaconda
 dependencies:
+  - biopython
   - bzip2
   - gawk
   - sed
