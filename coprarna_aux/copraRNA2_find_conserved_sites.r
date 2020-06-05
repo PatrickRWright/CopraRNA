@@ -1108,13 +1108,13 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 		peaks<-unlist(unique(c(ooi_int,peaks)))
 		colo4<-colo3
 		colo3<-gsub("#","",unique(c(colo3[ooi_int],colo3)))
+		colo3<-paste("#",colo3, sep="")
 	}
 	na<-which(is.na(peaks))
 	if(length(na)>0){
 		peaks<-peaks[-na]
 		colo3<-colo3[-na]
 	}
-	colo3<-paste("#",colo3, sep="")
 	#fit2<-(fitJC$tree)
 	#fit3<-fit2
 	
