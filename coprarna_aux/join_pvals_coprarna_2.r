@@ -194,14 +194,12 @@ qtrans<-function(dat2){
 int_table_all<-int_table
 # do prediction for all organisms
 
-
-if(ooi_only==F){
-	copra_results<-vector("list",length(namegenomes))
-	names(copra_results)<-namegenomes
-}
 if(ooi_only==T){
 	namegenomes<-ooi
 }
+
+copra_results<-vector("list",length(namegenomes))
+names(copra_results)<-namegenomes
 
 for(ii in namegenomes){
 	ooi<-ii
