@@ -17,12 +17,12 @@ name="result_all"
 mnum=40000
 weight_method<-"clustal"		# organism weights caluclated by the CopraRNA1 method (copra) or the ClustalW method (clustal)
 weight_tree<-"upgma"			# "ML" , "upgma"
-outlier_removal=TRUE			# Should p-value outliers be removed prior to p-value combination
+outlier_removal=FALSE			# Should p-value outliers be removed prior to p-value combination
 rholimit<-TRUE					# if TRUE rho can take only values between  0 and 1 even if the fit suggests higher rho values
 rho_weights<-2					# Controls if the fit for the dependency in the data should run on all data (rho_weights=1) or on the 1/x lowest p-Values (rho_weights=x).
 min_length<-2					# minimal number of homologs for combining a p_value
 ooi_only=FALSE					# prediction for all included organisms or only the ooi
-prediction_on_subset=TRUE		# Should the p-value combination be done on all organisms or on an optimized subsets. Only if ooi_only=FALSE. Requires to calculate the optimized subsets. 
+prediction_on_subset=FALSE		# Should the p-value combination be done on all organisms or on an optimized subsets. Only if ooi_only=FALSE. Requires to calculate the optimized subsets. 
 # For organisms subset selection
 mindis=0						# minimal required distance to the respective ooi
 maxorgs=15						# number of selected organisms, if possible
