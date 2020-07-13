@@ -10,14 +10,15 @@ use Cwd 'abs_path';
 my $ncrnas = $ARGV[0];
 my $upfromstartpos = $ARGV[1]; 
 my $down = $ARGV[2]; 
-my $mrnapart = $ARGV[3]; 
+my $mrnapart = $ARGV[3];
+my $core_count = $ARGV[4]; 
+my $intarnaParamFile = $ARGV[5];
 my $refseqid = '';
 
 # files dedicated to capture output of subcalls for debugging
 my $OUT_ERR = "CopraRNA2_subprocess.oe";
 
-
-my $orgcnt = (scalar(@ARGV) - 4);
+my $orgcnt = (scalar(@ARGV) - 6);
 
 # get absolute path
 my $ABS_PATH = abs_path($0); 
@@ -50,25 +51,28 @@ chomp $temperature;
 my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; 
 chomp $maxbpdist;
 
-for(my $i=4;$i<=scalar(@ARGV) - 1;$i++) {
+my $pm = new Parallel::ForkManager($cores);
+
+for(my $i=6;$i<=scalar(@ARGV) - 1;$i++) {
 
     my @splitarg = split(/,/, $ARGV[$i]);
 
     if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb(\.gz)?/) { 
         $refseqid = $1;
     }
-
+    $pm->start and next; 
     my $outfile = $refseqid . '_upfromstartpos_' . $upfromstartpos . '_down_' . $down . '.fa';
 
     my $splitargcount = 1;
-
     foreach (@splitarg) {
         my $tempOutfile = $outfile; 
         $tempOutfile = $tempOutfile . $splitargcount; 
         system $PATH_COPRA_SUBSCRIPTS . "parse_region_from_genome.pl $_ $upfromstartpos $down $mrnapart > $tempOutfile"; 
         $splitargcount++;   
     }
+    $pm->finish;
 }
+$pm->wait_all_children;
 
 my @files = ();
 @files = <*>;
@@ -123,7 +127,7 @@ close FILE;
 
 my $suffix = '_upfromstartpos_' . $upfromstartpos . '_down_' . $down . '.fa';
 
-my $pm = new Parallel::ForkManager($cores);   
+# my $pm = new Parallel::ForkManager($cores);   
 foreach (@files) {
     if ($_ =~ m/(N[ZC]_.+)$suffix$/) { 
         my $refid = $1;  # get refseq id
@@ -143,7 +147,6 @@ foreach (@files) {
 			@ncrnaarray = ();
 	        my $intarnaout = $_ . ".intarna.csv"; 
 			my $intarnasortedout = $_ . ".intarna.sorted.csv"; 
-            $pm->start and next;            
 			# create temporary "sorted" file to support old pipeline
 			my $intarna_call = 
 					"IntaRNA"
@@ -151,6 +154,9 @@ foreach (@files) {
 					." --target $_ --tAccW $winsize --tAccL $maxbpdist"
 					." --query $ncrnafilename --qAccW $winsize --qAccL $maxbpdist"
 					." --temperature $temperature"
+					." --outNumber=2"
+                    ." --parameterFile $intarnaParamFile"
+                    ." --threads $cores"
 					." --outMode=C --outCsvCols 'id1,id2,seq1,seq2,subseq1,subseq2,subseqDP,subseqDB,start1,end1,start2,end2,hybridDP,hybridDB,E,ED1,ED2,Pu1,Pu2,E_init,E_loops,E_dangleL,E_dangleR,E_endL,E_endR,seedStart1,seedEnd1,seedStart2,seedEnd2,seedE,seedED1,seedED2,seedPu1,seedPu2,E_norm'"
 					." --out $intarnaout"
 					." --outCsvSort E"
@@ -158,11 +164,9 @@ foreach (@files) {
 					."ln -s $intarnaout $intarnasortedout";
 			print($intarna_call . "\n") if ($verbose);
             system($intarna_call) unless (-e $intarnaout);
-            $pm->finish;
      }                                                                                   
 }
                                                                                         
-$pm->wait_all_children;  
 
 ### sort IntaRNA output by energy  # obsolete due to "--outCsvSort E" in intarna call
 #@files = <*intarna.csv>;

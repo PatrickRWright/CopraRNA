@@ -4,7 +4,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path';
 
-my $COPRARNA_VERSION="2.1.3";
+my $COPRARNA_VERSION="3.0.0";
 
  # License: MIT
 
@@ -136,7 +136,7 @@ my $enrich = 0; ## functional enrichment needs to be specifically turned on
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
 my $temperature = 37; # temperature for prediction
-my $intarnaParamFile = "NA";
+my $intarnaParamFile = "intarna_options.cfg";
 
 # get absolute path
 my $ABS_PATH = abs_path($0);
@@ -219,6 +219,7 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
 " --genomePath              path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
 " --temperature             temperature in Celsius to be used for interaction prediction (def:37.0)\n\n",
+" --intarnaOptions			path for IntaRNA parameter file\n\n",
 "\n",
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -364,7 +365,7 @@ if ($verbose) {
 }
 
 # my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $RefSeqIds";
-my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA3.pl $sRNAs_fasta $upstream $downstream $region $core_count $intarnaParamFile $RefSeqIds";
+my $homology_intaRNA_call=$PATH_COPRA . "coprarna_aux/homology_intaRNA.pl $sRNAs_fasta $upstream $downstream $region $core_count $intarnaParamFile $RefSeqIds";
 print $homology_intaRNA_call . "\n" if ($verbose);
 
 my $homology_intaRNA_exitStatus = system $homology_intaRNA_call;

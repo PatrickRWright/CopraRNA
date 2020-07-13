@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Cwd 'abs_path'; 
+use Parallel::ForkManager;
 
 # get absolute path
 my $ABS_PATH = abs_path($0); 
@@ -18,9 +19,10 @@ my $ncrnas = $ARGV[0]; # input_sRNA.fa
 my $upfromstartpos = $ARGV[1]; # 200
 my $down = $ARGV[2]; # 100
 my $mrnapart = $ARGV[3]; # cds or 5utr or 3utr
+my $core_count = $ARGV[4];
+my $intarnaParamFile = $ARGV[5];
 my $GenBankFiles = "";
 my $orgcount = 0;
-
 
 ##########################################################################################
 sub getOptionValue
@@ -85,6 +87,7 @@ open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology
 
 
 
+
 ##########################################################################################
 sub removeInvalidGenomeFiles
 ##########################################################################################
@@ -98,10 +101,11 @@ sub removeInvalidGenomeFiles
     }
     
     my $deletedFiles = 0;
-    
+    my $dgl = new Parallel::ForkManager($cores);
+
     # iterate all "gb" files
     foreach my $gbFile (<*.gb.gz>) {
-    
+        $dgl->start and next;
     	my $lastTwoLines = `zcat $gbFile | tail -n 2 | tr -d "\n"`;
     
     	# proper gb file ends with "//" line
@@ -115,10 +119,11 @@ sub removeInvalidGenomeFiles
     			print ERRORLOG "Genome file $gbFile : $errorMsg\n";
     		}
     	} # if invalid file
- 
+        $dgl->finish;
     } # for all gbFiles
     
     return( $deletedFiles );
+$dgl->wait_all_children;
 
 }
 ######################################################################## END OF SUBROUTINE
@@ -136,25 +141,26 @@ sub downloadGenomeAndLink
 	my $accessionnumber = $_[0];
 
     my $refseqoutputfile = "$accessionnumber.gb.gz";
-
+    
   	# download genome file if needed
 	unless ( -e "$genomePath/$refseqoutputfile" ) {
 	  	my $gbCall = $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $genomePath/$refseqoutputfile";
     	print $gbCall . "\n" if ($verbose); 
       	system $gbCall;
 	}
-
   	# link genome file locally if not present
   	if ( (not -e "$refseqoutputfile") and (-e "$genomePath/$refseqoutputfile") ) {
-  		system ("ln -s $genomePath/$refseqoutputfile .");
+	        system ("ln -s $genomePath/$refseqoutputfile .");
+		# print("ln -s $genomePath/$refseqoutputfile .");
   	}
+    
 }
 ######################################################################## END OF SUBROUTINE
 
-
+# finds replikons genomes 
 
 ####################################
-print "create kegg 2 refseq mapping\n" if ($verbose);
+print " create kegg 2 refseq mapping\n" if ($verbose);
 ####################################
 
 my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
@@ -176,16 +182,17 @@ foreach(@keggtorefseqnew) {
     my @split_refseqs = split(/\s/, $all_refseqs);
     foreach(@split_refseqs) {
         $refseqaffiliations{$_} = $all_refseqs;
+        
     }
 }
-
-####################################
 
 # add "ncRNA_" to fasta headers
 system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa"; 
 
+my $no_of_args = scalar(@ARGV); 
+
 # assign correct refseq IDs for each sequence
-for (my $i=4;$i<scalar(@ARGV);$i++) {
+for (my $i=6;$i<scalar(@ARGV);$i++) {
     # split up the refseq list for one organism
     my @split = split(/\s/, $refseqaffiliations{$ARGV[$i]});
     # get the first id entry
@@ -198,28 +205,39 @@ for (my $i=4;$i<scalar(@ARGV);$i++) {
 $ncrnas = "ncrna.fa";
 
 # get Orgcount
-$orgcount = (scalar(@ARGV) - 4);
+$orgcount = (scalar(@ARGV) - 6);
+
 
 ## prepare input for combine_clusters.pl
 ## Download Refseq files by Refseq ID 
 my $RefSeqIDs = `grep ">" input_sRNA.fa | tr '\n' ' ' | sed 's/>//g'`; 
 my @split_RefIds = split(/\s+/, $RefSeqIDs);
 
+my $dwn = new Parallel::ForkManager($cores);
 foreach(@split_RefIds) {
     my $currRefSeqID = $_;
-
     my $presplitreplicons = $refseqaffiliations{$currRefSeqID};
     my @replikons = split(/\s/, $presplitreplicons);
-    
+  
     foreach my $accessionnumber (@replikons) {
+	my $refseqoutputfile = "$accessionnumber.gb.gz";
         $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb.gz" . ",";
-		downloadGenomeAndLink( $accessionnumber );
+        if ( (not -e "$refseqoutputfile") and (not -e "$genomePath/$refseqoutputfile") ){
+
+	$dwn->start and next;
+        my $dwnCall = "python ". $PATH_COPRA_SUBSCRIPTS  . "download_genomes.py -g $accessionnumber -p $genomePath/";
+        system $dwnCall;
+        $dwn->finish;    }
     }
+           
 	# remove trailing comma
     chop $GenBankFiles;
 	# add space separator to begin next block of genome files
     $GenBankFiles = $GenBankFiles . " ";
+
+    
 }
+$dwn->wait_all_children; 
 
 ## RefSeq correct download check for 2nd try
 removeInvalidGenomeFiles();
@@ -232,19 +250,18 @@ my @totalrefseqFiles = split(/\s|,/, $GenBankFiles);
 my $consistencyswitch = 1;
 
 my $limitloops = 0;
+my $sleeptimer = 30;
 
-my $sleeptimer = 30; 
 while($consistencyswitch) {
     @gbFiles = <*.gb.gz>;
     foreach my $gbFile (@totalrefseqFiles) {
-        chomp $gbFile;
+	chomp $gbFile;
         if(grep( /^$gbFile$/, @gbFiles )) { 
             $consistencyswitch = 0;
         } else {
              $limitloops++;
              $consistencyswitch = 1;
- 
-             if($limitloops > 100) { 
+             if($limitloops > 1000) { 
                 $consistencyswitch = 0;
 				die( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
              }
@@ -253,14 +270,14 @@ while($consistencyswitch) {
 	     if ($gbFile =~ m/^(.+)\.gb(\.gz)?$/) {
 		$accNr = $1;
 	     }
-             sleep $sleeptimer; 
-             $sleeptimer = $sleeptimer * 1.1; 
-			# try downloading
-			downloadGenomeAndLink( $accNr );
+ 	     # print("downloadGenomeAndLink\n");
+	     downloadGenomeAndLink( $accNr );
              last;
         }
+	
     }
 }
+
 
 ### end availability check
 
@@ -273,6 +290,7 @@ if ( 0 < removeInvalidGenomeFiles("Genome file did not download correctly. This 
 ###########################################
 print "check sanity of CDS features\n" if ($verbose);
 ###########################################
+my $pm = new Parallel::ForkManager($cores);
 foreach my $gbFile (@gbFiles) {
 
 	## fixing issue with CONTIG and ORIGIN both in gb file (can't parse without this) 
@@ -283,10 +301,12 @@ foreach my $gbFile (@gbFiles) {
     	system "zcat $gbFile | sed '/^CONTIG/d' | gzip -9 > tmp.gz; mv -f tmp.gz $gbFile"; ## d stands for delete
 	}
 
+    $pm->start and next; 
 	# check for CDS features
     system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $gbFile >> gene_CDS_exception.txt";
-
+    $pm->finish;
 }
+$pm->wait_all_children;
 { 
     open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
         my @exception_lines = <MYDATA>;
@@ -346,13 +366,12 @@ print "get cluster.tab with DomClust\n" if ($verbose);
 		my $fileContent = do{local(@ARGV,$/)="duplicated_CDS.txt";<>};
 		print ERRORLOG $fileContent . "\n";
     }
-
 }
 
 # 16s sequence parsing 
-print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
-
+# system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl  $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
+system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
+# print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
 # check 16s
 open(MYDATA, "16s_sequences.fa") or die("\nError: cannot open file 16s_sequences.fa in homology_intaRNA.pl\n\n");
     my @sixteenSseqs = <MYDATA>;
@@ -379,7 +398,8 @@ if ($sixteenScounter ne $orgcount) {
 ## prepare single organism whole genome target predictions 
 system "echo $GenBankFiles > merged_refseq_ids.txt"; # need this for iterative region plot construction
 
-my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
+# my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
+my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $core_count $intarnaParamFile $GenBankFiles";
 print $prepare_intarna_out_call . "\n" if ($verbose);
 system $prepare_intarna_out_call;
 ## end
@@ -390,7 +410,7 @@ system $prepare_intarna_out_call;
 # system "Rscript --slave $refineClusterCall"; 
 
 # do CopraRNA combination 
-print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
+print "\n" . $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n\n" if ($verbose);
 system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
 
 # make annotations
@@ -400,7 +420,7 @@ if ($cop1) {
 } else {
   $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv";
 }
-print "$annotateCall\n" if ($verbose);
+print "\n$annotateCall\n" if ($verbose);
 system $annotateCall; 
 
 # get additional homologs in cluster.tab
@@ -432,7 +452,7 @@ system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.cs
 system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; 
 
 # get ooi refseq id
-my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
+my @split = split(/\s/, $refseqaffiliations{$ARGV[6]});
 # get the first id entry
 my $ooi_refseq_id = $split[0];
 
@@ -543,7 +563,7 @@ if ($websrv) {
 	print "generate webserver output\n" if ($verbose); 
 	#######################################################
 
-    my $allrefs = $refseqaffiliations{$ARGV[4]};
+    my $allrefs = $refseqaffiliations{$ARGV[6]};
     my @splitallrefs = split(/\s/,$allrefs);
 
     my $themainrefid = $splitallrefs[0]; # organism of interest RefSeq ID
