@@ -44,6 +44,5 @@ dependencies:
   - r-ggplot2
   - bioconductor-ggtree
   - r-cowplot
-  - r-rgl
   - python
   - suds-jurko
