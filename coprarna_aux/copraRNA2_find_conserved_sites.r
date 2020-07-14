@@ -602,31 +602,33 @@ peak_find2D<-function(align_table, tab_aligned, tabsub_aligned, alignment,sRNA_a
 							out_comb<-refine_consensus_site(out_comb, tab_comb, posprobs=posprobs, thres_m=0.2, thres_s=0.5)
 						}	
 						summ2<-table(unlist(out_comb))
-						levs<-peak_rel(summ2, align_table,posprobs,tab_comb, out_comb)
-						summ2<-names(summ2)[which(levs>=0.01 & summ2 >= thres)]
-						summ2<-check_length(summ2, min_length=min_length)
 						if(length(summ2)>0){
-							out_comb<-lapply(out_comb, function(x){
-							tmp<-na.omit(match(summ2,x ))
-							if(length(tmp)>0){
-								return (x[sort(tmp)])
-							} else{
-								return (NA)
-							}
-							})
-							# check if sites are unique, otherwise condense them
-							for(i in 1:length(out_comb)){
-								if(is.na(out_comb[i])[1]==F){
-									out_comb[[i]]<-unlist(condense_peak(out_comb[[i]], string=T, ov=min_length))
-								}
-							}
-							summ2<-table(unlist(out_comb))
-							summ2<-names(summ2)
+							levs<-peak_rel(summ2, align_table,posprobs,tab_comb, out_comb)
+							summ2<-names(summ2)[which(levs>=0.01 & summ2 >= thres)]
 							summ2<-check_length(summ2, min_length=min_length)
 							if(length(summ2)>0){
-								out_comb<-assign_int_fin(summ2, out_comb,tab_comb, alignment,sRNA_alignment2, ov_thres=0.50, ov_thres2=0.45)
-								summ2<-names(table(unlist(out_comb)))
+								out_comb<-lapply(out_comb, function(x){
+								tmp<-na.omit(match(summ2,x ))
+								if(length(tmp)>0){
+									return (x[sort(tmp)])
+								} else{
+									return (NA)
+								}
+								})
+								# check if sites are unique, otherwise condense them
+								for(i in 1:length(out_comb)){
+									if(is.na(out_comb[i])[1]==F){
+										out_comb[[i]]<-unlist(condense_peak(out_comb[[i]], string=T, ov=min_length))
+									}
+								}
+								summ2<-table(unlist(out_comb))
+								summ2<-names(summ2)
 								summ2<-check_length(summ2, min_length=min_length)
+								if(length(summ2)>0){
+									out_comb<-assign_int_fin(summ2, out_comb,tab_comb, alignment,sRNA_alignment2, ov_thres=0.50, ov_thres2=0.45)
+									summ2<-names(table(unlist(out_comb)))
+									summ2<-check_length(summ2, min_length=min_length)
+								}
 							}
 						}
 					}
@@ -1078,6 +1080,10 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	}
 	fit4<-treeNJ2
 	fit4$tip.label<-gsub(".*/","",fit4$tip.label)
+	
+	if(length(fit4[[2]])==0){
+		return()
+	}
 	
 	peaks_all<-test[[3]]
 	if(length(peaks_all)>0){

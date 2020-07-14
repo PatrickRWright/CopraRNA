@@ -113,6 +113,13 @@ my $COPRARNA_VERSION="3.0.0";
 # v1.2.2   : Fixed issue with organism: 'sfd'
 # v1.2.1   : RefSeq files now being downloaded from NCBI FTP
 
+# get absolute path
+my $ABS_PATH = abs_path($0);
+# remove script name at the end
+# match all non slash characters at the end of the string
+$ABS_PATH =~ s|[^/]+$||g;
+my $PATH_COPRA = $ABS_PATH; 
+
 my $help = "";
 my $sRNAs_fasta = "input_sRNA.fa";
 my $upstream = 200;
@@ -136,14 +143,11 @@ my $enrich = 0; ## functional enrichment needs to be specifically turned on
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
 my $temperature = 37; # temperature for prediction
-my $intarnaParamFile = "intarna_options.cfg";
+my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
 
-# get absolute path
-my $ABS_PATH = abs_path($0);
-# remove script name at the end
-# match all non slash characters at the end of the string
-$ABS_PATH =~ s|[^/]+$||g;
-my $PATH_COPRA = $ABS_PATH; 
+
+
+
 
 GetOptions (
     'help|?'		=> \$help,
@@ -433,12 +437,13 @@ if ($websrv) {
 system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
+
 unless ($cop1) {
 	#######################################################
 	print "prepare html output\n" if ($verbose);
 	#######################################################
 	print "CopraRNA2html.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA . "coprarna_aux/CopraRNA2html.r 2>>  /dev/null > /dev/null";
+    system "R --slave -f " . $PATH_COPRA . "coprarna_aux/CopraRNA2html.r 2>> CopraRNA2_subprocess.oe 1>&2";
 }
 
 
@@ -449,4 +454,3 @@ unless ($noclean) {
 	system "bash $PATH_COPRA/coprarna_aux/copraRNA_cleanupWD.sh";
 
 }
-

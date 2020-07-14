@@ -19,7 +19,7 @@ weight_method<-"clustal"		# organism weights caluclated by the CopraRNA1 method 
 weight_tree<-"upgma"			# "ML" , "upgma"
 outlier_removal=FALSE			# Should p-value outliers be removed prior to p-value combination
 rholimit<-TRUE					# if TRUE rho can take only values between  0 and 1 even if the fit suggests higher rho values
-rho_weights<-2					# Controls if the fit for the dependency in the data should run on all data (rho_weights=1) or on the 1/x lowest p-Values (rho_weights=x).
+rho_weights<-1					# Controls if the fit for the dependency in the data should run on all data (rho_weights=1) or on the 1/x lowest p-Values (rho_weights=x).
 min_length<-2					# minimal number of homologs for combining a p_value
 ooi_only=FALSE					# prediction for all included organisms or only the ooi
 prediction_on_subset=FALSE		# Should the p-value combination be done on all organisms or on an optimized subsets. Only if ooi_only=FALSE. Requires to calculate the optimized subsets. 
@@ -31,7 +31,7 @@ maxdis=0.5						# maximal allowed distance to the ooi to be considered
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
 max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
-registerDoMC(max_cores)
+
 root<-as.numeric(gsub("root:","",co[grep("root:", co)]))
 
 
@@ -39,11 +39,6 @@ root<-as.numeric(gsub("root:","",co[grep("root:", co)]))
 initial.options <- commandArgs(trailingOnly = FALSE)
 path<-initial.options [4]
 path<-sub("join_pvals_coprarna_2.r","",path)
-print(path)
-
-
-# object with phylogenetic sorting of the UTRs
-load("order_table_all_orgs.Rdata")  
 
 
 # transforming arguments into valid variables 
@@ -68,9 +63,12 @@ outlier_removal<-as.logical(outlier_removal)
 mindis<-as.numeric(mindis)
 maxorgs<-as.numeric(maxorgs)
 maxdis<-as.numeric(maxdis)
+max_cores<-as.numeric(max_cores)
+registerDoMC(max_cores)
+root<-as.numeric(root)
 
 if(ooi_only==T){
-	prediction_on_all_orgs=FALSE
+	prediction_on_subset<-FALSE
 }
 
 if(prediction_on_subset==T){
@@ -236,9 +234,11 @@ for(ii in namegenomes){
 	####
 
 	if(order_method=="phylogenetic"){
-		#load("order_table_all.Rdata")
+		load("order_table_all_orgs.Rdata")  
 		order_table<-order_table_all_orgs[[ooi]]
 		order_table<-order_table[,selected_genomes]
+		
+
 		min_length<-min_length
 		min_length<-min_length-1
 		h<-new.env()
@@ -377,7 +377,7 @@ for(ii in namegenomes){
 		name2<-paste("CopraRNA_",name,".csv",sep="")
 	}
 	copra_results[[ii]]<-out_evo
-	write.table(out_evo, file=name2,sep=",", quote=F, row.names=F)
+	#write.table(out_evo, file=name2,sep=",", quote=F, row.names=F)
 }
 
 write.table(copra_results[[1]], file="CopraRNA_result_all.csv",sep=",", quote=F, row.names=F)

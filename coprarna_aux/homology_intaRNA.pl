@@ -524,6 +524,7 @@ if ($ooi_filt) {
 }
 
 unless ($cop1) {
+
 	#######################################################
 	print "plot CopraRNA 2 evo heatmap, jalview files for selection\n" if ($verbose);
 	#######################################################
@@ -585,12 +586,15 @@ if ($websrv) {
         }
     }
 
-    system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
-    # fix for ambiguous nt in intarna output
-    system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop_IntaRNA1_ui.intarna";
+    # system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
+    # # fix for ambiguous nt in intarna output
+    # system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop_IntaRNA1_ui.intarna";
 
-    system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA_result.csv Cop_IntaRNA1_ui.intarna";
-    system "mv coprarna_internal_table.csv coprarna_websrv_table.csv";
+    # system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA_result.csv Cop_IntaRNA1_ui.intarna";
+    # system "mv coprarna_internal_table.csv coprarna_websrv_table.csv";
+	
+	
+	system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prepare_webserver_output.r";
 
     system "cp $orgofintTargets target_sequences_orgofint.fa";
 }

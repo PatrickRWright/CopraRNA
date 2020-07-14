@@ -22,8 +22,11 @@ rm -f weights.warning;
 rm -f aligned_sRNA.fa;
 rm -rf target_alignments;
 rm -f cluster_backup.tab;
-rm -f aux_table.csv;
-
+rm -f opt_tags.clustered;
+rm -f zscore.weight;
+rm -f weights.txt;
+rm -f CopraRNA_result.map_evo_align;
+rm -f markdown_final.Rmd;
 
 # blast files
 rm -f all.fas*;
@@ -59,9 +62,9 @@ mkdir -p Regions_plots;
 mv *regions* Regions_plots;
 for f in thumbnail_*; do
 	mv $f Regions_plots;
-end
+done
 
-if [ -s copra_heatmap.html]; then 
+if [ -s copra_heatmap.html ]; then 
     mkdir -p Enrichment;
     mv copra_heatmap.html Enrichment;
     mv copraRNA.json Enrichment;
@@ -72,18 +75,12 @@ if [ -s copra_heatmap.html]; then
 fi
 
 # make an archive for the Rdata files
- if [ -s int_sites.Rdata]; then
+if [ -s int_sites.Rdata ]; then
     mkdir Rdata;
     mv int_sites.Rdata Rdata;
-    mv order_table_all.Rdata Rdata;
-    mv conservation_table.Rdata Rdata;
+    mv order_table_all_orgs.Rdata Rdata;
+    mv peak_list.Rdata Rdata;
+	mv 16S_tree.Rdata Rdata;
+	mv copra_results_all.Rdata Rdata;
+	mv cluster.tab Rdata;	
 fi
- 
-# zip evo_alignments folder to reduce file number
-if [ -d evo_alignments ]; then 
-	zip -rmq evo_alignments evo_alignments 2>&1; 
-fi;
-
-
-
-

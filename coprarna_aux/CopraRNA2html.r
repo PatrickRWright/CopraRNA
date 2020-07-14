@@ -1,7 +1,7 @@
 
 
 #Call:
-# R --slave -f ./CopraRNA2html.r
+# R --slave -f ~/CopraRNA-git/coprarna_aux/CopraRNA2html.r
 
 
 suppressPackageStartupMessages(require(seqinr))
@@ -254,33 +254,33 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	co<-readLines(paste(wd,"/CopraRNA_option_file.txt",sep=""))
 	noclean<-grep("noclean:", co)
 	noclean<-as.numeric(gsub("noclean:","",co[noclean]))
-	if(noclean==1){
+	#if(noclean==1){
 		enrich1<-"./enriched_heatmap_big.pdf"
 		enrich_thumb<-"./enriched_heatmap_big.png"
-		aux<-"'./aux_table.csv'"
+		aux<-"./aux_table.csv"
 		mrna_reg1<-"./mRNA_regions_with_histogram.pdf"
 		srna_reg1<-"./sRNA_regions_with_histogram.pdf"
 		cons1<-"./conservation_heatmap.pdf"
-	}
+	#}
 
-	if(noclean==0){
-		enrich1<-"./Enrichment/enriched_heatmap_big.pdf"
-		enrich_thumb<-"./Enrichment/enriched_heatmap_big.png"
-		aux<-"'./Enrichment/aux_table.csv'"
-		mrna_reg1<-"./Regions_plots/mRNA_regions_with_histogram.pdf"
-		srna_reg1<-"./Regions_plots/sRNA_regions_with_histogram.pdf"
-		cons1<-"./conservation_heatmap.pdf"
-	}
+	# if(noclean==0){
+		# enrich1<-"./Enrichment/enriched_heatmap_big.pdf"
+		# enrich_thumb<-"./Enrichment/enriched_heatmap_big.png"
+		# aux<-"'./Enrichment/aux_table.csv'"
+		# mrna_reg1<-"./Regions_plots/mRNA_regions_with_histogram.pdf"
+		# srna_reg1<-"./Regions_plots/sRNA_regions_with_histogram.pdf"
+		# cons1<-"./conservation_heatmap.pdf"
+	# }
 	enrich_thumb<-paste0("![](",enrich_thumb,")")
 	
 	if(file.exists(enrich1)){
-		enrich<- paste0("[Functional enrichment](",enrich1,"){target='_blank'}")
+		enrich<- paste0("[Functional enrichment](",enrich1	,"){target='_blank'}")
 		enrich2<- paste0("<object data='",enrich1,"#zoom=75' type='application/pdf' width='100%' height='600'><embed src='",enrich1,"#zoom=75' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
 	} else{
 		enrich<-""
 		enrich2<-""
 	}
-	
+
 	if(file.exists(mrna_reg1)){
 		mrna_reg<-paste0("[mRNA regions plot](",mrna_reg1,"){target='_blank'}")
 		mrna_reg2<-paste0("<object data='",mrna_reg1,"' type='application/pdf' width='100%' height='600'><embed src='",mrna_reg1,"#' type='application/pdf'> <p>This browser does not support PDFs  </p></embed></object>")
@@ -312,6 +312,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	}
 	
 	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### Functional enrichment",enrich2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
+	#ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n",sep="\n"))
 	
 	prefix<-paste("```{r,echo=F}","wd<-getwd()",sep="\n")
 	#suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")
@@ -429,12 +430,56 @@ html_table()
 
 
 
+# create clean html zip folder
+# evo_alignments2
 
 
 
+#co<-readLines("CopraRNA_option_file.txt")
+#noclean<-grep("noclean:", co)
+#noclean<-as.numeric(gsub("noclean:","",co[noclean]))
+dir.create("./results_html")
+# if(noclean==0){
+	# dir.create("./results_html/Enrichment")
+	# dir.create("./results_html/Regions_plots")
+	# file.copy("./Enrichment/enriched_heatmap_big.pdf", "./results_html/Enrichment/enriched_heatmap_big.pdf")
+	# file.copy("./Enrichment/enriched_heatmap_big.png", "./results_html/Enrichment/enriched_heatmap_big.png")
+	# file.copy("./Enrichment/aux_table.csv", "./results_html/Enrichment/aux_table.csv")
+	# file.copy("./Regions_plots/mRNA_regions_with_histogram.pdf", "./results_html/Regions_plots/mRNA_regions_with_histogram.pdf")
+	# file.copy("./Regions_plots/sRNA_regions_with_histogram.pdf", "./results_html/Regions_plots/sRNA_regions_with_histogram.pdf")
+	# file.copy("./conservation_heatmap.pdf", "./results_html/conservation_heatmap.pdf")
+# }
+
+# if(noclean==1){
+	file.copy("./enriched_heatmap_big.pdf", "./results_html/enriched_heatmap_big.pdf")
+	file.copy("./enriched_heatmap_big.png", "./results_html/enriched_heatmap_big.png")
+	file.copy("./aux_table.csv", "./results_html/aux_table.csv")
+	file.copy("./mRNA_regions_with_histogram.pdf", "./results_html/mRNA_regions_with_histogram.pdf")
+	file.copy("./sRNA_regions_with_histogram.pdf", "./results_html/sRNA_regions_with_histogram.pdf")
+	file.copy("./conservation_heatmap.pdf", "./results_html/conservation_heatmap.pdf")
+# }
+file.copy("./evo_alignments2/","./results_html/", recursive=T)
 
 
+d<-dir("./results_html/evo_alignments2/")
+d<-d[-which(d=="ind_tables")]
 
+for(i in d){
+	system(paste("rm ./results_html/evo_alignments2/",i,"/*.txt",sep=""))
+	system(paste("rm ./results_html/evo_alignments2/",i,"/*.fasta",sep=""))
+}
+for(i in d){
+	system(paste("rm ./evo_alignments2/",i,"/*.txt",sep=""))
+	system(paste("rm ./evo_alignments2/",i,"/*.fasta",sep=""))
+	system(paste("rm ./evo_alignments2/",i,"/interactions.html",sep=""))
+}
 
+file.copy("./CopraRNA2_result.html", "./results_html/CopraRNA2_result.html")
+
+system("zip -r copra_html.zip ./results_html")
+system("rm -r ./results_html")
+system("rm -r ./evo_alignments2/ind_tables")
+system("rm CopraRNA2_result.html")
+system("rm *.md")
 
 
