@@ -50,7 +50,6 @@ top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 winsize<-as.numeric(gsub("win size:","",co[grep("win size:", co)]))
 maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
 maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
-temperature<-as.numeric(gsub("temperature:","",co[grep("temperature:", co)]))
 
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
@@ -1736,7 +1735,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					temp_locus<-tab_aligned[j,"name2"]
 					
 					# run IntaRNA for spot probabilities
-					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist, " --temperature ", temperature, " --parameterFile ", par_file, " --out /dev/null --out=SpotProb:STDOUT", sep="")
+					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist,  " --parameterFile ", par_file, " --out /dev/null --out=SpotProb:STDOUT", sep="")
 					temp_table<-as.matrix(read.csv(textConnection(system(temp_table,intern=T)),sep=";", row.names=1,comment.char = "#"))
 					temp_align_table2<-temp_align_table
 					mRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_mRNA"],")",sep="") ))

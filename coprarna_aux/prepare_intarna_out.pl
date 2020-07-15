@@ -43,9 +43,6 @@ chomp $cop1;
 my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; 
 chomp $winsize;
 
-# get temperature
-my $temperature = `grep -m 1 -P '^\\s*temperature:' CopraRNA_option_file.txt | sed 's/^\\s*temperature://g'`; 
-chomp $temperature;
 
 # get maximum base pair distance 
 my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; 
@@ -153,7 +150,6 @@ foreach (@files) {
 					." --outOverlap=Q"
 					." --target $_ --tAccW $winsize --tAccL $maxbpdist"
 					." --query $ncrnafilename --qAccW $winsize --qAccL $maxbpdist"
-					." --temperature $temperature"
 					." --outNumber=2"
                     ." --parameterFile $intarnaParamFile"
                     ." --threads $cores"
@@ -205,8 +201,14 @@ system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "add_pval_to_csv_evdfit.R";
 																			  
 # re-cluster based on 5'UTRs
 my $refineClusterCall = $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; 
-print "$refineClusterCall\n";
+print "$refineClusterCall\n"  if ($verbose);
 system "Rscript --slave $refineClusterCall"; 																			  
+
+
+# remove interactions with full hybrids
+print "remove_full_hybrids\n"  if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_full_hybrids.r";
+ 
 																			  
 																			  
 ## create opt_tags.clustered

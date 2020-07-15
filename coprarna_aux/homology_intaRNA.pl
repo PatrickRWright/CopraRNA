@@ -479,54 +479,11 @@ unless ($cop1) {
     #system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; 
 }
 
-if ($ooi_filt) {
-	######################################################
-	print "filtering for ooi single p-value\n" if ($verbose);
-	######################################################
-
-    my @not_filtered_list = (); # values below the p-value threshold
-    my @filtered_list = ();     # values empty or above the p-value threshold
-
-    open(MYDATA, "CopraRNA_result_all.csv") or die("\nError: cannot open file CopraRNA_result_all.csv at homology_intaRNA.pl\n\n");
-        my @CopraRNA_all_out_lines = <MYDATA>;
-    close MYDATA;
-
-    push(@not_filtered_list, $CopraRNA_all_out_lines[0]); # header
-
-    for (my $i=1;$i<scalar(@CopraRNA_all_out_lines);$i++) {
-        my $curr_line = $CopraRNA_all_out_lines[$i];
-        my @split = split(/,/,$curr_line);
-        my $curr_ooi_cell = $split[2];
-        if ($curr_ooi_cell) {
-            my @split_ooi_cell = split(/\|/,$curr_ooi_cell);
-            my $curr_ooi_pv = $split_ooi_cell[2];
-            if($curr_ooi_pv<=$ooi_filt) { # smaller or eq to the set ooi_filt threshold
-                push(@not_filtered_list, $curr_line);
-            } else { # bigger tahn the set ooi_filt threshold
-                push(@filtered_list, $curr_line);
-            }
-        } else { # empty cell
-            push(@filtered_list, $curr_line);
-        }
-    }
-    # print
-    open WRITEFILT, ">", "CopraRNA_result_all_filt.csv";
-
-    foreach(@not_filtered_list) {
-        print WRITEFILT $_;
-    }
-    foreach(@filtered_list) {
-        print WRITEFILT $_;
-    }
-    close WRITEFILT;
-    system "cp CopraRNA_result_all_filt.csv CopraRNA_result_all.csv";
-    system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv";
-}
 
 unless ($cop1) {
 
 	#######################################################
-	print "plot CopraRNA 2 evo heatmap, jalview files for selection\n" if ($verbose);
+	print "find conserved sites, plot CopraRNA evo heatmap, jalview files for selection\n" if ($verbose);
 	#######################################################
 	print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
     system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR 1>&2";
@@ -571,20 +528,20 @@ if ($websrv) {
     my $orgofintTargets = $themainrefid . "_upfromstartpos_" . $upfromstartpos . "_down_" . $down . ".fa";
     my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
 
-    # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; 
+    # # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
+    # my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; 
 
-    # split
-    my @split = split(/,/, $top_predictons_locus_tags);
+    # # split
+    # my @split = split(/,/, $top_predictons_locus_tags);
     
-    # remove RefSeqID
-    shift @split;
+    # # remove RefSeqID
+    # shift @split;
 
-    foreach (@split) {
-        if ($_) {
-            system "grep -iA1 '$_' $orgofintTargets >> CopraRNA_top_targets.fa";
-        }
-    }
+    # foreach (@split) {
+        # if ($_) {
+            # system "grep -iA1 '$_' $orgofintTargets >> CopraRNA_top_targets.fa";
+        # }
+    # }
 
     # system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
     # # fix for ambiguous nt in intarna output

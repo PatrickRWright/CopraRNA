@@ -257,7 +257,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	#if(noclean==1){
 		enrich1<-"./enriched_heatmap_big.pdf"
 		enrich_thumb<-"./enriched_heatmap_big.png"
-		aux<-"./aux_table.csv"
+		aux<-"'./aux_table.csv'"
 		mrna_reg1<-"./mRNA_regions_with_histogram.pdf"
 		srna_reg1<-"./sRNA_regions_with_histogram.pdf"
 		cons1<-"./conservation_heatmap.pdf"
@@ -305,7 +305,9 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 		cons2<-""
 	}
 	
-	if(file.exists(aux)){
+	d<-dir()
+	ex<-grep("aux_table.csv",d)
+	if(length(ex)>0){
 		aux2<-c("tab<-read.csv(",aux,",sep=',')")
 	} else{
 		aux2<-"tab<-matrix('no auxiliary enrichment available',1,1)"
@@ -435,9 +437,9 @@ html_table()
 
 
 
-#co<-readLines("CopraRNA_option_file.txt")
-#noclean<-grep("noclean:", co)
-#noclean<-as.numeric(gsub("noclean:","",co[noclean]))
+co<-readLines("CopraRNA_option_file.txt")
+noclean<-grep("noclean:", co)
+noclean<-as.numeric(gsub("noclean:","",co[noclean]))
 dir.create("./results_html")
 # if(noclean==0){
 	# dir.create("./results_html/Enrichment")
@@ -468,18 +470,21 @@ for(i in d){
 	system(paste("rm ./results_html/evo_alignments2/",i,"/*.txt",sep=""))
 	system(paste("rm ./results_html/evo_alignments2/",i,"/*.fasta",sep=""))
 }
-for(i in d){
-	system(paste("rm ./evo_alignments2/",i,"/*.txt",sep=""))
-	system(paste("rm ./evo_alignments2/",i,"/*.fasta",sep=""))
-	system(paste("rm ./evo_alignments2/",i,"/interactions.html",sep=""))
-}
 
 file.copy("./CopraRNA2_result.html", "./results_html/CopraRNA2_result.html")
 
 system("zip -r copra_html.zip ./results_html")
 system("rm -r ./results_html")
-system("rm -r ./evo_alignments2/ind_tables")
-system("rm CopraRNA2_result.html")
+
 system("rm *.md")
 
 
+if(noclean==0){
+	for(i in d){
+		system(paste("rm ./evo_alignments2/",i,"/*.txt",sep=""))
+		system(paste("rm ./evo_alignments2/",i,"/*.fasta",sep=""))
+		system(paste("rm ./evo_alignments2/",i,"/interactions.html",sep=""))
+		system("rm -r ./evo_alignments2/ind_tables")
+		system("rm CopraRNA2_result.html")
+	}
+}

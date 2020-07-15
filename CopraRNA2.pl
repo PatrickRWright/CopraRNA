@@ -142,9 +142,8 @@ my $root = 1; # root function to apply to the weights //
 my $enrich = 0; ## functional enrichment needs to be specifically turned on 
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
-my $temperature = 37; # temperature for prediction
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
-
+my $hybrid_threshold = 0.7; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybtid_threshold" of the sRNA
 
 
 
@@ -169,9 +168,9 @@ GetOptions (
     'root:i'		=> \$root, # root function to apply to the weights
     'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons
     'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
-    'temperature:f'		=> \$temperature,
     'genomePath:s'		=> \$genomePath,
-    'intarnaOptions:s'		=> \$intarnaParamFile
+    'intarnaOptions:s'		=> \$intarnaParamFile,
+	'hybrid_threshold:f'		=> \$hybrid_threshold
 );
 
 if ($help) {
@@ -222,8 +221,8 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
 " --genomePath              path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
-" --temperature             temperature in Celsius to be used for interaction prediction (def:37.0)\n\n",
 " --intarnaOptions			path for IntaRNA parameter file\n\n",
+" --hybrid_threshold		interactions are removed from the CopraRNA calculations if the hybrid covers >= hybtid_threshold of the sRNA\n\n",
 "\n",
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -333,8 +332,9 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
     print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
     print WRITETOOPTIONS "genomePath:$genomePath\n";
-	print WRITETOOPTIONS "temperature:$temperature\n";
     print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
+	print WRITETOOPTIONS "hybrid_threshold:$hybrid_threshold\n";
+	
 close WRITETOOPTIONS;
 # end write options
 
