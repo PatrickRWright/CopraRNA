@@ -41,7 +41,7 @@ max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 
 root<-as.numeric(gsub("root:","",co[grep("root:", co)]))
 
-cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)]))
+cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)])
 cop_option<-readLines(cop_option_file)
 cop_option<-gsub("\t.*","",cop_option)
 cop_option<-gsub("#.*","",cop_option)

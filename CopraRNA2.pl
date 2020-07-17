@@ -289,7 +289,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
     print WRITETOOPTIONS "genomePath:$genomePath\n";
     print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
-	print WRITETOOPTIONS "intarnaOptions:$CopraRNA_expert_options\n";	
+	print WRITETOOPTIONS "CopraRNA_expert_options:$CopraRNA_expert_options\n";	
 	print WRITETOOPTIONS "hybrid_threshold:$hybrid_threshold\n";
 	
 close WRITETOOPTIONS;
