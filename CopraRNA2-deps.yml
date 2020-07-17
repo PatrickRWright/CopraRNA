@@ -13,7 +13,6 @@ dependencies:
   - sed
   - grep
   - coreutils 
-  - emboss
   - embassy-phylip
   - blast-legacy
   - phantomjs

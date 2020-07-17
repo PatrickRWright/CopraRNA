@@ -10,6 +10,12 @@ suppressPackageStartupMessages(require(seqinr))
 suppressPackageStartupMessages(require(doMC))
 
 
+# get absolute path
+initial.options <- commandArgs(trailingOnly = FALSE)
+path<-initial.options [4]
+path<-sub("join_pvals_coprarna_2.r","",path)
+
+
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
@@ -17,7 +23,7 @@ order_method="phylogenetic"		# options = p_value or phylogenetic
 name="result_all"
 mnum=40000
 weight_method<-"clustal"		# organism weights caluclated by the CopraRNA1 method (copra) or the ClustalW method (clustal)
-weight_tree<-"upgma"			# "ML" , "upgma"
+weight_tree<-"upgma"			# options: "ML" (slow) , "upgma" or "NJ"
 outlier_removal=FALSE			# Should p-value outliers be removed prior to p-value combination
 rholimit<-TRUE					# if TRUE rho can take only values between  0 and 1 even if the fit suggests higher rho values
 rho_weights<-1					# Controls if the fit for the dependency in the data should run on all data (rho_weights=1) or on the 1/x lowest p-Values (rho_weights=x).
@@ -35,11 +41,25 @@ max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 
 root<-as.numeric(gsub("root:","",co[grep("root:", co)]))
 
+cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)]))
+cop_option<-readLines(cop_option_file)
+cop_option<-gsub("\t.*","",cop_option)
+cop_option<-gsub("#.*","",cop_option)
+cop_option<-gsub(" ","",cop_option)
+empty<-which(cop_option=="")
+if(length(empty)>0){
+	cop_option<-cop_option[-empty]
+}
 
-# get absolute path
-initial.options <- commandArgs(trailingOnly = FALSE)
-path<-initial.options [4]
-path<-sub("join_pvals_coprarna_2.r","",path)
+if(length(cop_option)>0){
+	for(i in 1:length(cop_option)){
+		temp<-strsplit(cop_option[i],"=")
+		temp<-temp[[1]]
+		temp1<-temp[1]
+		temp2<-temp[2]
+		assign(as.character(temp1),temp2)
+	}
+}
 
 
 # transforming arguments into valid variables 

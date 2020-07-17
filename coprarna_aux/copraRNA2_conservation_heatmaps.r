@@ -1,14 +1,8 @@
-
-# script by Jens Georg
+#!/usr/bin/env Rscript
 
 #call
 # R --slave -f ./copraRNA2_conservation_heatmaps.r --args top=50
 
-
-# Dependencies:
-## clustalo 
-## mafft
-## CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
 
 
@@ -215,14 +209,15 @@ if(clustering=="sRNA"){
 	ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
 }
 if(clustering=="ribosomal"){
-	mafft(filename="16s_sequences.fa")
-	tempf<-read.fasta("ncrna_aligned.fa")
-	write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
-	dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
-	dm <- dist.ml(dat, model="F81")
-	treeNJ <- NJ(dm)
-	fitJC = pml(treeNJ, data=dat)
-	fit2<-midpoint(fitJC$tree)
+	#mafft(filename="16s_sequences.fa")
+	#tempf<-read.fasta("ncrna_aligned.fa")
+	#write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
+	#dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+	#dm <- dist.ml(dat, model="F81")
+	#treeNJ <- NJ(dm)
+	#fitJC = pml(treeNJ, data=dat)
+	load("16S_tree.Rdata")
+	fit2<-midpoint(fit2)
 	fit2<-chronos(fit2)
 	clus<-as.hclust.phylo2((fit2))
 	ord<-clus$label

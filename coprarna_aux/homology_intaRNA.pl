@@ -61,12 +61,6 @@ my $websrv = getOptionValue("websrv");
 # check for enrichment on/off and count
 my $enrich = getOptionValue("enrich"); 
 
-# get window size option
-my $winsize = getOptionValue("win size");
-
-# get maximum base pair distance 
-my $maxbpdist = getOptionValue("max bp dist");
-
 
 ####################################
 # open error stream
@@ -393,9 +387,11 @@ print $prepare_intarna_out_call . "\n" if ($verbose);
 system $prepare_intarna_out_call;
 ## end
 
-# do CopraRNA combination 
-print "\n" . $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
+# prepare input for CopraRNA 2 combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prep_cop2.R --args opt_tags.clustered"; ## prepare lines for CopraRNA 2 combination
+
+# without pvalue sampling
+system "env LC_ALL=C sort -g -k1 CopraRNA2_prep.csv > CopraRNA2_prep_sorted.csv";
 
 # make annotations
 my $annotateCall = undef;

@@ -135,6 +135,7 @@ my $enrich = 0; ## functional enrichment needs to be specifically turned on
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
+my $CopraRNA_expert_options = $PATH_COPRA . "coprarna_aux/coprarna_options.cfg";
 my $hybrid_threshold = 0.9; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
 
 
@@ -155,6 +156,7 @@ GetOptions (
     'root:i'		=> \$root, # root function to apply to the weights
     'genomePath:s'		=> \$genomePath,
     'intarnaOptions:s'		=> \$intarnaParamFile,
+    'CopraRNA_expert_options:s'		=> \$CopraRNA_expert_options,
 	'hybrid_threshold:f'		=> \$hybrid_threshold
 );
 
@@ -196,6 +198,7 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
 " --genomePath              path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
 " --intarnaOptions			path for IntaRNA parameter file\n\n",
+" --CopraRNA_expert_options	path to parameter file for CopraRNA expert or experimental options\n\n",
 " --hybrid_threshold		interactions are removed from the CopraRNA calculations if the hybrid covers >= hybrid_threshold of the sRNA\n\n",
 "\n",
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
@@ -286,6 +289,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
     print WRITETOOPTIONS "genomePath:$genomePath\n";
     print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
+	print WRITETOOPTIONS "intarnaOptions:$CopraRNA_expert_options\n";	
 	print WRITETOOPTIONS "hybrid_threshold:$hybrid_threshold\n";
 	
 close WRITETOOPTIONS;
@@ -363,7 +367,7 @@ if ($enrich) {
 }
 
 # output warnings
-system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning";
+#system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning";
 
 # check err.log // should be empty // err.log contains information on 
 # 1. not correctly downloaded RefSeq files 

@@ -24,6 +24,9 @@ int_opt<-grep("intarnaOptions",co)
 int_opt<-gsub("intarnaOptions:","",co[int_opt])
 int_opt<-gsub("#","",readLines(int_opt))
 
+#CopraRNA expert options
+cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)]))
+cop_option<-readLines(cop_option_file)
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
@@ -36,10 +39,6 @@ dat<-read.csv(inputfile, sep=",")
 numMax<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 # ensure number does not exceed available data
 num <- min(numMax, nrow(dat))
-
-#bibliography
-bib<-paste0(path,"bibliography.bib")
-
 
 # markdown template path
 markdown<-paste(path,"markdown_template.Rmd",sep="")
@@ -429,6 +428,7 @@ Nucleic Acids Research, 46(W1), W25-W29, 2018.
 	ma<-c(ma,"\n", "## Options {.tabset .tabset-fade .tabset-pills}")
 	ma<-c(ma,"\n", "### CopraRNA parameter", "\n", paste(opt,"\n",sep=""))
 	ma<-c(ma,"\n", "### IntaRNA options", "\n", paste(int_opt,"\n",sep=""))	
+	ma<-c(ma,"\n", "### CopraRNA expert options", "\n", paste(cop_option,"\n",sep=""))	
 	writeLines(ma, con = "markdown_final.Rmd", sep = "\n", useBytes = FALSE)
 	rmarkdown::render("./markdown_final.Rmd",output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
 }

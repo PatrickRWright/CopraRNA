@@ -26,13 +26,6 @@ max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
 
 
-
-# method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
-weight_method="clustal"
-
-# path to ribosomal RNA fasta
-ribosomal_rna="16s_sequences.fa"
-
 # transforming arguments in valid variables 
 args <- commandArgs(trailingOnly = TRUE)
 if(length(args)>0){ 
@@ -136,14 +129,6 @@ parse_fasta<-function(x){
 	seqs
 }
 
-
-
-# re-align the 16S sequences with an accurate mafft setting and calculate weights
-# mafft(ribosomal_rna, outname="16s_sequences_mafft_align.fas", mode="accurate")
-# ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
-# dm <- dist.ml(ribo, model="F81")
-# fitJC<- upgma(dm)
-# weight<-tree_weights(fitJC, method=weight_method)
 
 build_anno<-function(ooi="NC_000911"){
 	fastutr<-read.fasta("utr_seqs.fa") # for own alignments
