@@ -27,6 +27,13 @@ int_opt<-gsub("#","",readLines(int_opt))
 #CopraRNA expert options
 cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)])
 cop_option<-readLines(cop_option_file)
+cop_option<-gsub("\t.*","",cop_option)
+cop_option<-gsub("#.*","",cop_option)
+cop_option<-gsub(" ","",cop_option)
+empty<-which(cop_option=="")
+if(length(empty)>0){
+	cop_option<-cop_option[-empty]
+}
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
