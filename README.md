@@ -123,26 +123,16 @@ The following options are available:
 - `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
 - `--ntdown` : amount of nucleotides downstream of '--region' to parse for targeting (def:100)
 - `--cores` : amount of cores to use for parallel computation (def:1)
-- `--rcsize` : minimum amount (%) of putative target homologs that need to be available for a target cluster 
-               to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
-- `--winsize`                 IntaRNA target (--tAccW) window size parameter (def:150)
-- `--maxbpdist`               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
-- `--cop1`                    switch for CopraRNA1 prediction (def:off)
-- `--cons`                    controls consensus prediction (def:0)
-    - '0' for off
-    - '1' for organism of interest based consensus
-    - '2' for overall consensus based prediction
 - `--verbose` : switch to print verbose output to terminal during computation (def:off)
 - `--websrv` : switch to provide webserver output files (def:off)
 - `--noclean` : switch to prevent removal of temporary files (def:off)
 - `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
-- `--nooi` : if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
-- `--ooifilt` : post processing filter for organism of interest p-value 0=off (def:0)
 - `--root` : specifies root function to apply to the weights (def:1)
 - `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
-- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
-- `--temperature` : temperature in Celsius to be used for interaction prediction (def:37.0)
 - `--genomePath`: path where NCBI genome files (`*.gb`) are to be stored (def:`.` i.e. working directory). Set this path if you (want to) store all your genomes in a dedicated folder to be shared by different CopraRNA calls.
+- `--intarnaOptions` : path for IntaRNA parameter file.
+- `--CopraRNA_expert_options` : path to parameter file for CopraRNA expert or experimental options.
+- `--hybrid_threshold` : interactions are removed from the CopraRNA calculations if the hybrid covers >= hybrid_threshold of the sRNA.
 
 <br /><br />
 <a name="updateava" />
