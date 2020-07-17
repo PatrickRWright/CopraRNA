@@ -1,7 +1,8 @@
+#!/usr/bin/env Rscript
 
 
 #Call:
-# R --slave -f ~/CopraRNA-git/coprarna_aux/CopraRNA2html.r
+# R --slave -f ~/CopraRNA2html.r
 
 
 suppressPackageStartupMessages(require(seqinr))
@@ -18,6 +19,12 @@ co<-readLines("CopraRNA_option_file.txt")
 max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
 registerDoMC(max_cores)
 
+#IntaRNA_option file
+int_opt<-grep("intarnaOptions",co)
+int_opt<-gsub("intarnaOptions:","",co[int_opt])
+int_opt<-gsub("#","",readLines(int_opt))
+
+
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
 
@@ -26,7 +33,6 @@ inputfile="CopraRNA_result_all.csv"
 dat<-read.csv(inputfile, sep=",")
 	
 # number of top predictions which should be investigated
-co<-readLines("CopraRNA_option_file.txt") 
 numMax<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
 # ensure number does not exceed available data
 num <- min(numMax, nrow(dat))
@@ -420,8 +426,9 @@ Nucleic Acids Research, 46(W1), W25-W29, 2018.
 
 </font>"
 		)
-	
-	ma<-c(ma,"\n", "## CopraRNA parameter", "\n", paste(opt,"\n",sep=""))
+	ma<-c(ma,"\n", "## Options {.tabset .tabset-fade .tabset-pills}")
+	ma<-c(ma,"\n", "### CopraRNA parameter", "\n", paste(opt,"\n",sep=""))
+	ma<-c(ma,"\n", "### IntaRNA options", "\n", paste(int_opt,"\n",sep=""))	
 	writeLines(ma, con = "markdown_final.Rmd", sep = "\n", useBytes = FALSE)
 	rmarkdown::render("./markdown_final.Rmd",output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
 }
@@ -441,25 +448,13 @@ co<-readLines("CopraRNA_option_file.txt")
 noclean<-grep("noclean:", co)
 noclean<-as.numeric(gsub("noclean:","",co[noclean]))
 dir.create("./results_html")
-# if(noclean==0){
-	# dir.create("./results_html/Enrichment")
-	# dir.create("./results_html/Regions_plots")
-	# file.copy("./Enrichment/enriched_heatmap_big.pdf", "./results_html/Enrichment/enriched_heatmap_big.pdf")
-	# file.copy("./Enrichment/enriched_heatmap_big.png", "./results_html/Enrichment/enriched_heatmap_big.png")
-	# file.copy("./Enrichment/aux_table.csv", "./results_html/Enrichment/aux_table.csv")
-	# file.copy("./Regions_plots/mRNA_regions_with_histogram.pdf", "./results_html/Regions_plots/mRNA_regions_with_histogram.pdf")
-	# file.copy("./Regions_plots/sRNA_regions_with_histogram.pdf", "./results_html/Regions_plots/sRNA_regions_with_histogram.pdf")
-	# file.copy("./conservation_heatmap.pdf", "./results_html/conservation_heatmap.pdf")
-# }
 
-# if(noclean==1){
-	file.copy("./enriched_heatmap_big.pdf", "./results_html/enriched_heatmap_big.pdf")
-	file.copy("./enriched_heatmap_big.png", "./results_html/enriched_heatmap_big.png")
-	file.copy("./aux_table.csv", "./results_html/aux_table.csv")
-	file.copy("./mRNA_regions_with_histogram.pdf", "./results_html/mRNA_regions_with_histogram.pdf")
-	file.copy("./sRNA_regions_with_histogram.pdf", "./results_html/sRNA_regions_with_histogram.pdf")
-	file.copy("./conservation_heatmap.pdf", "./results_html/conservation_heatmap.pdf")
-# }
+file.copy("./enriched_heatmap_big.pdf", "./results_html/enriched_heatmap_big.pdf")
+file.copy("./enriched_heatmap_big.png", "./results_html/enriched_heatmap_big.png")
+file.copy("./aux_table.csv", "./results_html/aux_table.csv")
+file.copy("./mRNA_regions_with_histogram.pdf", "./results_html/mRNA_regions_with_histogram.pdf")
+file.copy("./sRNA_regions_with_histogram.pdf", "./results_html/sRNA_regions_with_histogram.pdf")
+file.copy("./conservation_heatmap.pdf", "./results_html/conservation_heatmap.pdf")
 file.copy("./evo_alignments2/","./results_html/", recursive=T)
 
 

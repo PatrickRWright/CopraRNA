@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 
 #call:
 # R --slave -f /home/jens/CopraRNA-git/coprarna_aux/remove_full_hybrids.r 
@@ -14,10 +15,11 @@ check_hybrid<-function(hybrid, srna_length){
 	return(nchar(hybrid)/srna_length)
 }
 
-if(hybrid_threshold<1){
+if(hybrid_threshold<=1){
 	removed<-c()
 	d<-dir()
-	sRNAs<-read.fasta("input_sRNA.fa")
+	sRNAs<-read.fasta("ncrna.fa")
+	names(sRNAs)<-gsub("ncRNA_","",names(sRNAs))
 	cluster<-read.csv("cluster.tab", sep="\t")
 	for(i in 1:length(sRNAs)){
 		le<-length(sRNAs[[i]])
@@ -32,7 +34,6 @@ if(hybrid_threshold<1){
 				pos_col<-grep(tags[j],cluster)
 				pos_row<-grep(tags[j],cluster[,pos_col])
 				pos_col<-rep(pos_col,length(pos_row))
-				print(c(pos_col,pos_row,tags[j]))
 				if(length(pos_row)>0){
 					for(jj in 1:length(pos_row)){
 						tmp<-cluster[pos_row[jj],pos_col[jj]]

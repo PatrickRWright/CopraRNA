@@ -1,7 +1,8 @@
-# script by Jens Georg
+#!/usr/bin/env Rscript
+
 
 #call:
-#R --slave -f /home/jens/CopraRNA-git/coprarna_aux/join_pvals_coprarna_2.r --args ooi_only=FALSE prediction_on_subset=TRUE	outlier_removal=TRUE maxorgs=15	 
+#R --slave -f ~join_pvals_coprarna_2.r
  
 #Dependencies:
 suppressPackageStartupMessages(require(phangorn))

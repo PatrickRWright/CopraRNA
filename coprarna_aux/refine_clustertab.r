@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-# script by Jens Georg
-
 #dependencies:
 # mafft
 

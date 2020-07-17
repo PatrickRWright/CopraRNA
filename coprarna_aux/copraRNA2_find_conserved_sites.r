@@ -1,21 +1,9 @@
-# script by Jens Georg
-
-# dependencies:
-
-## Tools: 
-### Mafft
-### dialign-tx
-
-## Files:
-### CopraRNA_available_organisms.txt
-### path to dialign config file
-### jalview_props.txt
+#!/usr/bin/env Rscript
 
 #call:
-#R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r 
-#R --slave -f /home/jens/media/jens@margarita/CopraRNA-git/coprarna_aux/copraRNA2_find_conserved_sites.r
-#path="/home/jens/media/jens@margarita/CopraRNA-git/coprarna_aux/"
-#path="/home/jens/CopraRNA-git/coprarna_aux/"
+#R --slave -f ~/copraRNA2_find_conserved_sites.r 
+
+
 suppressPackageStartupMessages(require(phangorn))
 suppressPackageStartupMessages(require(seqinr))
 suppressPackageStartupMessages(require(doMC))
@@ -45,11 +33,6 @@ registerDoMC(max_cores)
 
 # number of top predictions which should be investigated
 top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
-
-# IntaRNA parameters
-winsize<-as.numeric(gsub("win size:","",co[grep("win size:", co)]))
-maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
-maxbpdist<-as.numeric(gsub("max bp dist:","",co[grep("max bp dist:", co)]))
 
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method
@@ -1735,7 +1718,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					temp_locus<-tab_aligned[j,"name2"]
 					
 					# run IntaRNA for spot probabilities
-					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] , " --tAccW " ,winsize, " --tAccL ",maxbpdist, " --query ",tab[j,"seq_srna"]," --qAccW ", winsize, " --qAccL ", maxbpdist,  " --parameterFile ", par_file, " --out /dev/null --out=SpotProb:STDOUT", sep="")
+					temp_table<-paste("IntaRNA  --target ",tab[j,"seq_mrna"] ,  " --query ",tab[j,"seq_srna"], " --parameterFile ", par_file, " --out /dev/null --out=SpotProb:STDOUT", sep="")
 					temp_table<-as.matrix(read.csv(textConnection(system(temp_table,intern=T)),sep=";", row.names=1,comment.char = "#"))
 					temp_align_table2<-temp_align_table
 					mRNA_no_gaps<-eval(parse( text=paste("c(",tab_aligned[j,"gaps_mRNA"],")",sep="") ))

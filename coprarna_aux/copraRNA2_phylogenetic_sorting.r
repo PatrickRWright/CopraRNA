@@ -1,11 +1,7 @@
-# script by Jens Georg
-
-# dependencies: 
-## CopraRNA_available_organisms.txt
-## Mafft
+#!/usr/bin/env Rscript# script by Jens Georg
 
 #call:
-# R --slave -f /home/jens/CopraRNA-git/coprarna_aux/copraRNA2_phylogenetic_sorting.r 
+# R --slave -f ~/copraRNA2_phylogenetic_sorting.r 
 
 suppressPackageStartupMessages(require(phangorn))
 suppressPackageStartupMessages(require(seqinr))

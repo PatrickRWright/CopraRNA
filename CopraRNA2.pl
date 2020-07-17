@@ -125,25 +125,17 @@ my $sRNAs_fasta = "input_sRNA.fa";
 my $upstream = 200;
 my $downstream = 100;
 my $region = "5utr";
-my $RelClusterSize = 0.5;
 my $core_count = 1; # how many parallel processes are allowed
-my $winsize = 150; # IntaRNA window size
-my $maxbpdist = 100; # IntaRNA maximum base pair distance 
-my $cop1 = 0;
-my $cons = 0;
-my $nooi = 0; # if this is set to 1 then the standard prediction mode is CopraRNA 2 balanced else ooi
 my $verbose = 0;
 my $noclean = 0;
 my $websrv = 0;
-my $ooi_filt = 0; ## for copraRNA2_ooi_post_filtering.R
-my $pvalcutoff = 0.15; # p-value cutoff for CopraRNA 2 //
 my $topcount = 200; # amount of top predictions //
 my $root = 1; # root function to apply to the weights //
 my $enrich = 0; ## functional enrichment needs to be specifically turned on 
                 ## this option also allows to specify how many top predictions to use for the enrichment
 my $genomePath = "."; # where to look for and store genome files
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
-my $hybrid_threshold = 0.7; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybtid_threshold" of the sRNA
+my $hybrid_threshold = 0.9; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
 
 
 
@@ -155,19 +147,12 @@ GetOptions (
     'ntdown:i'		=> \$downstream,
     'cores:i'		=> \$core_count,
     'region:s'		=> \$region, # one of "5utr", "3utr", "cds"
-    'rcsize:f'		=> \$RelClusterSize,
-    'winsize:i'		=> \$winsize,
-    'maxbpdist:i'	=> \$maxbpdist,
-    'cop1'		=> \$cop1, # switch for coprarna1, if set then coprarna1 is run // else only coprarna2
     'verbose'		=> \$verbose, # switch for verbose output during computation
     'websrv'		=> \$websrv, # switch for providing webserver output
     'noclean'		=> \$noclean, # switch to prevent cleaning of files
-    'nooi'		=> \$nooi, # switch to set prediction mode to balanced mode
     'topcount:i'	=> \$topcount, # amount of top predictions to return
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
     'root:i'		=> \$root, # root function to apply to the weights
-    'cons:i'		=> \$cons, # consensus mode / 0=off, 1=ooi_cons, 2=overall_cons
-    'ooifilt:f'		=> \$ooi_filt, # for copraRNA2_ooi_post_filtering.R
     'genomePath:s'		=> \$genomePath,
     'intarnaOptions:s'		=> \$intarnaParamFile,
 	'hybrid_threshold:f'		=> \$hybrid_threshold
@@ -203,26 +188,15 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
-" --rcsize                  minimum amount (%) of putative target homologs that need to be available \n",
-"                           for a target cluster to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)\n",
-" --winsize                 IntaRNA target (--tAccW) window size parameter (def:150)\n",
-" --maxbpdist               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)\n",
-" --cop1                    switch for CopraRNA1 prediction (def:off)\n",
-" --cons                    controls consensus prediction (def:0)\n",
-"                           '0' for off\n",
-"                           '1' for organism of interest based consensus\n",
-"                           '2' for overall consensus based prediction\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",
 " --websrv                  switch to provide webserver output files (def:off)\n",
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",
 " --enrich                  if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)\n",
-" --nooi                    if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)\n",
-" --ooifilt                 post processing filter for organism of interest p-value 0=off (def:0)\n",
 " --root                    specifies root function to apply to the weights (def:1)\n",
 " --topcount                specifies the amount of top predictions to return and use for the extended regions plots (def:200)\n",
 " --genomePath              path where NCBI genome files (*.gb) are to be stored (def:"." == working directory)\n\n",
 " --intarnaOptions			path for IntaRNA parameter file\n\n",
-" --hybrid_threshold		interactions are removed from the CopraRNA calculations if the hybrid covers >= hybtid_threshold of the sRNA\n\n",
+" --hybrid_threshold		interactions are removed from the CopraRNA calculations if the hybrid covers >= hybrid_threshold of the sRNA\n\n",
 "\n",
 "Example call: CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4\n\n",
 "License: MIT\n\n",
@@ -253,9 +227,6 @@ my $count_fa = `grep -c '>' $sRNAs_fasta`;
 chomp $count_fa;
 die("\nError: The input file ($sRNAs_fasta) seems to contain less than 3 sequences!\n\n") unless($count_fa>2);
 
-# check for ooifilt <=1 and >= 0
-die("\nError: ooifilt needs to be specified between 0 and 1. You set $ooi_filt\n\n") unless ($ooi_filt>=0 and $ooi_filt<=1);
-
 # create warning for non empty run dir
 my @dir_files = <*>;
 my $file_count = scalar(@dir_files);
@@ -268,15 +239,6 @@ if ($core_count <= 1) {
 
 # check region parameter
 die ("\nError: -region parameter must be one of 5utr, 3utr or cds. You set '$region'.\n\n") unless ($region eq "5utr" or $region eq "3utr" or $region eq "cds");
-
-# check cons paramter
-die ("\nError: -cons parameter must be one of 0, 1 or 2. You set '$cons'.\n\n") unless ($cons eq 2 or $cons eq 1 or $cons eq 0);
-
-# disallow nooi=1 and cons=1 combination
-die ("\nError: -cons 1 can not be combined with -nooi 1. Set -cons to 0 or 2.\n\n") if ( ($cons eq 1) and $nooi );
-
-# disallow consensus predictions with coprarna 1
-die ("\nError: -cons must be 0 for -cop1 prediction. You set '$cons'.\n\n") if ( ( ($cons eq 1) and $cop1 ) or ( ($cons eq 2) and $cop1 ) );
 
 # check for gaps
 system "grep '-' $sRNAs_fasta > find_gaps.txt";
@@ -294,16 +256,14 @@ foreach(@splitHeaderIDs) {
 }
 
 # check that maxbpdist ist smaller or equal to windowsize
-die("\nError: The maximal basepair distance ($maxbpdist) is larger than the given window size ($winsize) but must be <= to the windows size. Please change the parameters accordingly.\n\n") if ($maxbpdist > $winsize);
+
+#die("\nError: The maximal basepair distance ($maxbpdist) is larger than the given window size ($winsize) but must be <= to the windows size. Please change the parameters accordingly.\n\n") if ($maxbpdist > $winsize);
 
 # check for ntup + ntdown being >= $winsize because of IntaRNA parameters
-my $sumUpDown = $upstream+$downstream;
-if ($region eq "5utr" or $region eq "3utr") {
-    die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize (--winsize). Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize );
-}
-
-# check for correct range of 0.5 <= -rcsize <= 1.0
-die("\nError: -rcsize can only be specified between 0 and 1.0. You set '$RelClusterSize'.\n\n") unless ($RelClusterSize >= 0 and $RelClusterSize <= 1.0);
+# my $sumUpDown = $upstream+$downstream;
+# if ($region eq "5utr" or $region eq "3utr") {
+    # die("\nError: (-ntup + -ntdown) is $sumUpDown but must be >= $winsize (--winsize). Please change the parameters accordingly.\n\n") if ( $sumUpDown < $winsize );
+# }
 
 # check for duplicate IDs in FASTA header // not allowed
 my $duplicate_fasta_header = `grep ">" $sRNAs_fasta | sort | uniq -d`;
@@ -316,20 +276,13 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "nt upstream:" . $upstream . "\n";
     print WRITETOOPTIONS "nt downstream:" . $downstream . "\n";
     print WRITETOOPTIONS "region:" . $region . "\n";
-    print WRITETOOPTIONS "relative clustersize:" . $RelClusterSize . "\n"; 
     print WRITETOOPTIONS "core count:" . $core_count . "\n";
-    print WRITETOOPTIONS "win size:" . $winsize . "\n";
-    print WRITETOOPTIONS "max bp dist:" . $maxbpdist . "\n";
-    print WRITETOOPTIONS "CopraRNA1:" . $cop1 . "\n";
     print WRITETOOPTIONS "verbose:" . $verbose . "\n";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
-    print WRITETOOPTIONS "nooi:" . $nooi . "\n";
     print WRITETOOPTIONS "top count:" . $topcount . "\n";
     print WRITETOOPTIONS "root:" . $root . "\n";
     print WRITETOOPTIONS "enrich:" . $enrich . "\n";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
-    print WRITETOOPTIONS "cons:" . $cons . "\n";
-    print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
     print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
     print WRITETOOPTIONS "genomePath:$genomePath\n";
     print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
@@ -438,13 +391,13 @@ system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_wi
 system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
 
-unless ($cop1) {
-	#######################################################
-	print "prepare html output\n" if ($verbose);
-	#######################################################
-	print "CopraRNA2html.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA . "coprarna_aux/CopraRNA2html.r 2>> CopraRNA2_subprocess.oe 1>&2";
-}
+
+#######################################################
+print "prepare html output\n" if ($verbose);
+#######################################################
+print "CopraRNA2html.r\n" if ($verbose);
+system "R --slave -f " . $PATH_COPRA . "coprarna_aux/CopraRNA2html.r 2>> CopraRNA2_subprocess.oe 1>&2";
+
 
 
 # clean up

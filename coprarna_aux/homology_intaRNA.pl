@@ -41,12 +41,6 @@ sub getOptionValue
 
 my $cores = getOptionValue("core count");
 
-# check if CopraRNA1 prediction should be made
-my $cop1 = getOptionValue("CopraRNA1");
-
-# check nooi switch
-my $nooi = getOptionValue("nooi");
-
 # check for verbose printing
 my $verbose = getOptionValue("verbose");
 
@@ -73,11 +67,6 @@ my $winsize = getOptionValue("win size");
 # get maximum base pair distance 
 my $maxbpdist = getOptionValue("max bp dist");
 
-# get consensus prediction option
-my $cons = getOptionValue("cons");
-
-# get ooifilt
-my $ooi_filt = getOptionValue("ooifilt");
 
 ####################################
 # open error stream
@@ -404,51 +393,34 @@ print $prepare_intarna_out_call . "\n" if ($verbose);
 system $prepare_intarna_out_call;
 ## end
 
-# # re-cluster based on 5'UTRs
-# my $refineClusterCall = $PATH_COPRA_SUBSCRIPTS . "refine_clustertab.r"; 
-# print "$refineClusterCall\n";
-# system "Rscript --slave $refineClusterCall"; 
-
 # do CopraRNA combination 
 print "\n" . $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n\n" if ($verbose);
 system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
 
 # make annotations
 my $annotateCall = undef;
-if ($cop1) {
-  $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA1_with_pvsample_sorted.csv opt_tags.clustered_rcsize $GenBankFiles > CopraRNA1_anno.csv";
-} else {
   $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv";
-}
+
 print "\n$annotateCall\n" if ($verbose);
 system $annotateCall; 
 
 # get additional homologs in cluster.tab
 my $parseHomologsCall = undef;
-if ($cop1) {
-	$parseHomologsCall = $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv";
-} else {
 	$parseHomologsCall = $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv";
-}
+
 print "$parseHomologsCall\n" if ($verbose);
 system $parseHomologsCall; 
 
-# add corrected p-values (padj) - first column
-system "awk -F',' '{ print \$1 }' CopraRNA1_anno_addhomologs.csv > CopraRNA1_pvalues.txt" if ($cop1); 
+ 
 # just for formatting
 system "awk -F',' '{ print \$1 }' CopraRNA2_prep_anno_addhomologs.csv > CopraRNA2_pvalues.txt";
-
-system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA1_pvalues.txt" if ($cop1);
-system "paste padj.csv CopraRNA1_anno_addhomologs.csv -d ',' > CopraRNA1_anno_addhomologs_padj.csv" if ($cop1); 
 
 # just for formatting
 system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA2_pvalues.txt";
 system "paste padj.csv CopraRNA2_prep_anno_addhomologs.csv -d ',' > CopraRNA2_prep_anno_addhomologs_padj.csv"; 
 
-# add amount sampled values CopraRNA 1 // CopraRNA 2 has no sampling
-system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA1_anno_addhomologs_padj.csv 0 > CopraRNA1_anno_addhomologs_padj_amountsamp.csv" if ($cop1); 
+
 # make consistent names
-system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv" if ($cop1); 
 system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; 
 
 # get ooi refseq id
@@ -458,38 +430,27 @@ my $ooi_refseq_id = $split[0];
 
 
 
-unless ($cop1) {
-	######################################################
-    print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
-	######################################################
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR 1>&2"; 
-    # perform actual CopraRNA 2 p-value combination
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR 1>&2"; 
-    
-}
+
+######################################################
+print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
+######################################################
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR 1>&2"; 
+# perform actual CopraRNA 2 p-value combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR 1>&2"; 
+
 
 
 # truncate final output // 
-system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); 
-unless ($cop1) {
-    system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv"; 
-    #system "head -n $topcount CopraRNA2_final_all_balanced.csv > CopraRNA2_final_balanced.csv"; 
-    #system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; 
-    #system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; 
-    #system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; 
-}
+system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv"; 
 
+#######################################################
+print "find conserved sites, plot CopraRNA evo heatmap, jalview files for selection\n" if ($verbose);
+#######################################################
+print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR 1>&2";
+print "copraRNA2_conservation_heatmaps.r\n" if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR 1>&2"; 
 
-unless ($cop1) {
-
-	#######################################################
-	print "find conserved sites, plot CopraRNA evo heatmap, jalview files for selection\n" if ($verbose);
-	#######################################################
-	print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR 1>&2";
-	print "copraRNA2_conservation_heatmaps.r\n" if ($verbose);
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR 1>&2"; 
-}
 
 # check for run fail CopraRNA
 open(MYDATA, "CopraRNA_result.csv") or die("\nError: cannot open file CopraRNA_result.csv at homology_intaRNA.pl\n\n");
@@ -501,20 +462,19 @@ if (scalar(@CopraRNA_out_lines) <= 1) {
 }
 
 # trim off last column (initial_sorting) if CopraRNA 2 prediction mode
-unless ($cop1) {
-     system "awk -F',' '{ print \$NF }' CopraRNA_result.csv > CopraRNA_result.map_evo_align" if ($websrv);
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
-     system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
-     system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
-     # change header
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
-     system "sed -i 's/p.value/p-value/g' CopraRNA_result.csv";
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
-     system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
-}
+system "awk -F',' '{ print \$NF }' CopraRNA_result.csv > CopraRNA_result.map_evo_align" if ($websrv);
+system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
+system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
+system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
+system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
+# change header
+system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
+system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
+system "sed -i 's/p.value/p-value/g' CopraRNA_result.csv";
+system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
+system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
+system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
+
 
 if ($websrv) { 
 	#######################################################
@@ -527,30 +487,6 @@ if ($websrv) {
     my $themainrefid = $splitallrefs[0]; # organism of interest RefSeq ID
     my $orgofintTargets = $themainrefid . "_upfromstartpos_" . $upfromstartpos . "_down_" . $down . ".fa";
     my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
-
-    # # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    # my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; 
-
-    # # split
-    # my @split = split(/,/, $top_predictons_locus_tags);
-    
-    # # remove RefSeqID
-    # shift @split;
-
-    # foreach (@split) {
-        # if ($_) {
-            # system "grep -iA1 '$_' $orgofintTargets >> CopraRNA_top_targets.fa";
-        # }
-    # }
-
-    # system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
-    # # fix for ambiguous nt in intarna output
-    # system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop_IntaRNA1_ui.intarna";
-
-    # system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA_result.csv Cop_IntaRNA1_ui.intarna";
-    # system "mv coprarna_internal_table.csv coprarna_websrv_table.csv";
-	
-	
 	system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prepare_webserver_output.r";
 
     system "cp $orgofintTargets target_sequences_orgofint.fa";

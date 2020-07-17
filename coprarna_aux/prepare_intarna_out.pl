@@ -35,18 +35,6 @@ chomp $cores;
 my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; 
 chomp $verbose;
 
-# check if CopraRNA1 prediction should be made
-my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; 
-chomp $cop1;
-
-# get window size option
-my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; 
-chomp $winsize;
-
-
-# get maximum base pair distance 
-my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; 
-chomp $maxbpdist;
 
 my $pm = new Parallel::ForkManager($cores);
 
@@ -148,8 +136,8 @@ foreach (@files) {
 			my $intarna_call = 
 					"IntaRNA"
 					." --outOverlap=Q"
-					." --target $_ --tAccW $winsize --tAccL $maxbpdist"
-					." --query $ncrnafilename --qAccW $winsize --qAccL $maxbpdist"
+					." --target $_"
+					." --query $ncrnafilename"
 					." --outNumber=2"
                     ." --parameterFile $intarnaParamFile"
                     ." --threads $cores"
@@ -164,21 +152,6 @@ foreach (@files) {
 }
                                                                                         
 
-### sort IntaRNA output by energy  # obsolete due to "--outCsvSort E" in intarna call
-#@files = <*intarna.csv>;
-#
-#foreach (@files) {
-#    
-#    my $temp = $_;
-#    chomp $temp;
-#    chop $temp;
-#    chop $temp;
-#    chop $temp;
-#    my $sortedcsv = $temp . "sorted.csv"; 
-#    system "env LC_ALL=C sort -t';' -g -k15 $_ -o $sortedcsv"; 
-#}
-#
-#@files = <*>;
 
 my %ncrnalengthhash = (); 
 my @lines = (); 
@@ -207,15 +180,13 @@ system "Rscript --slave $refineClusterCall";
 
 # remove interactions with full hybrids
 print "remove_full_hybrids\n"  if ($verbose);
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_full_hybrids.r";
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_full_hybrids.r>> $OUT_ERR 1>&2"; 
  
 																			  
 																			  
 ## create opt_tags.clustered
 system $PATH_COPRA_SUBSCRIPTS . "cluster_intarna_csv.pl > opt_tags.clustered"; 
 
-## create opt_tags.clustered_rcsize
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_clusters_under_percantage.R" if ($cop1); 
 
 system "mafft --localpair --quiet 16s_sequences.fa > 16s_sequences.aln";
 system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2>> $OUT_ERR 1>&2"; 
