@@ -56,18 +56,18 @@ It is also possible to run CopraRNA [via a provided Docker container](#biocontai
 <a name="deps" />
 ## Dependencies
 
-We provide a [list of dependencies](CopraRNA2-deps.yml) within the file [CopraRNA2-deps.yml](CopraRNA2-deps.yml).
+We provide a [list of dependencies](CopraRNA-deps.yml) within the file [CopraRNA-deps.yml](CopraRNA-deps.yml).
 
 You can easily create a [`conda` environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) using the following command (after installing `conda`)
 ```bash
 # within CopraRNA project folder
 # once
-conda env create --file CopraRNA2-deps.yml --name CopraRNA2-deps
-chmod a+x CopraRNA2.pl
+conda env create --file CopraRNA-deps.yml
+chmod a+x CopraRNA.pl
 # always once within a shell session
-conda activate CopraRNA2-deps
+conda activate CopraRNA-deps
 # call CopraRNA
-./CopraRNA2.pl -help
+./CopraRNA.pl -help
 ```
 
 <br /><br />
@@ -80,10 +80,10 @@ with all dependencies.
 Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information. We recommend installing into a dedicated environment, to avoid conflicts with
-other installed tools (or their versions). Following two commands install CopraRNA into the enviroment `CopraRNA2` and activate it:
+other installed tools (or their versions). Following two commands install CopraRNA into the enviroment `CopraRNA` and activate it:
 ```bash
-conda create -n CopraRNA2 -c r -c conda-forge -c bioconda coprarna
-conda activate CopraRNA2
+conda create -n CopraRNA -c r -c conda-forge -c bioconda coprarna
+conda activate CopraRNA
 ```
 <br /><br />
 <a name="biocontainer" />
@@ -92,7 +92,7 @@ conda activate CopraRNA2
 
 CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type (with changed version):
 ```bash
-       docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
+       docker run -i -t quay.io/biocontainers/coprarna:3.0.0--0 /bin/bash
 ```
 <br /><br />
 <a name="instgithub" />
@@ -109,7 +109,7 @@ If you installed all dependencies you should be able to directly use the source.
 
 Example call:
 ```bash
-CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4
+CopraRNA.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4
 ```
 
 The following options are available:
