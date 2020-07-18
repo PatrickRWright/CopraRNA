@@ -22,6 +22,9 @@ rm -rf $TESTTMPDIR
 mkdir -p $TESTTMPDIR
 cd $TESTTMPDIR
 
+# copy 16s sequences from original genomes for dummy genomes here
+ln -s ../$TESTFILE-genomes/16s_sequences.fa .
+
 echo "run test call : $CALLARGS"
 ../../CopraRNA.pl $CALLARGS
 CALLEXITCODE=$?
