@@ -483,10 +483,10 @@ system("rm *.md")
 
 if(noclean==0){
 	for(i in d){
-		system(paste("rm ./evo_alignments2/",i,"/*.txt",sep=""))
-		system(paste("rm ./evo_alignments2/",i,"/*.fasta",sep=""))
-		system(paste("rm ./evo_alignments2/",i,"/interactions.html",sep=""))
-		system("rm -r ./evo_alignments2/ind_tables")
-		system("rm CopraRNA2_result.html")
+		system(paste("rm -f ./evo_alignments2/",i,"/*.txt",sep=""))
+		system(paste("rm -f ./evo_alignments2/",i,"/*.fasta",sep=""))
+		system(paste("rm -f ./evo_alignments2/",i,"/interactions.html",sep=""))
+		system("rm -rf ./evo_alignments2/ind_tables")
+		system("rm -f CopraRNA2_result.html")
 	}
 }
