@@ -1,85 +1,85 @@
 fdr,p-value,IntaRNA_pValue_ooi,NC_000913,NZ_CP007392,NC_007606,Annotation,Additional homologs,Amount sampled
-0.009110638,0.004555319,0.0107708,b0008(talB|-8.81|0.0107708|76|83|3|10|GeneID:944748),cf58_rs00575(fsa|-7.89|0.073163|261|268|1|8|N/A),sdy_0008(talB|-7.24|0.0128079|76|82|1|7|GeneID:3796046),transaldolase B,NA,0
-0.534511739,0.534511739,0.4824102,b0002(thrA|-3.02|0.4824102|213|220|3|10|GeneID:945803),cf58_rs00535(N/A|-6.26|0.2004806|203|214|1|12|N/A),sdy_0002(thrA|-2.73|0.5635875|213|219|1|7|GeneID:3796040),fused aspartate kinase/homoserine dehydrogenase 1,NA,0
-NA,NA,0.1327749,b0003(thrB|-5.22|0.1327749|91|103|4|16|GeneID:947498),,sdy_0003(thrB|-5.13|0.1124467|91|102|2|13|GeneID:3796041),homoserine kinase,NA,0
-NA,NA,0.1046228,b0004(thrC|-5.58|0.1046228|213|219|3|9|GeneID:945198),,sdy_0004(thrC|-2.97|0.5019481|82|93|1|11|GeneID:3796042),threonine synthase,NA,0
-NA,NA,0.9569664,b0005(yaaX|-0.72|0.9569664|60|66|52|58|GeneID:944747),,sdy_0005(N/A|-2.23|0.6915534|60|66|49|55|GeneID:3796043),DUF2502 domain-containing protein YaaX,NA,0
-NA,NA,0.8381828,b0006(yaaA|-1.53|0.8381828|56|62|2|8|GeneID:944749),,,peroxide stress resistance protein YaaA,NA,0
-NA,NA,0.9167138,b0009(mog|-1.07|0.9167138|51|57|52|58|GeneID:944760),,sdy_0009(mogA|-0.98|0.9291163|51|57|49|55|GeneID:3796047),molybdopterin adenylyltransferase,NA,0
-NA,NA,0.2050958,b0010(satP|-4.54|0.2050958|222|228|3|9|GeneID:944792),,sdy_0010(yaaH|-1.33|0.8807801|88|94|49|55|GeneID:3796048),acetate/succinate:H(+) symporter,NA,0
-NA,NA,0.800514,b0011(yaaW|-1.71|0.800514|228|234|3|9|GeneID:944771),,sdy_0011(N/A|-1.16|0.906235|196|202|49|55|GeneID:3796049),putative enzyme-specific chaperone YaaW,NA,0
-NA,NA,0.1532005,b0013(yaaI|-5|0.1532005|204|210|4|10|GeneID:944751),,sdy_0012(yaaI|-4.93|0.133248|159|165|1|7|GeneID:3796050),DUF2541 domain-containing protein YaaI,NA,0
-NA,NA,0.9153109,b0014(dnaK|-1.08|0.9153109|108|114|52|58|GeneID:944750),,sdy_0013(dnaK|-1.1|0.9143257|108|114|49|55|GeneID:3796051),chaperone protein DnaK,NA,0
-NA,NA,0.4800678,b0015(dnaJ|-3.03|0.4800678|83|90|3|10|GeneID:944753),,sdy_0014(dnaJ|-1.97|0.753959|83|89|1|7|GeneID:3796052),chaperone protein DnaJ,NA,0
-NA,NA,0.7217661,b0016(insL-1|-2.05|0.7217661|255|261|52|58|GeneID:944754),,sdy_p114(N/A|-2.26|0.6840883|57|69|2|14|GeneID:3776670),IS186/IS421 transposase,NA,0
-NA,NA,0.6424174,b0018(mokC|-2.37|0.6424174|87|93|52|58|GeneID:944756),,sdy_0015(gef|-2.15|0.7112241|20|27|49|56|GeneID:3796053),regulatory protein MokC,NA,0
-NA,NA,0.0359565,b0019(nhaA|-7.13|0.0359565|127|135|1|9|GeneID:944758),,sdy_0018(nhaA|-2.85|0.5326198|82|88|2|8|GeneID:3796056),Na(+):H(+) antiporter NhaA,NA,0
-NA,NA,0.5996858,b0020(nhaR|-2.54|0.5996858|27|38|5|15|GeneID:944757),,sdy_0019(nhaR|-2.51|0.620512|27|38|2|12|GeneID:3796057),DNA-binding transcriptional activator NhaR,NA,0
-NA,NA,0.3588051,b0021(insB-1|-3.59|0.3588051|37|50|3|19|GeneID:944743),,sdy_0044(insB|-3.39|0.3992241|131|138|49|56|GeneID:3799809),IS1 protein InsB,NA,0
-NA,NA,0.5971776,b0022(insA-1|-2.55|0.5971776|3|9|52|58|GeneID:948449),,sdy_0106(insA|-4.71|0.1594859|91|101|2|12|GeneID:3795912),IS1 protein InsA,NA,0
-NA,NA,0.1276484,b0023(rpsT|-5.28|0.1276484|117|123|5|11|GeneID:944759),,sdy_0045(rpsT|-5.29|0.0977462|117|123|2|8|GeneID:3799810),30S ribosomal subunit protein S20,NA,0
-NA,NA,0.1148466,b0024(yaaY|-5.44|0.1148466|79|103|5|26|GeneID:949128),,sdy_0046(N/A|-5.62|0.0723318|79|103|2|23|GeneID:3799811),DUF2575 domain-containing protein YaaY,NA,0
-NA,NA,0.0459772,b0025(ribF|-6.78|0.0459772|229|239|5|16|GeneID:949129),,sdy_0047(ribF|-6.82|0.0209554|229|239|2|13|GeneID:3799812),bifunctional riboflavin kinase/FMN adenylyltransferase,NA,0
-NA,NA,0.0440869,b0026(ileS|-6.84|0.0440869|194|202|2|10|GeneID:944761),,sdy_0048(ileS|-4.09|0.254262|194|200|1|7|GeneID:3799813),isoleucine--tRNA ligase,NA,0
-NA,NA,0.3954797,b0027(lspA|-3.41|0.3954797|267|273|3|9|GeneID:944800),,sdy_0049(lspA|-1.86|0.7788124|140|146|1|7|GeneID:3799814),lipoprotein signal peptidase,NA,0
-NA,NA,0.4039423,b0028(fkpB|-3.37|0.4039423|207|213|4|10|GeneID:944807),,sdy_0050(slpA|-3.27|0.4276353|207|213|1|7|GeneID:3799815),peptidyl-prolyl cis-trans isomerase FkpB,NA,0
-NA,NA,0.3548757,b0029(ispH|-3.61|0.3548757|204|210|5|11|GeneID:944777),,sdy_0051(ispH|-3.45|0.3853588|204|210|2|8|GeneID:3799816),1-hydroxy-2-methyl-2-(E)-butenyl 4-diphosphate reductase,NA,0
-NA,NA,0.8792062,b0030(rihC|-1.31|0.8792062|194|200|52|58|GeneID:944796),,sdy_0052(yaaF|-1.29|0.887105|194|200|49|55|GeneID:3799817),ribonucleoside hydrolase RihC,NA,0
-NA,NA,0.8556829,b0031(dapB|-1.44|0.8556829|283|290|52|59|GeneID:944762),,sdy_0053(dapB|-2.04|0.737619|283|290|49|56|GeneID:3799818),4-hydroxy-tetrahydrodipicolinate reductase,NA,0
-NA,NA,0.4478596,b0032(carA|-3.17|0.4478596|110|116|4|10|GeneID:949025),,sdy_0054(carA|-3.08|0.4742374|110|116|1|7|GeneID:3799819),carbamoyl phosphate synthetase subunit alpha,NA,0
-NA,NA,0.5696959,b0033(carB|-2.66|0.5696959|193|199|52|58|GeneID:944775),,sdy_0055(carB|-5.52|0.0793797|102|113|2|12|GeneID:3799820),carbamoyl phosphate synthetase subunit beta,NA,0
-NA,NA,0.2263766,b0035(caiE|-4.38|0.2263766|172|179|2|9|GeneID:948999),,sdy_0057(caiE|-0.71|0.9558573|162|169|49|56|GeneID:3799822),putative transferase CaiE,NA,0
-NA,NA,0.0866566,b0036(caiD|-5.86|0.0866566|80|87|3|10|GeneID:948995),,sdy_0058(caiD|-3.73|0.3240282|188|194|1|7|GeneID:3799823),crotonobetainyl-CoA hydratase,NA,0
-NA,NA,0.1878915,b0037(caiC|-4.68|0.1878915|5|13|3|11|GeneID:944886),,sdy_0059(caiC|-3.63|0.3452626|20|27|1|8|GeneID:3799824),carnitine-CoA ligase,NA,0
-NA,NA,0.1179319,b0038(caiB|-5.4|0.1179319|68|77|4|13|GeneID:948997),,sdy_0060(caiB|-5.18|0.1076741|68|77|1|10|GeneID:3798940),gamma-butyrobetainyl-CoA:carnitine CoA transferase,NA,0
-NA,NA,0.3529222,b0039(caiA|-3.62|0.3529222|8|23|1|16|GeneID:949064),,sdy_0061(caiA|-0.88|0.9400503|161|167|49|55|GeneID:3798941),crotonobetainyl-CoA reductase,NA,0
-NA,NA,0.19147,b0040(caiT|-4.65|0.19147|286|300|3|15|GeneID:944765),,sdy_0062(caiT|-4.11|0.250703|286|299|1|12|GeneID:3798942),L-carnitine:gamma-butyrobetaine antiporter,NA,0
-NA,NA,0.8860038,b0041(fixA|-1.27|0.8860038|130|137|52|59|GeneID:947316),,sdy_0063(fixA|-1.21|0.8991363|130|137|49|56|GeneID:3798943),putative electron transfer flavoprotein FixA,NA,0
-NA,NA,0.1975643,b0042(fixB|-4.6|0.1975643|216|223|4|11|GeneID:948939),,sdy_0064(fixB|-4.58|0.176745|216|223|1|8|GeneID:3798944),putative electron transfer flavoprotein FixB,NA,0
-NA,NA,0.9020518,b0044(fixX|-1.17|0.9020518|257|264|52|59|GeneID:948590),,sdy_0066(fixX|-1.31|0.8839682|257|264|49|56|GeneID:3798946),putative ferredoxin FixX,NA,0
-NA,NA,0.3788918,b0046(kefF|-3.49|0.3788918|292|298|4|10|GeneID:944767),,sdy_0069(yabF|-3.59|0.3539698|292|298|1|7|GeneID:3798949),regulator of KefC-mediated potassium transport and quinone oxidoreductase,NA,0
-NA,NA,0.6147563,b0047(kefC|-2.48|0.6147563|240|246|3|9|GeneID:944773),,sdy_0070(kefC|-1.21|0.8991363|4|10|49|55|GeneID:3798950),K(+) : H(+) antiporter KefC,NA,0
-NA,NA,0.1623352,b0048(folA|-4.91|0.1623352|207|215|1|9|GeneID:944790),,sdy_0071(folA|-1.09|0.9156288|36|42|6|12|GeneID:3798951),dihydrofolate reductase,NA,0
-NA,NA,0.9471998,b0049(apaH|-0.82|0.9471998|194|200|52|58|GeneID:944770),,sdy_0074(apaH|-0.82|0.9460202|194|200|49|55|GeneID:3798954),diadenosine tetraphosphatase,NA,0
-NA,NA,0.9869598,b0050(apaG|-0.24|0.9869598|171|177|52|58|GeneID:944772),,sdy_0075(apaG|-0.24|0.9837956|228|234|2|8|GeneID:3798955),DUF525 domain-containing protein ApaG,NA,0
-NA,NA,0.5327141,b0051(rsmA|-2.81|0.5327141|210|216|5|11|GeneID:944939),,sdy_0076(ksgA|-2.67|0.5791254|210|216|2|8|GeneID:3798956),16S rRNA m(6)2A1518 m(6)2A1519 dimethyltransferase,NA,0
-NA,NA,0.8499557,b0052(pdxA|-1.47|0.8499557|126|132|5|11|GeneID:944919),,sdy_0077(pdxA|-1.48|0.8552569|126|132|2|8|GeneID:3798957),4-hydroxythreonine-4-phosphate dehydrogenase,NA,0
-NA,NA,0.7386099,b0053(surA|-1.98|0.7386099|202|209|52|59|GeneID:944812),,sdy_0078(surA|-1.98|0.7516484|202|209|49|56|GeneID:3798958),peptidyl-prolyl cis-trans isomerase SurA,NA,0
-NA,NA,0.9005088,b0054(lptD|-1.18|0.9005088|204|210|52|58|GeneID:945011),,sdy_0079(imp|-1.18|0.9034345|204|210|49|55|GeneID:3798959),lipopolysaccharide assembly protein LptD,NA,0
-NA,NA,0.6424174,b0055(djlA|-2.37|0.6424174|187|193|3|9|GeneID:948992),,sdy_0080(djlA|-0.38|0.9775889|214|220|49|55|GeneID:3799440),co-chaperone protein DjlA,NA,0
-NA,NA,0.4546657,b0056(yabP|-3.14|0.4546657|110|117|52|59|GeneID:945039),,sdy_0081(yabP|-2.68|0.5765348|110|117|49|56|GeneID:3799441),putative uncharacterized protein YabP,NA,0
-NA,NA,0.8197671,b0058(rluA|-1.62|0.8197671|208|215|52|59|GeneID:946262),,sdy_0082(yabO|-1.54|0.8442698|208|215|49|56|GeneID:3799442),23S rRNA pseudouridine(746) and tRNA pseudouridine(32) synthase,NA,0
-NA,NA,0.0217031,b0059(rapA|-7.84|0.0217031|180|198|5|23|GeneID:948523),,sdy_0083(hepA|-7.85|0.0058768|180|198|2|20|GeneID:3799443),RNA polymerase-binding ATPase and RNAP recycling factor,NA,0
-NA,NA,0.8893223,b0061(araD|-1.25|0.8893223|205|212|52|59|GeneID:945294),,sdy_0088(araD|-1.49|0.8534559|205|212|49|56|GeneID:3799448),L-ribulose-5-phosphate 4-epimerase AraD,NA,0
-NA,NA,0.7644874,b0062(araA|-1.87|0.7644874|45|51|52|58|GeneID:947511),,sdy_0089(araA|-4.22|0.2317333|242|254|1|12|GeneID:3799449),L-arabinose isomerase,NA,0
-NA,NA,0.6097294,b0063(araB|-2.5|0.6097294|126|132|5|11|GeneID:946017),,sdy_0090(araB|-2.27|0.6815902|126|132|2|8|GeneID:3799450),ribulokinase,NA,0
-NA,NA,0.4615253,b0064(araC|-3.11|0.4615253|138|151|2|15|GeneID:944780),cf58_rs00610(N/A|-6.02|0.2286652|7|13|1|7|N/A),,DNA-binding transcriptional dual regulator AraC,NA,0
-NA,NA,0.9050962,b0065(yabI|-1.15|0.9050962|76|82|53|59|GeneID:944783),,sdy_0092(yabI|-1.87|0.7765976|31|38|49|56|GeneID:3799452),DedA family protein YabI,NA,0
-NA,NA,0.5205602,b0066(thiQ|-2.86|0.5205602|181|188|52|59|GeneID:944785),,sdy_0093(thiQ|-0.74|0.9533133|183|189|49|55|GeneID:3799453),thiamine ABC transporter ATP binding subunit,NA,0
-NA,NA,0.445603,b0067(thiP|-3.18|0.445603|86|92|2|8|GeneID:944784),,sdy_0094(thiP|-1.52|0.8479804|120|127|49|56|GeneID:3799454),thiamine ABC transporter membrane subunit,NA,0
-NA,NA,0.15519,b0068(thiB|-4.98|0.15519|128|134|3|9|GeneID:946306),,sdy_0095(tbpA|-1.3|0.885543|207|213|49|55|GeneID:3799455),thiamine ABC transporter periplasmic binding protein,NA,0
-NA,NA,0.1435903,b0071(leuD|-5.1|0.1435903|43|49|4|10|GeneID:945642),,sdy_0098(leuD|-4.95|0.1310409|43|49|1|7|GeneID:3799458),3-isopropylmalate dehydratase subunit LeuD,NA,0
-NA,NA,0.1179319,b0072(leuC|-5.4|0.1179319|7|13|5|11|GeneID:945076),,sdy_0099(leuC|-1.79|0.7940494|7|13|2|8|GeneID:3795905),3-isopropylmalate dehydratase subunit LeuC,NA,0
-NA,NA,0.2128697,b0073(leuB|-4.48|0.2128697|246|252|3|9|GeneID:944798),,sdy_0100(leuB|-2.17|0.7063408|84|90|2|8|GeneID:3795906),3-isopropylmalate dehydrogenase,NA,0
-NA,NA,0.6574772,b0074(leuA|-2.31|0.6574772|118|125|8|15|GeneID:947465),,sdy_0101(leuA|-2.37|0.6563716|118|125|5|12|GeneID:3795907),2-isopropylmalate synthase,NA,0
-NA,NA,0.8925868,b0075(leuL|-1.23|0.8925868|80|87|9|16|GeneID:946072),,sdy_0102(leuL|-3.05|0.4817491|60|66|2|8|GeneID:3795908),leu operon leader peptide,NA,0
-NA,NA,0.1284901,b0077(ilvI|-5.27|0.1284901|21|33|6|18|GeneID:948793),,,acetolactate synthase/acetohydroxybutanoate synthase  catalytic subunit,NA,0
-NA,NA,0.6147563,b0078(ilvH|-2.48|0.6147563|142|149|4|11|GeneID:947267),,sdy_0108(ilvH|-2.74|0.5609999|142|149|1|8|GeneID:3795914),acetolactate synthase/acetohydroxybutanoate synthase  regulatory subunit,NA,0
-NA,NA,0.8893223,b0081(mraZ|-1.25|0.8893223|65|78|10|26|GeneID:944810),,sdy_0111(yabB|-1.27|0.8901904|65|78|7|23|GeneID:3795917),DNA-binding transcriptional repressor MraZ,NA,0
-NA,NA,0.8649835,b0082(rsmH|-1.39|0.8649835|205|212|52|59|GeneID:944806),,sdy_0112(mraW|-1.39|0.8709098|205|212|49|56|GeneID:3795918),16S rRNA m(4)C1402 methyltransferase,NA,0
-NA,NA,0.73622,b0083(ftsL|-1.99|0.73622|144|151|20|27|GeneID:944803),,sdy_0113(ftsL|-7.36|0.0110573|30|42|1|12|GeneID:3795919),cell division protein FtsL,NA,0
-NA,NA,0.559768,b0084(ftsI|-2.7|0.559768|240|246|52|58|GeneID:944799),,sdy_0114(ftsI|-2.7|0.5713544|240|246|49|55|GeneID:3795920),peptidoglycan DD-transpeptidase FtsI,NA,0
-NA,NA,0.8826316,b0085(murE|-1.29|0.8826316|170|176|4|10|GeneID:944791),,sdy_0115(murE|-1.22|0.8976777|170|176|1|7|GeneID:3795921),UDP-N-acetylmuramoyl-L-alanyl-D-glutamate--2  6-diaminopimelate ligase,NA,0
-NA,NA,0.8381828,b0086(murF|-1.53|0.8381828|84|90|52|58|GeneID:944813),,sdy_0116(murF|-2.47|0.6308072|84|90|49|55|GeneID:3795922),D-alanyl-D-alanine-adding enzyme,NA,0
-NA,NA,0.972615,b0087(mraY|-0.52|0.972615|206|212|3|9|GeneID:944814),,sdy_0117(mraY|-0.45|0.9738674|164|170|50|56|GeneID:3795923),phospho-N-acetylmuramoyl-pentapeptide- transferase,NA,0
-NA,NA,0.3933815,b0088(murD|-3.42|0.3933815|165|171|1|7|GeneID:944818),,sdy_0118(murD|-1.04|0.9219515|104|111|49|56|GeneID:3795924),UDP-N-acetylmuramoyl-L-alanine--D-glutamate ligase,NA,0
-NA,NA,0.1697696,b0089(ftsW|-4.84|0.1697696|86|102|2|20|GeneID:946322),,sdy_0119(ftsW|-2.51|0.620512|41|47|49|55|GeneID:3799344),putative lipid II flippase FtsW,NA,0
-NA,NA,0.4146749,b0090(murG|-3.32|0.4146749|100|106|3|9|GeneID:946321),,sdy_0120(murG|-3.05|0.4817491|12|22|2|15|GeneID:3799345),N-acetylglucosaminyl transferase,NA,0
-NA,NA,0.8321423,b0091(murC|-1.56|0.8321423|47|53|52|58|GeneID:946153),,sdy_0121(murC|-1.66|0.8210254|47|53|49|55|GeneID:3799346),UDP-N-acetylmuramate--L-alanine ligase,NA,0
-NA,NA,0.3337963,b0092(ddlB|-3.72|0.3337963|56|62|3|9|GeneID:946324),,sdy_0122(ddl|-2.23|0.6915534|36|42|2|8|GeneID:3799347),D-alanine--D-alanine ligase B,NA,0
-NA,NA,0.872198,b0093(ftsQ|-1.35|0.872198|176|182|5|11|GeneID:944823),,sdy_0123(ftsQ|-1.36|0.8759021|176|182|2|8|GeneID:3799348),cell division protein FtsQ,NA,0
-NA,NA,0.1227024,b0094(ftsA|-5.34|0.1227024|53|60|1|8|GeneID:944778),,sdy_0124(ftsA|-1.05|0.9207126|219|225|49|55|GeneID:3799349),cell division protein FtsA,NA,0
-NA,NA,0.6172705,b0095(ftsZ|-2.47|0.6172705|69|75|52|58|GeneID:944786),,sdy_0125(ftsZ|-2.47|0.6308072|69|75|49|55|GeneID:3799350),cell division protein FtsZ,NA,0
-NA,NA,0.4299812,b0096(lpxC|-3.25|0.4299812|136|157|5|26|GeneID:944816),,sdy_0126(lpxC|-3.27|0.4276353|136|157|2|23|GeneID:3799351),UDP-3-O-acyl-N-acetylglucosamine deacetylase,NA,0
-NA,NA,0.5157271,b0097(secM|-2.88|0.5157271|22|35|5|15|GeneID:944831),,sdy_0127(yacA|-2.62|0.5920778|23|36|2|12|GeneID:3799352),SecA translation regulator,NA,0
-NA,NA,NA,,cf58_rs00455(cytR|-3.07|0.7427789|292|298|7|13|N/A),,,NA,0
+0.9486123,0.7466569,0.732995,b0008(talB|-8.81|0.732995|76|83|3|10|GeneID:944748),cf58_rs00575(fsa|-7.89|0.8582973|261|268|1|8|N/A),sdy_0008(talB|-7.24|0.7561757|76|82|1|7|GeneID:3796046),transaldolase B,NA,0
+0.9486123,0.9486123,0.9425022,b0002(thrA|-3.02|0.9425022|213|220|3|10|GeneID:945803),cf58_rs00535(N/A|-6.26|0.8582973|203|214|1|12|N/A),sdy_0002(thrA|-2.73|0.9526475|213|219|1|7|GeneID:3796040),fused aspartate kinase/homoserine dehydrogenase 1,NA,0
+NA,NA,0.9425022,b0003(thrB|-3.28|0.9425022|91|102|5|16|GeneID:947498),,sdy_0003(thrB|-5.13|0.7561757|91|102|2|13|GeneID:3796041),homoserine kinase,NA,0
+NA,NA,0.732995,b0004(thrC|-5.58|0.732995|213|219|3|9|GeneID:945198),,sdy_0004(thrC|-2.71|0.9526475|46|54|1|9|GeneID:3796042),threonine synthase,NA,0
+NA,NA,0.9822016,b0005(yaaX|-0.72|0.9822016|60|66|52|58|GeneID:944747),,sdy_0005(N/A|-2.23|0.9721458|60|66|49|55|GeneID:3796043),DUF2502 domain-containing protein YaaX,NA,0
+NA,NA,0.9687891,b0006(yaaA|-1.53|0.9687891|56|62|2|8|GeneID:944749),,,peroxide stress resistance protein YaaA,NA,0
+NA,NA,0.9687891,b0009(mog|-1.07|0.9687891|51|57|52|58|GeneID:944760),,sdy_0009(mogA|-0.98|0.9890935|51|57|49|55|GeneID:3796047),molybdopterin adenylyltransferase,NA,0
+NA,NA,0.732995,b0010(satP|-4.54|0.732995|222|228|3|9|GeneID:944792),,sdy_0010(yaaH|-1.33|0.9890935|88|94|49|55|GeneID:3796048),acetate/succinate:H(+) symporter,NA,0
+NA,NA,0.9687891,b0011(yaaW|-1.71|0.9687891|228|234|3|9|GeneID:944771),,sdy_0011(N/A|-1.16|0.9890935|196|202|49|55|GeneID:3796049),putative enzyme-specific chaperone YaaW,NA,0
+NA,NA,0.732995,b0013(yaaI|-5|0.732995|204|210|4|10|GeneID:944751),,sdy_0012(yaaI|-4.93|0.8192648|159|165|1|7|GeneID:3796050),DUF2541 domain-containing protein YaaI,NA,0
+NA,NA,0.9687891,b0014(dnaK|-1.08|0.9687891|108|114|52|58|GeneID:944750),,sdy_0013(dnaK|-1.1|0.9890935|108|114|49|55|GeneID:3796051),chaperone protein DnaK,NA,0
+NA,NA,0.9425022,b0015(dnaJ|-3.03|0.9425022|83|90|3|10|GeneID:944753),,sdy_0014(dnaJ|-1.97|0.9890935|83|89|1|7|GeneID:3796052),chaperone protein DnaJ,NA,0
+NA,NA,0.9687891,b0016(insL-1|-2.05|0.9687891|255|261|52|58|GeneID:944754),,sdy_p114(N/A|-2.26|0.9721458|57|69|2|14|GeneID:3776670),IS186/IS421 transposase,NA,0
+NA,NA,0.9509374,b0018(mokC|-2.37|0.9509374|87|93|52|58|GeneID:944756),,sdy_0015(gef|-2.15|0.9826503|20|27|49|56|GeneID:3796053),regulatory protein MokC,NA,0
+NA,NA,0.732995,b0019(nhaA|-7.13|0.732995|127|135|1|9|GeneID:944758),,sdy_0018(nhaA|-2.85|0.9526475|82|88|2|8|GeneID:3796056),Na(+):H(+) antiporter NhaA,NA,0
+NA,NA,0.9425022,b0020(nhaR|-2.54|0.9425022|27|38|5|15|GeneID:944757),,sdy_0019(nhaR|-2.51|0.9526475|27|38|2|12|GeneID:3796057),DNA-binding transcriptional activator NhaR,NA,0
+NA,NA,0.9425022,b0021(insB-1|-3.59|0.9425022|37|50|3|19|GeneID:944743),,sdy_0044(insB|-3.39|0.9526475|131|138|49|56|GeneID:3799809),IS1 protein InsB,NA,0
+NA,NA,0.9425022,b0022(insA-1|-2.55|0.9425022|3|9|52|58|GeneID:948449),,sdy_0106(insA|-3.54|0.9526475|91|98|5|12|GeneID:3795912),IS1 protein InsA,NA,0
+NA,NA,0.732995,b0023(rpsT|-5.28|0.732995|117|123|5|11|GeneID:944759),,sdy_0045(rpsT|-5.29|0.7561757|117|123|2|8|GeneID:3799810),30S ribosomal subunit protein S20,NA,0
+NA,NA,0.732995,b0024(yaaY|-5.44|0.732995|79|103|5|26|GeneID:949128),,sdy_0046(N/A|-5.62|0.7561757|79|103|2|23|GeneID:3799811),DUF2575 domain-containing protein YaaY,NA,0
+NA,NA,0.732995,b0025(ribF|-6.78|0.732995|229|239|5|16|GeneID:949129),,sdy_0047(ribF|-6.82|0.7561757|229|239|2|13|GeneID:3799812),bifunctional riboflavin kinase/FMN adenylyltransferase,NA,0
+NA,NA,0.732995,b0026(ileS|-6.84|0.732995|194|202|2|10|GeneID:944761),,sdy_0048(ileS|-4.09|0.9526475|194|200|1|7|GeneID:3799813),isoleucine--tRNA ligase,NA,0
+NA,NA,0.9425022,b0027(lspA|-3.41|0.9425022|267|273|3|9|GeneID:944800),,sdy_0049(lspA|-1.86|0.9890935|140|146|1|7|GeneID:3799814),lipoprotein signal peptidase,NA,0
+NA,NA,0.9425022,b0028(fkpB|-3.37|0.9425022|207|213|4|10|GeneID:944807),,sdy_0050(slpA|-3.27|0.9526475|207|213|1|7|GeneID:3799815),peptidyl-prolyl cis-trans isomerase FkpB,NA,0
+NA,NA,0.9425022,b0029(ispH|-3.61|0.9425022|204|210|5|11|GeneID:944777),,sdy_0051(ispH|-3.45|0.9526475|204|210|2|8|GeneID:3799816),1-hydroxy-2-methyl-2-(E)-butenyl 4-diphosphate reductase,NA,0
+NA,NA,0.9687891,b0030(rihC|-1.31|0.9687891|194|200|52|58|GeneID:944796),,sdy_0052(yaaF|-1.29|0.9890935|194|200|49|55|GeneID:3799817),ribonucleoside hydrolase RihC,NA,0
+NA,NA,0.9687891,b0031(dapB|-1.44|0.9687891|283|290|52|59|GeneID:944762),,sdy_0053(dapB|-2.04|0.9890935|283|290|49|56|GeneID:3799818),4-hydroxy-tetrahydrodipicolinate reductase,NA,0
+NA,NA,0.9425022,b0032(carA|-3.17|0.9425022|110|116|4|10|GeneID:949025),,sdy_0054(carA|-3.08|0.9526475|110|116|1|7|GeneID:3799819),carbamoyl phosphate synthetase subunit alpha,NA,0
+NA,NA,0.9425022,b0033(carB|-2.66|0.9425022|193|199|52|58|GeneID:944775),,sdy_0055(carB|-5.52|0.7561757|102|113|2|12|GeneID:3799820),carbamoyl phosphate synthetase subunit beta,NA,0
+NA,NA,0.7525261,b0035(caiE|-4.38|0.7525261|172|179|2|9|GeneID:948999),,sdy_0057(caiE|-0.71|0.9896969|162|169|49|56|GeneID:3799822),putative transferase CaiE,NA,0
+NA,NA,0.732995,b0036(caiD|-5.86|0.732995|80|87|3|10|GeneID:948995),,sdy_0058(caiD|-3.73|0.9526475|188|194|1|7|GeneID:3799823),crotonobetainyl-CoA hydratase,NA,0
+NA,NA,0.732995,b0037(caiC|-4.68|0.732995|5|13|3|11|GeneID:944886),,sdy_0059(caiC|-3.63|0.9526475|20|27|1|8|GeneID:3799824),carnitine-CoA ligase,NA,0
+NA,NA,0.732995,b0038(caiB|-5.4|0.732995|68|77|4|13|GeneID:948997),,sdy_0060(caiB|-5.18|0.7561757|68|77|1|10|GeneID:3798940),gamma-butyrobetainyl-CoA:carnitine CoA transferase,NA,0
+NA,NA,0.9425022,b0039(caiA|-3.62|0.9425022|8|23|1|16|GeneID:949064),,sdy_0061(caiA|-0.88|0.9890935|161|167|49|55|GeneID:3798941),crotonobetainyl-CoA reductase,NA,0
+NA,NA,0.732995,b0040(caiT|-4.65|0.732995|286|300|3|15|GeneID:944765),,sdy_0062(caiT|-4.11|0.9526475|286|299|1|12|GeneID:3798942),L-carnitine:gamma-butyrobetaine antiporter,NA,0
+NA,NA,0.9687891,b0041(fixA|-1.27|0.9687891|130|137|52|59|GeneID:947316),,sdy_0063(fixA|-1.21|0.9890935|130|137|49|56|GeneID:3798943),putative electron transfer flavoprotein FixA,NA,0
+NA,NA,0.732995,b0042(fixB|-4.6|0.732995|216|223|4|11|GeneID:948939),,sdy_0064(fixB|-4.58|0.9015186|216|223|1|8|GeneID:3798944),putative electron transfer flavoprotein FixB,NA,0
+NA,NA,0.9687891,b0044(fixX|-1.17|0.9687891|257|264|52|59|GeneID:948590),,sdy_0066(fixX|-1.31|0.9890935|257|264|49|56|GeneID:3798946),putative ferredoxin FixX,NA,0
+NA,NA,0.9425022,b0046(kefF|-3.49|0.9425022|292|298|4|10|GeneID:944767),,sdy_0069(yabF|-3.59|0.9526475|292|298|1|7|GeneID:3798949),regulator of KefC-mediated potassium transport and quinone oxidoreductase,NA,0
+NA,NA,0.9425022,b0047(kefC|-2.48|0.9425022|240|246|3|9|GeneID:944773),,sdy_0070(kefC|-1.21|0.9890935|4|10|49|55|GeneID:3798950),K(+) : H(+) antiporter KefC,NA,0
+NA,NA,0.732995,b0048(folA|-4.91|0.732995|207|215|1|9|GeneID:944790),,sdy_0071(folA|-1.09|0.9890935|36|42|6|12|GeneID:3798951),dihydrofolate reductase,NA,0
+NA,NA,0.9822016,b0049(apaH|-0.82|0.9822016|194|200|52|58|GeneID:944770),,sdy_0074(apaH|-0.82|0.9890935|194|200|49|55|GeneID:3798954),diadenosine tetraphosphatase,NA,0
+NA,NA,0.9875091,b0050(apaG|-0.24|0.9875091|171|177|52|58|GeneID:944772),,sdy_0075(apaG|-0.24|0.9916586|228|234|2|8|GeneID:3798955),DUF525 domain-containing protein ApaG,NA,0
+NA,NA,0.9425022,b0051(rsmA|-2.81|0.9425022|210|216|5|11|GeneID:944939),,sdy_0076(ksgA|-2.67|0.9526475|210|216|2|8|GeneID:3798956),16S rRNA m(6)2A1518 m(6)2A1519 dimethyltransferase,NA,0
+NA,NA,0.9687891,b0052(pdxA|-1.47|0.9687891|126|132|5|11|GeneID:944919),,sdy_0077(pdxA|-1.48|0.9890935|126|132|2|8|GeneID:3798957),4-hydroxythreonine-4-phosphate dehydrogenase,NA,0
+NA,NA,0.9687891,b0053(surA|-1.98|0.9687891|202|209|52|59|GeneID:944812),,sdy_0078(surA|-1.98|0.9890935|202|209|49|56|GeneID:3798958),peptidyl-prolyl cis-trans isomerase SurA,NA,0
+NA,NA,0.9687891,b0054(lptD|-1.18|0.9687891|204|210|52|58|GeneID:945011),,sdy_0079(imp|-1.18|0.9890935|204|210|49|55|GeneID:3798959),lipopolysaccharide assembly protein LptD,NA,0
+NA,NA,0.9509374,b0055(djlA|-2.37|0.9509374|187|193|3|9|GeneID:948992),,sdy_0080(djlA|-0.38|0.9916586|214|220|49|55|GeneID:3799440),co-chaperone protein DjlA,NA,0
+NA,NA,0.9425022,b0056(yabP|-3.14|0.9425022|110|117|52|59|GeneID:945039),,sdy_0081(yabP|-2.68|0.9526475|110|117|49|56|GeneID:3799441),putative uncharacterized protein YabP,NA,0
+NA,NA,0.9687891,b0058(rluA|-1.62|0.9687891|208|215|52|59|GeneID:946262),,sdy_0082(yabO|-1.54|0.9890935|208|215|49|56|GeneID:3799442),23S rRNA pseudouridine(746) and tRNA pseudouridine(32) synthase,NA,0
+NA,NA,0.732995,b0059(rapA|-6.55|0.732995|180|195|8|23|GeneID:948523),,sdy_0083(hepA|-6.56|0.7561757|180|195|5|20|GeneID:3799443),RNA polymerase-binding ATPase and RNAP recycling factor,NA,0
+NA,NA,0.9687891,b0061(araD|-1.25|0.9687891|205|212|52|59|GeneID:945294),,sdy_0088(araD|-1.49|0.9890935|205|212|49|56|GeneID:3799448),L-ribulose-5-phosphate 4-epimerase AraD,NA,0
+NA,NA,0.9687891,b0062(araA|-1.87|0.9687891|45|51|52|58|GeneID:947511),,sdy_0089(araA|-2.51|0.9526475|242|253|2|12|GeneID:3799449),L-arabinose isomerase,NA,0
+NA,NA,0.9425022,b0063(araB|-2.5|0.9425022|126|132|5|11|GeneID:946017),,sdy_0090(araB|-2.27|0.9721458|126|132|2|8|GeneID:3799450),ribulokinase,NA,0
+NA,NA,0.9425022,b0064(araC|-3.11|0.9425022|138|151|2|15|GeneID:944780),cf58_rs00610(N/A|-6.02|0.8582973|7|13|1|7|N/A),,DNA-binding transcriptional dual regulator AraC,NA,0
+NA,NA,0.9687891,b0065(yabI|-1.15|0.9687891|76|82|53|59|GeneID:944783),,sdy_0092(yabI|-1.87|0.9890935|31|38|49|56|GeneID:3799452),DedA family protein YabI,NA,0
+NA,NA,0.9425022,b0066(thiQ|-2.86|0.9425022|181|188|52|59|GeneID:944785),,sdy_0093(thiQ|-0.74|0.9896969|183|189|49|55|GeneID:3799453),thiamine ABC transporter ATP binding subunit,NA,0
+NA,NA,0.9425022,b0067(thiP|-3.18|0.9425022|86|92|2|8|GeneID:944784),,sdy_0094(thiP|-1.52|0.9890935|120|127|49|56|GeneID:3799454),thiamine ABC transporter membrane subunit,NA,0
+NA,NA,0.732995,b0068(thiB|-4.98|0.732995|128|134|3|9|GeneID:946306),,sdy_0095(tbpA|-1.3|0.9890935|207|213|49|55|GeneID:3799455),thiamine ABC transporter periplasmic binding protein,NA,0
+NA,NA,0.732995,b0071(leuD|-5.1|0.732995|43|49|4|10|GeneID:945642),,sdy_0098(leuD|-4.95|0.8192648|43|49|1|7|GeneID:3799458),3-isopropylmalate dehydratase subunit LeuD,NA,0
+NA,NA,0.732995,b0072(leuC|-5.4|0.732995|7|13|5|11|GeneID:945076),,sdy_0099(leuC|-1.79|0.9890935|7|13|2|8|GeneID:3795905),3-isopropylmalate dehydratase subunit LeuC,NA,0
+NA,NA,0.732995,b0073(leuB|-4.48|0.732995|246|252|3|9|GeneID:944798),,sdy_0100(leuB|-2.17|0.9826503|84|90|2|8|GeneID:3795906),3-isopropylmalate dehydrogenase,NA,0
+NA,NA,0.9586979,b0074(leuA|-2.31|0.9586979|118|125|8|15|GeneID:947465),,sdy_0101(leuA|-2.37|0.959764|118|125|5|12|GeneID:3795907),2-isopropylmalate synthase,NA,0
+NA,NA,0.9687891,b0075(leuL|-1.23|0.9687891|80|87|9|16|GeneID:946072),,sdy_0102(leuL|-3.05|0.9526475|60|66|2|8|GeneID:3795908),leu operon leader peptide,NA,0
+NA,NA,0.732995,b0077(ilvI|-5.27|0.732995|21|33|6|18|GeneID:948793),,,acetolactate synthase/acetohydroxybutanoate synthase  catalytic subunit,NA,0
+NA,NA,0.9425022,b0078(ilvH|-2.48|0.9425022|142|149|4|11|GeneID:947267),,sdy_0108(ilvH|-2.74|0.9526475|142|149|1|8|GeneID:3795914),acetolactate synthase/acetohydroxybutanoate synthase  regulatory subunit,NA,0
+NA,NA,0.9687891,b0081(mraZ|-1.25|0.9687891|65|78|10|26|GeneID:944810),,sdy_0111(yabB|-1.27|0.9890935|65|78|7|23|GeneID:3795917),DNA-binding transcriptional repressor MraZ,NA,0
+NA,NA,0.9687891,b0082(rsmH|-1.39|0.9687891|205|212|52|59|GeneID:944806),,sdy_0112(mraW|-1.39|0.9890935|205|212|49|56|GeneID:3795918),16S rRNA m(4)C1402 methyltransferase,NA,0
+NA,NA,0.9687891,b0083(ftsL|-1.99|0.9687891|144|151|20|27|GeneID:944803),,sdy_0113(ftsL|-7.36|0.7561757|30|42|1|12|GeneID:3795919),cell division protein FtsL,NA,0
+NA,NA,0.9425022,b0084(ftsI|-2.7|0.9425022|240|246|52|58|GeneID:944799),,sdy_0114(ftsI|-2.7|0.9526475|240|246|49|55|GeneID:3795920),peptidoglycan DD-transpeptidase FtsI,NA,0
+NA,NA,0.9687891,b0085(murE|-1.29|0.9687891|170|176|4|10|GeneID:944791),,sdy_0115(murE|-1.22|0.9890935|170|176|1|7|GeneID:3795921),UDP-N-acetylmuramoyl-L-alanyl-D-glutamate--2  6-diaminopimelate ligase,NA,0
+NA,NA,0.9687891,b0086(murF|-1.53|0.9687891|84|90|52|58|GeneID:944813),,sdy_0116(murF|-2.47|0.9526475|84|90|49|55|GeneID:3795922),D-alanyl-D-alanine-adding enzyme,NA,0
+NA,NA,0.9838328,b0087(mraY|-0.52|0.9838328|206|212|3|9|GeneID:944814),,sdy_0117(mraY|-0.45|0.9916586|164|170|50|56|GeneID:3795923),phospho-N-acetylmuramoyl-pentapeptide- transferase,NA,0
+NA,NA,0.9425022,b0088(murD|-3.42|0.9425022|165|171|1|7|GeneID:944818),,sdy_0118(murD|-1.04|0.9890935|104|111|49|56|GeneID:3795924),UDP-N-acetylmuramoyl-L-alanine--D-glutamate ligase,NA,0
+NA,NA,0.732995,b0089(ftsW|-4.84|0.732995|86|102|2|20|GeneID:946322),,sdy_0119(ftsW|-2.51|0.9526475|41|47|49|55|GeneID:3799344),putative lipid II flippase FtsW,NA,0
+NA,NA,0.9425022,b0090(murG|-3.32|0.9425022|100|106|3|9|GeneID:946321),,sdy_0120(murG|-2.75|0.9526475|170|176|49|55|GeneID:3799345),N-acetylglucosaminyl transferase,NA,0
+NA,NA,0.9687891,b0091(murC|-1.56|0.9687891|47|53|52|58|GeneID:946153),,sdy_0121(murC|-1.66|0.9890935|47|53|49|55|GeneID:3799346),UDP-N-acetylmuramate--L-alanine ligase,NA,0
+NA,NA,0.9425022,b0092(ddlB|-3.72|0.9425022|56|62|3|9|GeneID:946324),,sdy_0122(ddl|-2.23|0.9721458|36|42|2|8|GeneID:3799347),D-alanine--D-alanine ligase B,NA,0
+NA,NA,0.9687891,b0093(ftsQ|-1.35|0.9687891|176|182|5|11|GeneID:944823),,sdy_0123(ftsQ|-1.36|0.9890935|176|182|2|8|GeneID:3799348),cell division protein FtsQ,NA,0
+NA,NA,0.732995,b0094(ftsA|-5.34|0.732995|53|60|1|8|GeneID:944778),,sdy_0124(ftsA|-1.05|0.9890935|219|225|49|55|GeneID:3799349),cell division protein FtsA,NA,0
+NA,NA,0.9425022,b0095(ftsZ|-2.47|0.9425022|69|75|52|58|GeneID:944786),,sdy_0125(ftsZ|-2.47|0.9526475|69|75|49|55|GeneID:3799350),cell division protein FtsZ,NA,0
+NA,NA,0.9425022,b0096(lpxC|-2.99|0.9425022|136|155|7|26|GeneID:944816),,sdy_0126(lpxC|-3.01|0.9526475|136|155|4|23|GeneID:3799351),UDP-3-O-acyl-N-acetylglucosamine deacetylase,NA,0
+NA,NA,0.9425022,b0097(secM|-2.88|0.9425022|22|35|5|15|GeneID:944831),,sdy_0127(yacA|-2.62|0.9526475|23|36|2|12|GeneID:3799352),SecA translation regulator,NA,0
+NA,NA,NA,,cf58_rs00455(cytR|-3.07|0.9805069|292|298|7|13|N/A),,,NA,0
