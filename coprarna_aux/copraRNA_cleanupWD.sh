@@ -38,6 +38,13 @@ rm -f *IntaRNA1_ui* *top_targets*;
 
 ############### subdir distribution ######################
 
+# local bash function to move files
+mv2dir () {
+	# check if file exists: if so create folder and move
+	[ ! -f $1 ] || (mkdir -p $2; mv $1 $2);
+}
+
+
 # log files for debug  ###########################
 for f in 
 CopraRNA2_subprocess.* \
@@ -45,29 +52,27 @@ err.log \
 error.log \
 formatdb.log \
 ; do
-	[ ! -f $f ] || (mkdir -p log; mv $f log);
+	mv2dir $f log;
 done
 
-# make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots
-mkdir -p IntaRNA;
-mv *.fa.intarna.csv IntaRNA;
+# IntaRNA output files  ###########################
+mv2dir *.fa.intarna.csv IntaRNA;
 
 # Phylogeny files  ###########################
 for f in 
 16s_sequences* \
 ; do
-	[ ! -f $f ] || (mkdir -p Phylogeny; mv $f Phylogeny);
+	mv2dir $f Phylogeny;
 done
 
 
 # FASTA files  ###########################
-mkdir -p FASTA;
-mv *.fa FASTA;
-mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
+mv2dir *.fa FASTA;
+[ -f input_sRNA.fa ] || mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
 
 # Regions_plots  ###########################
 for f in *regions* thumbnail_*; do
-	[ ! -f $f ] || (mkdir -p Regions_plots; mv $f Regions_plots); # move file if present
+	mv2dir $f Regions_plots;
 done
 
 # Enrichment files  ###########################
@@ -78,7 +83,7 @@ enriched_heatmap_big* \
 termClusterReport.txt \
 aux_table.csv \
 ; do
-	[ ! -f $f ] || (mkdir -p Enrichment; mv $f Enrichment);
+	mv2dir $f Enrichment;
 done
 rm -f org_of_interest_aux_enrichment.txt;
 
@@ -91,6 +96,6 @@ peak_list.Rdata \
 copra_results_all.Rdata \
 cluster.tab \
 ; do
-	[ ! -f $f ] || (mkdir -p Rdata; mv $f Rdata);
+	mv2dir $f Rdata;
 done
 
