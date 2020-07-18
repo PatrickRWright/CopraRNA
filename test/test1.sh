@@ -5,7 +5,7 @@
 # default: remove temporary files at end of call
 KEEPTMPFILES=
 # comment next line to remove temporary files at end of call
-KEEPTMPFILES="--noclean"
+#KEEPTMPFILES="--noclean"
 
 TESTDIR=$PWD
 TESTFILE=$0
