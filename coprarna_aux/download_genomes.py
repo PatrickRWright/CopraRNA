@@ -25,7 +25,8 @@ def download(organism, organism_path):
     Entrez.email = 'whatever@mail.com'
 
     f_name = organism_path + fasta_file + ".gb.gz"
-    file_exist = os.path.isfile(f_name)
+    if(os.path.isfile(f_name)):
+        return
 
     # accession id works, returns genome in fasta format, looks in the 'nucleotide' database:
     try:
