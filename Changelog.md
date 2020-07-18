@@ -1,12 +1,19 @@
 
 ## version 3.0.0
 
+### 200718 Martin Raden
+
+- rename CopraRNA2(.pl|-deps|..) to CopraRNA
+- README.md updated
+- Changelog.md updated
+
+### before 200717 Jens Georg + Fayyaz Hussain
+
 - CopraRNA2.pl :
   - cop1 param and related scripts and calls removed
   - new coprarna_expert_option_file for advanced and experimental parameters
   - new hybrid_coverage option to filter for full hybrids (anti-sense)
   - IntaRNA-specific parameters now set via default intarna_option_file
-  
 
 ### 191024 Martin Raden
 
