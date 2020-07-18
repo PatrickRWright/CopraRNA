@@ -8,7 +8,7 @@ KEEPTMPFILES=
 #KEEPTMPFILES="--noclean"
 
 TESTDIR=$PWD
-TESTFILE=$0
+TESTFILE="$(basename -- $0)"
 
 ##########################################################
 
