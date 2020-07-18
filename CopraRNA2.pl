@@ -25,93 +25,27 @@ my $COPRARNA_VERSION="3.0.0";
 
  #    Comparative prediction algorithm for sRNA targets (CopraRNA)
  #
- #    Contributions by: 
+ #    Contributors (in lexicographic order of first name): 
  #
- #    Patrick R. Wright              
- #    Jens Georg
- #    Martin Raden, nee Mann
- #    Rolf Backofen
- #    Steffen C. Lott
  #    Andreas S. Richter 
- #    Florian Eggenhofer
- #    Robert Kleinkauf
  #    Dragos A. Sorescu
- #    Wolfgang R. Hess
- #    Stephan Klaehn
+ #    Florian Eggenhofer
+ #    Jens Georg
  #    Joerg Vogel
  #    Kai Papenfort
+ #    Martin Raden, nee Mann
+ #    Patrick R. Wright              
+ #    Robert Kleinkauf
+ #    Rolf Backofen
+ #    Steffen C. Lott
+ #    Stephan Klaehn
+ #    Wolfgang R. Hess
 
 #####################################################
 
 #### dependencies: see file CopraRNA2-deps.yml
 
 #####################################################
-
-#### changelog
-
-# v2.1.3   : input sRNA file is kept, updated organisms-list
-#
-# v2.1.2   : added R downstream ooi false positive removal
-#
-# v2.1.1   : added input exceptions
-#            DAVID python code now py2 and py3 compatible
-#            changed coloring in evolutionary heatmap
-#            fixed issue for regions plots for sequences with non ATGC alphabet
-#
-# v2.1.0   : topcount default 200
-#            stopped tracking edits manually
-#
-# v2.0.6   : new p-value combination (no hard cutoff anymore // switching to integrated superior method) 
-#            standard root function for weights is now 1 instead of 2.5 (no more weight reduction)
-#            added phylogeny output directory in clean output
-#            -cop2 option is now -cop1 since CopraRNA2 will be standard
-#            removed -pvcut option
-#            added -nooi option
-#            added gawk, sed, grep, tr, sort as dependencies
-#            added extended regions plots
-#            aux enrichment now also done for count specified by $enrich
-#            adding consensus prediction
-#            removed phantomjs bin // now installing it via conda
-#
-# v2.0.5.1 : major restructuring due to changed IntaRNA version (2.0.4)
-#            added IntaRNA --tAccW and --tAccL as parameters to CopraRNA 
-#            adjusted update_kegg2refseq for new format of prokaryotes.txt
-#            added verbose terminal printing option
-#            added topcount option
-#            added pvalue cutoff option for CopraRNA 2
-#            now using Cwd 'abs_path' to make script path locations dynamic
-#            added warning for run directories that contain many files
-#            added websrv option to only output websrv files if explicitly called for
-#            added root option // applies this root function to weights both for CopraRNA1 and CopraRNA2 pvalue combination
-#            now calculating normalized IntaRNA energy scores internally in IntaRNA // adjusted CopraRNA accordingly
-#            added enrichment parameter 
-#            added noclean parameter
-#
-# v2.0.5   : changed to using IntaRNA2.0 ui
-#            local mirror for .gbk changed to .gb because file ending in local mirror changed
-#            removed evir dependency by now sourcing the gev and pgev functions locally
-#            added MIT license
-# v2.0.4.2 : now using Hartung.R to combine pvalues // no previous calculation of rho needed
-# v2.0.4.1 : added new adjust_tags_clustered.R that now makes two files one for pold one for padj // also added rho calculation rho_script.R
-#            changed scale_clusters.pl to combine_clusters.pl // reimplementation
-#            weights are no longer subjected to the 2.5th root (only for CopraRNA2)
-# v2.0.4   : major changes to the code preparing for CopraRNA2 benchmarking and publication (UPGMA tree for example)
-# v2.0.3.2 : fixed issue with RefSeq IDs longer than 11 that chars caused job fail // changed DAVID parameters to "medium" from the webpage
-#            mirroring DAVID v6.7 specifically instead of DAVID v6.8
-# v2.0.3.1 : changed DAVID-WS from perl to python client
-# v2.0.3   : using local mirrors of old NCBI ID system for compatibility if available
-# v2.0.2   : support of new NCBI ID system
-# v2.0.1   : Iterative organism subset analysis enabled. Auxiliary enrichment output added. Minimal relative cluster size parameter added. IntaRNA parameters changed to -w 150 -L 100
-# v1.3.0   : Potential outlier detection; evolutionary tree visualization; minor bugfix in weight calculation.
-# v1.2.9   : Now using (Benjamini&Hochberg, 1995) for false discovery rate (fdr) estimation. Fixed issue where trees with branch lengths of zero would cause job failures.
-# v1.2.8   : Fixed the issue where jobs with input organisms with exactly the same 16S sequences would fail
-# v1.2.7   : Reimplementation of p-value joining (runtime reduction); Minor bugfix for heatmap drawing and regions plots
-# v1.2.6   : Added heatmap pdf output
-# v1.2.5   : Added functional enrichment heatmaps
-# v1.2.4   : Changed DomClust parameters to standard MBGD parameters
-# v1.2.3   : BLAST speedup
-# v1.2.2   : Fixed issue with organism: 'sfd'
-# v1.2.1   : RefSeq files now being downloaded from NCBI FTP
 
 # get absolute path
 my $ABS_PATH = abs_path($0);
