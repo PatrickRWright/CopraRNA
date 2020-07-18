@@ -4,7 +4,7 @@
 
 # default: remove temporary files at end of call
 KEEPTMPFILES=
-# comment next line to remove temporary files at end of cal
+# comment next line to remove temporary files at end of call
 KEEPTMPFILES="--noclean"
 
 TESTDIR=$PWD
