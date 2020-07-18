@@ -62,7 +62,7 @@ You can easily create a [`conda` environment](https://docs.conda.io/projects/con
 ```bash
 # within CopraRNA project folder
 # once
-conda env create --file CopraRNA2-deps.yml
+conda env create --file CopraRNA2-deps.yml --name CopraRNA2-deps
 chmod a+x CopraRNA2.pl
 # always once within a shell session
 conda activate CopraRNA2-deps
