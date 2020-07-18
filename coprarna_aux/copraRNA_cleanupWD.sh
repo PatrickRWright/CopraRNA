@@ -56,7 +56,11 @@ formatdb.log \
 done
 
 # IntaRNA output files  ###########################
-mv2dir *.fa.intarna.csv IntaRNA;
+for f in \
+*.fa.intarna.csv \
+; do
+	mv2dir $f IntaRNA;
+done
 
 # Phylogeny files  ###########################
 for f in \
@@ -67,7 +71,11 @@ done
 
 
 # FASTA files  ###########################
-mv2dir *.fa FASTA;
+for f in \
+*.fa \
+; do
+	mv2dir $f FASTA;
+done
 [ -f input_sRNA.fa ] || mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
 
 # Regions_plots  ###########################
