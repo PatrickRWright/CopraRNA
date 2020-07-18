@@ -29,6 +29,7 @@ my $COPRARNA_VERSION="3.0.0";
  #
  #    Andreas S. Richter 
  #    Dragos A. Sorescu
+ #    Fayyaz Hussain
  #    Florian Eggenhofer
  #    Jens Georg
  #    Joerg Vogel
