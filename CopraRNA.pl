@@ -63,7 +63,7 @@ my $core_count = 1; # how many parallel processes are allowed
 my $verbose = 0;
 my $noclean = 0;
 my $websrv = 0;
-my $topcount = 200; # amount of top predictions //
+my $topcount = 100; # amount of top predictions //
 my $root = 1; # root function to apply to the weights //
 my $enrich = 0; ## functional enrichment needs to be specifically turned on 
                 ## this option also allows to specify how many top predictions to use for the enrichment

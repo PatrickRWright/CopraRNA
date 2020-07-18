@@ -109,7 +109,7 @@ If you installed all dependencies you should be able to directly use the source.
 
 Example call:
 ```bash
-CopraRNA.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4
+CopraRNA.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 100 -cores 4
 ```
 
 The following options are available:
@@ -128,7 +128,7 @@ The following options are available:
 - `--noclean` : switch to prevent removal of temporary files (def:off)
 - `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
 - `--root` : specifies root function to apply to the weights (def:1)
-- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:100)
 - `--genomePath`: path where NCBI genome files (`*.gb`) are to be stored (def:`.` i.e. working directory). Set this path if you (want to) store all your genomes in a dedicated folder to be shared by different CopraRNA calls.
 - `--intarnaOptions` : path for IntaRNA parameter file.
 - `--CopraRNA_expert_options` : path to parameter file for CopraRNA expert or experimental options.
