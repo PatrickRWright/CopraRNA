@@ -46,7 +46,7 @@ mv2dir () {
 
 
 # log files for debug  ###########################
-for f in 
+for f in \
 CopraRNA2_subprocess.* \
 err.log \
 error.log \
@@ -59,7 +59,7 @@ done
 mv2dir *.fa.intarna.csv IntaRNA;
 
 # Phylogeny files  ###########################
-for f in 
+for f in \
 16s_sequences* \
 ; do
 	mv2dir $f Phylogeny;
@@ -71,12 +71,14 @@ mv2dir *.fa FASTA;
 [ -f input_sRNA.fa ] || mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
 
 # Regions_plots  ###########################
-for f in *regions* thumbnail_*; do
+for f in \
+*regions* thumbnail_* \
+; do
 	mv2dir $f Regions_plots;
 done
 
 # Enrichment files  ###########################
-for f in 
+for f in \
 copra_heatmap.html \
 copraRNA.json \
 enriched_heatmap_big* \
@@ -88,7 +90,7 @@ done
 rm -f org_of_interest_aux_enrichment.txt;
 
 # Rdata files  ###########################
-for f in 
+for f in \
 16S_tree.Rdata \
 int_sites.Rdata \
 order_table_all_orgs.Rdata \
