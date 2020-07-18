@@ -13,7 +13,6 @@ rm -f *ncRNA*;
 rm -f *pvalues*;
 rm -f *.fa.intarna.sorted.csv *opt.intarna.csv;
 rm -f gene_CDS_exception.txt find_gaps.txt;
-#rm -f distmat.out;
 rm -f merged_refseq_ids.txt;    
 rm -f CopraRNA2_prep*;
 rm -f fasta_temp_file fasta_temp_file_out;
@@ -39,45 +38,59 @@ rm -f *IntaRNA1_ui* *top_targets*;
 
 ############### subdir distribution ######################
 
-# log files for debug
-mkdir -p log;
-mv CopraRNA2_subprocess.* err.log error.log formatdb.log log/.;
+# log files for debug  ###########################
+for f in 
+CopraRNA2_subprocess.* \
+err.log \
+error.log \
+formatdb.log \
+; do
+	[ ! -f $f ] || (mkdir -p log; mv $f log);
+done
 
 # make subdirs for IntaRNA, FASTA, Enrichment, Phylogeny and regions plots
 mkdir -p IntaRNA;
 mv *.fa.intarna.csv IntaRNA;
 
-mkdir -p Phylogeny;
-#mv compatible.* Phylogeny;
-mv 16s_sequences* Phylogeny;
+# Phylogeny files  ###########################
+for f in 
+16s_sequences* \
+; do
+	[ ! -f $f ] || (mkdir -p Phylogeny; mv $f Phylogeny);
+done
 
+
+# FASTA files  ###########################
 mkdir -p FASTA;
 mv *.fa FASTA;
 mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
 
-mkdir -p Regions_plots;
-mv *regions* Regions_plots;
-for f in thumbnail_*; do
-	[ ! -f src ] || mv $f Regions_plots; # move file if present
+# Regions_plots  ###########################
+for f in *regions* thumbnail_*; do
+	[ ! -f $f ] || (mkdir -p Regions_plots; mv $f Regions_plots); # move file if present
 done
 
-if [ -s copra_heatmap.html ]; then 
-    mkdir -p Enrichment;
-    mv copra_heatmap.html Enrichment;
-    mv copraRNA.json Enrichment;
-    mv enriched_heatmap_big* Enrichment;
-    mv termClusterReport.txt Enrichment;
-    rm -f org_of_interest_aux_enrichment.txt;
-    mv aux_table.csv Enrichment;
-fi
+# Enrichment files  ###########################
+for f in 
+copra_heatmap.html \
+copraRNA.json \
+enriched_heatmap_big* \
+termClusterReport.txt \
+aux_table.csv \
+; do
+	[ ! -f $f ] || (mkdir -p Enrichment; mv $f Enrichment);
+done
+rm -f org_of_interest_aux_enrichment.txt;
 
-# make an archive for the Rdata files
-if [ -s int_sites.Rdata ]; then
-    mkdir Rdata;
-    mv int_sites.Rdata Rdata;
-    mv order_table_all_orgs.Rdata Rdata;
-    mv peak_list.Rdata Rdata;
-	mv 16S_tree.Rdata Rdata;
-	mv copra_results_all.Rdata Rdata;
-	mv cluster.tab Rdata;	
-fi
+# Rdata files  ###########################
+for f in 
+16S_tree.Rdata \
+int_sites.Rdata \
+order_table_all_orgs.Rdata \
+peak_list.Rdata \
+copra_results_all.Rdata \
+cluster.tab \
+; do
+	[ ! -f $f ] || (mkdir -p Rdata; mv $f Rdata);
+done
+
