@@ -1,4 +1,4 @@
-name: CopraRNA2
+name: CopraRNA-deps
 channels:
   - bioconda
   - conda-forge
