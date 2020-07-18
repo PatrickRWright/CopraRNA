@@ -23,7 +23,7 @@ mkdir -p $TESTTMPDIR
 cd $TESTTMPDIR
 
 echo "run test call : $CALLARGS"
-../../CopraRNA2.pl $CALLARGS
+../../CopraRNA.pl $CALLARGS
 CALLEXITCODE=$?
 echo "exit code of call = $CALLEXITCODE"
 
