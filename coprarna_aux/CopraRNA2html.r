@@ -469,16 +469,16 @@ d<-dir("./results_html/evo_alignments2/")
 d<-d[-which(d=="ind_tables")]
 
 for(i in d){
-	system(paste("rm ./results_html/evo_alignments2/",i,"/*.txt",sep=""))
-	system(paste("rm ./results_html/evo_alignments2/",i,"/*.fasta",sep=""))
+	system(paste("rm -f ./results_html/evo_alignments2/",i,"/*.txt",sep=""))
+	system(paste("rm -f ./results_html/evo_alignments2/",i,"/*.fasta",sep=""))
 }
 
 file.copy("./CopraRNA2_result.html", "./results_html/CopraRNA2_result.html")
 
 system("zip -r copra_html.zip ./results_html")
-system("rm -r ./results_html")
+system("rm -rf ./results_html")
 
-system("rm *.md")
+system("rm -f *.md")
 
 
 if(noclean==0){
