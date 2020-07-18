@@ -722,24 +722,19 @@ position_data<-mRNAalign(x, numplot2, le)
 plot_pars<-plot_parameter(position_data, center=center, rescale=TRUE)
 density_pars<-dens_pars(plot_pars,numdens)
 
-na<-"mRNA_regions_with_histogram.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"mRNA_regions_with_histogram"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
+plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
+dev.off()
+postscript(file=paste(na,"ps",sep="."))
 plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
 dev.off()
 
-na<-"mRNA_regions_extended_list.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"mRNA_regions_extended_list"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
 dev.off()
-
-
-na<-"mRNA_regions_with_histogram.ps"
-postscript(file=na)
-plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
-dev.off()
-
-na<-"mRNA_regions_extended_list.ps"
-postscript(file=na)
+postscript(file=paste(na,"ps",sep="."))
 plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
 dev.off()
 
@@ -751,25 +746,20 @@ sRNA_position_data<-sRNA_align(x, numplot2, le)
 sRNA_plot_pars<-plot_parameter(sRNA_position_data, center=center, rescale=FALSE)
 sRNA_density_pars<-dens_pars(sRNA_plot_pars,numdens)
 
-na<-"sRNA_regions_with_histogram.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"sRNA_regions_with_histogram"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
+plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
+dev.off()
+postscript(file=paste(na,"ps",sep="."))
 plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
 dev.off()
 
 
-na<-"sRNA_regions_with_extended_list.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"sRNA_regions_with_extended_list"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
 dev.off()
-
-na<-"sRNA_regions_with_histogram.ps"
-postscript(file=na)
-plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
-dev.off()
-
-
-na<-"sRNA_regions_with_extended_list.ps"
-postscript(file=na)
+postscript(file=paste(na,"ps",sep="."))
 plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
 dev.off()
 
