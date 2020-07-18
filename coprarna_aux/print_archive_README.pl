@@ -47,9 +47,6 @@ the phylogeny is calculated on.
 compatible.treefile/.fneighbor (in Phylogeny):
 These files stores the 16s phylogeny.
 
-compatible.distmat (in Phylogeny):
-This file contains the distance matrix for the 16s phylogeny.
-
 zscore.weight/weights.warning:
 The unrooted weights for the individual organisms are stored in this file.
 If an organism has a weight greater than 0.5 then this is reported in

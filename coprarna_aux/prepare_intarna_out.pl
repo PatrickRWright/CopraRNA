@@ -189,6 +189,6 @@ system $PATH_COPRA_SUBSCRIPTS . "cluster_intarna_csv.pl > opt_tags.clustered";
 
 
 system "mafft --localpair --quiet 16s_sequences.fa > 16s_sequences.aln";
-system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2>> $OUT_ERR 1>&2"; 
-system $PATH_COPRA_SUBSCRIPTS . "transform_distmat.pl distmat.out > compatible.distmat";
+#system "distmat -sequence 16s_sequences.aln -nucmethod 1 -outfile distmat.out 2>> $OUT_ERR 1>&2"; 
+#system $PATH_COPRA_SUBSCRIPTS . "transform_distmat.pl distmat.out > compatible.distmat";
 

@@ -191,7 +191,6 @@ $ncrnas = "ncrna.fa";
 $orgcount = (scalar(@ARGV) - 6);
 
 
-## prepare input for combine_clusters.pl
 ## Download Refseq files by Refseq ID 
 my $RefSeqIDs = `grep ">" input_sRNA.fa | tr '\n' ' ' | sed 's/>//g'`; 
 my @split_RefIds = split(/\s+/, $RefSeqIDs);

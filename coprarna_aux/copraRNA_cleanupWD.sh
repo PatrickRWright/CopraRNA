@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ###################################################################
-# cleans a CopraRNA job directy after the job was run, i.e.
+# cleans a CopraRNA job directly after the job was run, i.e.
 # - removes temporary files
 # - aggregates input and output files in respective subfolders
 ###################################################################
@@ -12,7 +12,8 @@ rm -f *anno* padj.csv;
 rm -f *ncRNA*;
 rm -f *pvalues*;
 rm -f *.fa.intarna.sorted.csv *opt.intarna.csv;
-rm -f gene_CDS_exception.txt find_gaps.txt distmat.out;
+rm -f gene_CDS_exception.txt find_gaps.txt;
+#rm -f distmat.out;
 rm -f merged_refseq_ids.txt;    
 rm -f CopraRNA2_prep*;
 rm -f fasta_temp_file fasta_temp_file_out;
