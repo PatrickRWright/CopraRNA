@@ -21,28 +21,27 @@ Example1:
 
 def download(organism, organism_path):
 
-    fasta_file = organism
     Entrez.email = 'whatever@mail.com'
 
-    f_name = organism_path + fasta_file + ".gb.gz"
+    f_name = organism_path + organism + ".gb.gz"
     if(os.path.isfile(f_name)):
         return
 
-    # accession id works, returns genome in fasta format, looks in the 'nucleotide' database:
+    # accession organism works, returns genome in fasta format, looks in the 'nucleotide' database:
     try:
-        handle = Entrez.efetch(db='nucleotide', id=fasta_file,  rettype='gbwithparts', retmode="text", seq_start=1)  #,  seq_start=1 The genome with the accession number is fetched from ncbi server and saved in 'handle' variable
+        handle = Entrez.efetch(db='nucleotide', id=organism,  rettype='gbwithparts', retmode="text", seq_start=1)  #,  seq_start=1 The genome with the accession number is fetched from ncbi server and saved in 'handle' variable
         # store locally:
-        file_name = organism_path + fasta_file + ".gb"
+        file_name = organism_path + organism + ".gb"
         # print(file_name)
         local_file=open(file_name, 'w')
         local_file.write(handle.read()) # write the genome to a file
         handle.close()
         local_file.close()
-        print(fasta_file + " succesfully downloaded")
+        print(organism + " succesfully downloaded")
     except HTTPError:
-        print(fasta_file, "Error received in retrieving the fasta file with the given Accession Number.\nPlease check the Accession Number, or\nPlease check your internet connection or The 'NCBI' web server is down.\n")
+        print(organism, "Error received in retrieving the fasta file with the given Accession Number.\nPlease check the Accession Number, or\nPlease check your internet connection or The 'NCBI' web server is down.\n")
         with open("organims_not_downloaded.txt", 'a') as wr:
-            wr.write(fasta_file + '\n')
+            wr.write(organism + '\n')
 
 
 
