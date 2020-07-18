@@ -30,21 +30,19 @@ def download(organism, organism_path):
     # accession id works, returns genome in fasta format, looks in the 'nucleotide' database:
     try:
         handle = Entrez.efetch(db='nucleotide', id=fasta_file,  rettype='gbwithparts', retmode="text", seq_start=1)  #,  seq_start=1 The genome with the accession number is fetched from ncbi server and saved in 'handle' variable
+        # store locally:
+        file_name = organism_path + fasta_file + ".gb"
+        # print(file_name)
+        local_file=open(file_name, 'w')
+        local_file.write(handle.read()) # write the genome to a file
+        handle.close()
+        local_file.close()
         print(fasta_file + " succesfully downloaded")
     except HTTPError:
         print(fasta_file, "Error received in retrieving the fasta file with the given Accession Number.\nPlease check the Accession Number, or\nPlease check your internet connection or The 'NCBI' web server is down.\n")
         with open("organims_not_downloaded.txt", 'a') as wr:
             wr.write(fasta_file + '\n')
 
-    # store locally:
-
-    file_name = organism_path + fasta_file + ".gb"
-    # print(file_name)
-    local_file=open(file_name, 'w')
-    local_file.write(handle.read()) # write the genome to a file
-    
-    handle.close()
-    local_file.close()
 
 
 def zip_file(organism, organism_path):
