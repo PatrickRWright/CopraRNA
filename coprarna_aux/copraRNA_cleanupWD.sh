@@ -37,10 +37,6 @@ rm -f duplicated_CDS.txt;
 rm -f enrichment.txt *DAVID* IntaRNA* intarna*;
 rm -f *IntaRNA1_ui* *top_targets*;
 
-# v1 specific
-rm -f *pvsample*;
-rm -f CopraRNA1_final_all.csv CopraRNA1_final.csv;
-
 ############### subdir distribution ######################
 
 # log files for debug
@@ -52,7 +48,7 @@ mkdir -p IntaRNA;
 mv *.fa.intarna.csv IntaRNA;
 
 mkdir -p Phylogeny;
-mv compatible.* Phylogeny;
+#mv compatible.* Phylogeny;
 mv 16s_sequences* Phylogeny;
 
 mkdir -p FASTA;
@@ -62,7 +58,7 @@ mv -f FASTA/input_sRNA.fa .; # move input file back to root folder
 mkdir -p Regions_plots;
 mv *regions* Regions_plots;
 for f in thumbnail_*; do
-	mv $f Regions_plots;
+	[ ! -f src ] || mv $f Regions_plots; # move file if present
 done
 
 if [ -s copra_heatmap.html ]; then 
