@@ -373,7 +373,7 @@ foreach (@sixteenSseqs) {
 }
 
 if ($sixteenScounter ne $orgcount) {
-    my $no16sOrgs = `(grep ">" 16s_sequences.fa && grep ">" input_sRNA.fa) | sort | uniq -u | tr '\n' ' '`; 
+    my $no16sOrgs = `cat 16s_sequences.fa input_sRNA.fa | grep ">"  | sort | uniq -u | tr '\n' ' '`; 
     chomp $no16sOrgs;
     print ERRORLOG "\nError: wrong number of sequences in 16s_sequences.fa.\nOne (or more) of your entered organisms does not contain a correctly annotated 16s rRNA sequence and needs to be removed.\nPlease remove $no16sOrgs\n";
 }
