@@ -95,8 +95,8 @@ for (i in 1:length(files_opt)) {
     } else { write("ERROR in add_pval_to_csv_evdfit.R: files of optimal and suboptimal output don't match", file="err.log", append=T) }
 
 	# call p-value script from IntaRNA package
-	system(paste("Rscript --vanilla IntaRNA_CSV_p-value.R",curr_opt_file,curr_opt_file,energyCol,sep=" "))
-	system(paste("Rscript --vanilla IntaRNA_CSV_p-value.R",curr_subopt_file,curr_subopt_file,energyCol,sep=" "))
+	system(paste("IntaRNA_CSV_p-value.R",curr_opt_file,curr_opt_file,energyCol,sep=" "))
+	system(paste("IntaRNA_CSV_p-value.R",curr_subopt_file,curr_subopt_file,energyCol,sep=" "))
 	
 #	
 #    # opt
