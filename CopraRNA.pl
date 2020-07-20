@@ -72,19 +72,20 @@ my $genomePath = "."; # where to look for and store genome files
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
 my $CopraRNA_expert_options = $PATH_COPRA . "coprarna_aux/coprarna_options.cfg";
 my $hybrid_threshold = 0.8; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
-
+my $jalview_cores = 5; # number of cores used for jalview during post-processing. 0 indicates as many cores as defined in core_count
 
 
 
 GetOptions (
-    'help|?'		=> \$help,
-    'srnaseq:s'		=> \$sRNAs_fasta,
-    'ntup:i'		=> \$upstream,
-    'ntdown:i'		=> \$downstream,
-    'cores:i'		=> \$core_count,
-    'region:s'		=> \$region, # one of "5utr", "3utr", "cds"
-    'verbose'		=> \$verbose, # switch for verbose output during computation
-    'websrv'		=> \$websrv, # switch for providing webserver output
+    'help|?'			=> \$help,
+    'srnaseq:s'			=> \$sRNAs_fasta,
+    'ntup:i'			=> \$upstream,
+    'ntdown:i'			=> \$downstream,
+    'cores:i'			=> \$core_count,
+	'jalview_cores:i'	=> \$jalview_cores,
+    'region:s'			=> \$region, # one of "5utr", "3utr", "cds"
+    'verbose'			=> \$verbose, # switch for verbose output during computation
+    'websrv'			=> \$websrv, # switch for providing webserver output
     'noclean'		=> \$noclean, # switch to prevent cleaning of files
     'topcount:i'	=> \$topcount, # amount of top predictions to return
     'enrich:i'		=> \$enrich, # functional enrichment needs to be specifically turned on // also how many top preds to use for enrichment 
@@ -125,6 +126,7 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
+" --jalview_cores           number of cores used for jalview during post-processing. 0 indicates as many cores as defined in cores (def:5)\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",
 " --websrv                  switch to provide webserver output files (def:off)\n",
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",
@@ -215,6 +217,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "nt downstream:" . $downstream . "\n";
     print WRITETOOPTIONS "region:" . $region . "\n";
     print WRITETOOPTIONS "core count:" . $core_count . "\n";
+	print WRITETOOPTIONS "jalview_cores:" . $jalview_cores . "\n";
     print WRITETOOPTIONS "verbose:" . $verbose . "\n";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
     print WRITETOOPTIONS "top count:" . $topcount . "\n";
@@ -226,6 +229,8 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
 	print WRITETOOPTIONS "CopraRNA_expert_options:$CopraRNA_expert_options\n";	
 	print WRITETOOPTIONS "hybrid_threshold:$hybrid_threshold\n";
+	
+	
 	
 close WRITETOOPTIONS;
 # end write options
@@ -326,8 +331,8 @@ if ($websrv) {
 }
 
 # blow up images png
-system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
-system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
+# system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
+# system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
 
 

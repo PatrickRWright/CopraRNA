@@ -35,6 +35,16 @@ if(length(empty)>0){
 	cop_option<-cop_option[-empty]
 }
 
+# jalview cores
+jal_cores<-as.numeric(gsub("jalview_cores:","",co[grep("jalview_cores:", co)]))
+if(jal_cores==0){
+	jal_cores<-max_cores
+}
+if(jal_cores>max_cores){
+	jal_cores<-max_cores
+}
+
+
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
 
@@ -175,7 +185,8 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 	selection<-gsub("\\(.*","",dat[1:number,match(ooi, colnames(dat))])
 	d<-dir(align_folder)
 	
-	# divide the data in subsets for parallel processing 
+	# divide the data in subsets for parallel processing
+	max_cores<-jal_cores
 	max_cores<-min(number, max_cores)
 	jobs<-number%/%max_cores
 	rest<-number-max_cores*jobs
