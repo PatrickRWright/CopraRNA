@@ -71,7 +71,7 @@ my $enrich = 0; ## functional enrichment needs to be specifically turned on
 my $genomePath = "."; # where to look for and store genome files
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
 my $CopraRNA_expert_options = $PATH_COPRA . "coprarna_aux/coprarna_options.cfg";
-my $hybrid_threshold = 0.9; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
+my $hybrid_threshold = 0.8; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
 
 
 
