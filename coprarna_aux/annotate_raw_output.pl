@@ -121,7 +121,7 @@ close DATA;
 foreach my $line (@datalines) {
     my @splitarg = split(/;/, $line);
     foreach(@splitarg) { chomp $_; }
-    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-2] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11];
+    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-3] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11];
     chomp $pvalenergy;
     $pvalenergyhash{lc($splitarg[0])} = $pvalenergy;
 }
