@@ -44,20 +44,12 @@ This file contains the set of input options.
 This is the FASTA file containing the (aligned) 16s sequences that
 the phylogeny is calculated on.
 
-compatible.treefile/.fneighbor (in Phylogeny):
-These files stores the 16s phylogeny.
-
-zscore.weight/weights.warning:
-The unrooted weights for the individual organisms are stored in this file.
-If an organism has a weight greater than 0.5 then this is reported in
-weights.warning.
-
 cluster.tab:
 This tab delimited file contains the clusters of homologous 
 protein coding genes throughout the organisms participating 
 in the prediction. The clusters are computed with DomClust.
 
-*regions *pdf *ps *png (in Regions_plots):
+*regions *pdf *png (in Regions_plots):
 These image files contain the regions plots of your run.
 
 *.fa.intarna.csv (in IntaRNA):
@@ -71,11 +63,6 @@ This FASTA contains the sequences you submitted.
 *_upfromstartpos_*_down_*.fa (in FASTA):
 These FASTA files contain the putative target sequences of the
 respective organisms in the prediction.
-
-*tags.clustered*:
-These files contain the IntaRNA predictions for for the clusters
-of homologous putative targets. _rcsize is the truncated input
-for the CopraRNA 1 thread (only if -cop1 was set).
 
 target_sequences_orgofint.fa: (only if -websrv was set // in FASTA)
 This FASTA contains the putative target sequences extracted from the
@@ -95,24 +82,15 @@ candidates specified in the -enrich parameter.
 aux_table.csv: (in Enrichment)
 This is the auxilliary enrichment file for the organism of interest.
 
-copra_heatmap.html/copraRNA.json: (in Enrichment)
-This html file contains the heatmap for the enriched terms from your prediction.
-It can be viewed in your web browser. The json file is needed for correct
-display of copra_heatmap.html.
-
 enriched_heatmap_big.*: (in Enrichment)
 pdf and png files for the functional enrichment heatmap.
 
 sRNA_conservation_heatmap.pdf:
-This file shows the interaction conservation of the top 25 predictions.
+This file shows the interaction conservation of the top predictions.
 
-evo_alignments.zip:
-This archive contains the alignments of the clusters of putative target
-sequences with an annotation to visualize the interaction sites and consensus
-interaction regions in Jalview.
-
-all_predictions (not made if -cop1):
-This directory contains the results for all modes available in CopraRNA 2. 
+copra_html.zip:
+Zip file containing an offline html file, to view the most important results and
+visualizations of the CopraRNA prediction.
 
 Rdata:
 Precomputed R data environments. 

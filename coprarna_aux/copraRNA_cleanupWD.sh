@@ -27,6 +27,11 @@ rm -f zscore.weight;
 rm -f weights.txt;
 rm -f CopraRNA_result.map_evo_align;
 rm -f markdown_final.Rmd;
+rm -f utr_seqs.fa;
+rm -f copra_heatmap.html;
+rm -f copraRNA.json;
+
+
 
 # blast files
 rm -f all.fas*;
@@ -104,7 +109,6 @@ int_sites.Rdata \
 order_table_all_orgs.Rdata \
 peak_list.Rdata \
 copra_results_all.Rdata \
-cluster.tab \
 ; do
 	mv2dir $f Rdata;
 done

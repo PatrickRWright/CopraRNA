@@ -209,16 +209,23 @@ if(clustering=="sRNA"){
 	ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
 }
 if(clustering=="ribosomal"){
-	#mafft(filename="16s_sequences.fa")
-	#tempf<-read.fasta("ncrna_aligned.fa")
-	#write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
-	#dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
-	#dm <- dist.ml(dat, model="F81")
-	#treeNJ <- NJ(dm)
-	#fitJC = pml(treeNJ, data=dat)
+	
 	load("16S_tree.Rdata")
 	fit2<-midpoint(fit2)
-	fit2<-chronos(fit2)
+	if(length(fit2$tip.label)==(length(unique(fit2[[1]][,1]))+1)){
+		fit2<-chronos(fit2)
+	} else {
+		#mafft(filename="16s_sequences.fa")
+		#tempf<-read.fasta("ncrna_aligned.fa")
+		#write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
+		dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+		dm <- dist.ml(dat, model="F81")
+		treeNJ <- NJ(dm)
+		fitJC = pml(treeNJ, data=dat)
+		fit2<-fitJC$tree
+		fit2<-midpoint(fit2)
+		fit2<-chronos(fit2)
+	}
 	clus<-as.hclust.phylo2((fit2))
 	ord<-clus$label
 	ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
