@@ -742,10 +742,10 @@ na<-"mRNA_regions_extended_list"
 pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
 dev.off()
-png(file=paste(na,"png",sep="."),  width=1200, height=800)
-#postscript(file=paste(na,"ps",sep="."))
-plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
-dev.off()
+# png(file=paste(na,"png",sep="."),  width=1200, height=800)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
+# dev.off()
 
 
 
@@ -772,10 +772,10 @@ na<-"sRNA_regions_with_extended_list"
 pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
 dev.off()
-png(file=paste(na,"png",sep="."),  width=1200, height=800)
-#postscript(file=paste(na,"ps",sep="."))
-plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
-dev.off()
+# png(file=paste(na,"png",sep="."),  width=1200, height=800)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
+# dev.off()
 
 
 }
