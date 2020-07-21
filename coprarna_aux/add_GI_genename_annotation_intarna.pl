@@ -12,8 +12,6 @@ open(MYDATA, "intarna_websrv_table.csv") or die("Error: cannot open file intarna
     my @intarna_websrv_lines = <MYDATA>;
 close MYDATA;
 
-open(WRITETABLE, ">intarna_websrv_table_ncbi.csv");
-
 my @gbks = <*gb.gz>;
 my %ltagToRestHash = ();
 
@@ -76,6 +74,10 @@ foreach(@gbks) {
             }
         } 
 }
+
+
+
+open(WRITETABLE, ">intarna_websrv_table_ncbi.csv");
 
 foreach my $line (@intarna_websrv_lines) {
     chomp $line;
