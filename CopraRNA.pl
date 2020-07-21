@@ -322,17 +322,12 @@ if (-s "err.log") { die("\nError: CopraRNA failed. Check err.log for details.\n\
 print "Preparing interaction plots\n" if ($verbose);
 system "R --slave -f " . $PATH_COPRA . "coprarna_aux/script_R_plots_8.R --args CopraRNA_result_all.csv $topcount 2> /dev/null > /dev/null"; ## changed input file and piping command line output to /dev/null for silencing // 
 
-# convert postscript files to PNG
 
 # thumbnails png
 if ($websrv) {
-    system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 sRNA_regions_with_histogram.ps thumbnail_sRNA.png";
-    system "convert -size 170x170 -resize 170x170 -flatten -rotate 90 mRNA_regions_with_histogram.ps thumbnail_mRNA.png";
+    system "convert -size 170x170 -resize 170x170 sRNA_regions_with_histogram.png thumbnail_sRNA.png";
+    system "convert -size 170x170 -resize 170x170 mRNA_regions_with_histogram.png thumbnail_mRNA.png";
 }
-
-# blow up images png
-# system "convert -density '300' -resize '700' -flatten -rotate 90 sRNA_regions_with_histogram.ps sRNA_regions_with_histogram.png";
-# system "convert -density '300' -resize '700' -flatten -rotate 90 mRNA_regions_with_histogram.ps mRNA_regions_with_histogram.png";
 
 
 
