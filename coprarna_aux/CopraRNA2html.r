@@ -277,23 +277,14 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	co<-readLines(paste(wd,"/CopraRNA_option_file.txt",sep=""))
 	noclean<-grep("noclean:", co)
 	noclean<-as.numeric(gsub("noclean:","",co[noclean]))
-	#if(noclean==1){
-		enrich1<-"./enriched_heatmap_big.pdf"
-		enrich_thumb<-"./enriched_heatmap_big.png"
-		aux<-"'./aux_table.csv'"
-		mrna_reg1<-"./mRNA_regions_with_histogram.pdf"
-		srna_reg1<-"./sRNA_regions_with_histogram.pdf"
-		cons1<-"./conservation_heatmap.pdf"
-	#}
 
-	# if(noclean==0){
-		# enrich1<-"./Enrichment/enriched_heatmap_big.pdf"
-		# enrich_thumb<-"./Enrichment/enriched_heatmap_big.png"
-		# aux<-"'./Enrichment/aux_table.csv'"
-		# mrna_reg1<-"./Regions_plots/mRNA_regions_with_histogram.pdf"
-		# srna_reg1<-"./Regions_plots/sRNA_regions_with_histogram.pdf"
-		# cons1<-"./conservation_heatmap.pdf"
-	# }
+	enrich1<-"./enriched_heatmap_big.pdf"
+	enrich_thumb<-"./enriched_heatmap_big.png"
+	aux<-"'./aux_table.csv'"
+	mrna_reg1<-"./mRNA_regions_with_histogram.pdf"
+	srna_reg1<-"./sRNA_regions_with_histogram.pdf"
+	cons1<-"./conservation_heatmap.pdf"
+
 	enrich_thumb<-paste0("![](",enrich_thumb,")")
 	
 	if(file.exists(enrich1)){
@@ -337,45 +328,36 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	}
 	
 	ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### Functional enrichment",enrich2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n","### Auxiliary enrichment","\n",sep="\n"))
-	#ma<-c(ma,paste("## Overview {.tabset .tabset-fade .tabset-pills}","### Phylogenetic target conservation",cons2,"\n","### mRNA regions plots",mrna_reg2,"\n","### sRNA regions plots",srna_reg2,"\n",sep="\n"))
 	
 	prefix<-paste("```{r,echo=F}","wd<-getwd()",sep="\n")
-	#suffix<-paste("kable((tab)) %>% ","kable_styling(c('striped', 'bordered')) %>% ","kable_styling(fixed_thead = T) %>% ","kable_styling(full_width = F)",  "```",sep="\n")
+
 	suffix<-paste("datatable(tab, escape = FALSE,rownames= FALSE, extensions = 'FixedHeader',options = list(fixedHeader = TRUE),class = 'cell-border stripe',width='100%')","  ```"," ",sep="\n")
 	
 	
-	#<a href="http://rstudio.com">RStudio</a>
+
 	ma<-c(ma,prefix,aux2,suffix)
 	ints<-paste("./evo_alignments2/",selection,"/interactions.html",sep="")
-	#ints<- paste0("[interaction](",ints,"){target='_blank'}")
+	
 	ints<- paste0("<a href='",ints,"' target='popup' onclick=\"window.open('",ints,"','popup','width=600,height=600'); return false;\">Interactions</a>")
 	d<-dir("./evo_alignments2")
 	na<-which(is.na(d[match(selection,d)]))
 	mrna<-paste("./evo_alignments2/",d[match(selection,d)],"/",d[match(selection,d)],"_mRNA.PNG",sep="")
-	#mrna<-paste0("[mRNA_alignment](",mrna,"){target='_blank'}")
+	
 	mrna<-paste0("<a href='",mrna,"' target='popup' onclick=\"window.open('",mrna,"','popup','width=600,height=600'); return false;\">mRNA_alignment</a>")
 	srna<-paste("./evo_alignments2/",d[match(selection,d)],"/",d[match(selection,d)],"_sRNA.PNG",sep="")
-	#srna<-paste0("[sRNA_alignment](",srna,"){target='_blank'}")
+	
 	srna<-paste0("<a href='",srna,"' target='popup' onclick=\"window.open('",srna,"','popup','width=600,height=600'); return false;\">sRNA_alignment</a>")
 
-	#heat<-paste("./evo_alignments2/",selection,"/tree.pdf",sep="")
 	heat<-paste("./evo_alignments2/",selection,"/",selection,"_conservation_heatmap.pdf",sep="")
-	#heat<-paste("./heatmaps/",selection,".pdf",sep="")
-	#heat<- paste0("[conservation](",heat,"){target='_blank'}")
 	heat<- paste0("<a href='",heat,"' target='popup' onclick=\"window.open('",heat,"','popup','width=600,height=600'); return false;\">conservation</a>")
-	#probcons<-paste("./evo_alignments2/",selection,"/", selection,".html",sep="")
+
 	probcons<-paste("./evo_alignments2/",selection,"/spot_probabilities.png",sep="")
-	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
+
 	probcons<- paste0("<a href='",probcons,"' target='popup' onclick=\"window.open('",probcons,"','popup','width=600,height=600'); return false;\">conserved_peaks</a>")
-	#Links<-paste(heat,mrna,srna,ints, sep=", ")
-	
+
 	tree<-paste("./evo_alignments2/",selection,"/tree.pdf",sep="")
-	#probcons<- paste0("[conserved_peaks](",probcons,"){target='_blank'}")
+
 	tree<- paste0("<a href='",tree,"' target='popup' onclick=\"window.open('",tree,"','popup','width=600,height=600'); return false;\">tree</a>")
-	#Links<-paste(heat,mrna,srna,ints, sep=", ")
-	
-	
-	
 	Links<-paste(heat,mrna, srna,ints,probcons,tree, sep=", ")
 	
 	if(length(na)>0){
@@ -416,9 +398,6 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 				colnames(tab3)<-c("#","FDR","pVal.","Locus_tag","Name","Energy","Int.pVal.","st","en","start_sRNA","end_sRNA","GeneID","Annotation")
 				tab3<-tab3[,-c(10,11,12)]
 				tab<-tab3
-			
-				#tab<-cbind(ranks,fdr,pval,tab)
-				#colnames(tab)[1]<-" "
 				write.table(tab, file=paste(ind_tables,"/",names(tabs)[i],".txt",sep=""), sep="\t", row.names=FALSE, quote=F)
 				tmp<-paste("'./evo_alignments2/ind_tables/",names(tabs)[i],".txt'",sep="")
 				tmp<-c("tab<-read.csv(",tmp,",sep='\\t')", "\n","tab[,2]<-formatC(as.numeric(tab[,2]), format = 'e', digits = 2)", "\n","tab[,3]<-formatC(as.numeric(tab[,3]), format = 'e', digits = 2)", "\n","tab[,7]<-formatC(as.numeric(tab[,7]), format = 'e', digits = 2)" )
@@ -458,9 +437,7 @@ html_table()
 
 
 # create clean html zip folder
-# evo_alignments2
-
-
+# remove obsolete files
 
 co<-readLines("CopraRNA_option_file.txt")
 noclean<-grep("noclean:", co)

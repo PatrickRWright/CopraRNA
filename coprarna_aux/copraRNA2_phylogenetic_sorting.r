@@ -70,7 +70,7 @@ tree_weights<-function(tree, method="clustal"){
 			t1<-tree[[1]][which(tree[[1]][,2]==t1),1]
 			temp<-c(temp,t1)
 		}
-		out[[i]]<-temp#[1:(length(temp)-1)]
+		out[[i]]<-temp
 	}
 	count<-table(unlist(out))
 	le<-0
@@ -176,13 +176,10 @@ build_anno<-function(ooi="NC_000911"){
 		nam2<-c(nam2,temp)
 	}
 	
-	#identify the column postion of the organism of interest (ooi) and exclude rows without a homolog from the ooi 
+	
 	ooi_pos<-grep(ooi, colnames(dat))
-	#ex<-which(dat[,ooi]!="")
 	align_pos<-1:nrow(dat)
 	dat_old<-dat
-	#dat<-dat[ex,]
-	#align_pos<-ex
 	dat_all<-cbind(dat,align_pos)
 		
 	
@@ -195,6 +192,7 @@ build_anno<-function(ooi="NC_000911"){
 	}
 	count_vect1<-cumsum(c(1,jobs[1:(length(jobs)-1)]))
 	count_vect2<-cumsum(jobs)
+	
 	# generate a temp file per thread to prepare mafft input file
 	thread2tmpfile = c();
 	for (i in 1:max_cores) { thread2tmpfile = c(thread2tmpfile, tempfile(pattern="CopraRNA2.phyloSort.")); }

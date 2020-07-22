@@ -951,9 +951,7 @@ assign_int_fin<-function(peaks, out_comb, tab_comb, alignment,sRNA_alignment2, o
 			# compare the overlap of interaction pair i with all detected peaks in the site probability landscape
 			
 			temp<-rep(0, length(peaks))		# stores ratio of overlap length and length of union from interaction site and peak for the mRNA
-			#temp_l<-rep(0, length(peaks))	# stores length of overlap mRNA/peak
 			temp_s<-rep(0, length(peaks))	# stores ratio of overlap length and length of union from interaction site and peak for the sRNA
-			#temp_ls<-rep(0, length(peaks))	# stores length of overlap sRNA/peak
 			
 			peaks<-lapply(out_comb[[i]], function(x){return(as.numeric(strsplit(x,"_")[[1]]))})
 			
@@ -1042,7 +1040,7 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	dat2<-read.FASTA(paste(na3,"/",tab_aligned[1,"name"],"_mRNA_alignment.fasta",sep=""),type="DNA")
 	dat<-as.phyDat(dat2)
 	dm2<-dist.dna(dat2, model = "F81")
-	#dm2 <- dist.ml(dat2, model="F81")
+
 	treeNJ2<-"a"
 	tryCatch({
 		treeNJ2 <- njs(dm2)
@@ -1052,9 +1050,6 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	if(treeNJ2=="a"){
 		return()
 	}
-	#fitStart2 = pml(treeNJ2, dat, k=4)
-	#fitJC2 = optim.pml(fitStart2, model="GTR", optGamma=T, rearrangement="stochastic",ratchet.par = list(iter = 5L, maxit = 20L, prop = 1/3),control = pml.control(epsilon = 1e-08, maxit = 10,
-	#trace = 1L))
 	
 	nu<-which(treeNJ2[[2]]<0)
 	if(length(nu)>0){
@@ -1103,13 +1098,11 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 		peaks<-peaks[-na]
 		colo3<-colo3[-na]
 	}
-	#fit2<-(fitJC$tree)
-	#fit3<-fit2
 	
 	
 	peak_mat<-matrix(,length(all_orgs),length(peaks))
 	peak_mat2<-peak_mat
-	#peak_mat[]<-0
+
 	for(i in 1:length(peaks)){
 		tmp<-grep(peaks[i],tab_aligned[,"cluster_id"])
 		tmp2<-grep(peaks[i],tabsub_aligned[,"cluster_id"])
@@ -1119,15 +1112,12 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 		if(length(tmp2)>0){
 			tmp2<-tabsub_aligned[tmp2,"orgs"]
 		}
-		#tmp<-c(tmp,tmp2)
+
 		p<-match(tmp, fit2$tip.label)
 		p2<-match(tmp2, fit2$tip.label)
-		#if(length(na.omit(p))>0){
-			peak_mat[p,i]<-"A"
-		#}
-		#if(length(na.omit(p2))>0){
-			peak_mat2[p2,i]<-"A"
-		#}
+
+		peak_mat[p,i]<-"A"
+		peak_mat2[p2,i]<-"A"
 	}
 	na<-which(is.na(tab_aligned[,"cluster_id"]))
 	na2<- which(is.na(tabsub_aligned[,"cluster_id"]))
@@ -1138,8 +1128,7 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 			na2<-tabsub_aligned[na2,"orgs"]
 	}
 	
-	
-	#na<-unlist(intersect(na,na2))
+
 	if(is.null(na)==F){
 		na<-match(na, fit2$tip.label)
 		peak_mat[na,ncol(peak_mat)]<-"A"
@@ -1153,12 +1142,6 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	colnames(peak_mat)<-1:ncol(peak_mat)
 	colnames(peak_mat2)<-paste(1:ncol(peak_mat2),"sub",sep="_")
 	
-	# p<-match(fit2$tip.label,all_orgs)
-	# nam3<-gsub("/","",nam2)
-	# nam3<-paste(nam3,all_orgs,sep="_")
-	# fit2$tip.label=nam3[p]
-	
-	
 	p<-match(fit2$tip.label,all_orgs)
 	nam3<-gsub("/","",nam2)
 	nam3<-paste(nam3,all_orgs,sep="_")
@@ -1170,7 +1153,6 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	
 	peak_mat<-matrix(,nrow(tab_aligned),length(peaks))
 	peak_mat2<-peak_mat
-	#peak_mat[]<-0
 	for(i in 1:length(peaks)){
 		tmp<-grep(peaks[i],tab_aligned[,"cluster_id"])
 		tmp2<-grep(peaks[i],tabsub_aligned[,"cluster_id"])
@@ -1180,15 +1162,10 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 		if(length(tmp2)>0){
 			tmp2<-tabsub_aligned[tmp2,"orgs"]
 		}
-		#tmp<-c(tmp,tmp2)
 		p<-match(tmp, fit4$tip.label)
 		p2<-match(tmp2, fit4$tip.label)
-		#if(length(na.omit(p))>0){
-			peak_mat[p,i]<-"A"
-		#}
-		#if(length(na.omit(p2))>0){
-			peak_mat2[p2,i]<-"A"
-		
+		peak_mat[p,i]<-"A"
+		peak_mat2[p2,i]<-"A"		
 	}
 	na<-which(is.na(tab_aligned[,"cluster_id"]))
 	na2<- which(is.na(tabsub_aligned[,"cluster_id"]))
@@ -1199,8 +1176,6 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 			na2<-tabsub_aligned[na2,"orgs"]
 	}
 	
-	
-	#na<-unlist(intersect(na,na2))
 	if(is.null(na)==F){
 		na<-match(na, fit4$tip.label)
 		peak_mat[na,ncol(peak_mat)]<-"A"
@@ -1211,12 +1186,6 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	}
 	colnames(peak_mat)<-1:ncol(peak_mat)
 	colnames(peak_mat2)<-paste(1:ncol(peak_mat2),"sub",sep="_")
-	
-	# p<-match(fit2$tip.label,all_orgs)
-	# nam3<-gsub("/","",nam2)
-	# nam3<-paste(nam3,all_orgs,sep="_")
-	# fit2$tip.label=nam3[p]
-	
 	
 	p<-match(fit4$tip.label,all_orgs)
 	nam3<-gsub("/","",nam2)
@@ -1254,11 +1223,7 @@ peak_tree<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oo
 	
 	eval(parse(text=command1))
 	eval(parse(text=command2))
-	#png(paste(na3,"/tree.png",sep=""))
-	#pdf(paste(na3,"/tree.pdf",sep=""),paper = "a4r", width = 0, height = 0)
-		#plot_grid(tr[[1]], tr[[2]], ncol=2, labels = c("16S ML-tree", paste(tab_aligned[1,"name"], " UTR ML-tree",sep="")))
-		plot_grid(n1, n2, ncol=2, labels = c("16S ML-tree", paste(tab_aligned[1,"name"], "-UTR NL-tree",sep="")))
-	#dev.off()
+	plot_grid(n1, n2, ncol=2, labels = c("16S ML-tree", paste(tab_aligned[1,"name"], "-UTR NL-tree",sep="")))
 	ggsave(paste(na3,"/tree.pdf",sep=""), width = 297, height = 210, units = "mm")
 	out<-list(n1,n2)
 	out
@@ -1279,8 +1244,6 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa", mode="accurate"
 		command<-paste("mafft --retree 1 --maxiterate 0 --quiet --inputorder ", filename, " > ", outname, sep="" )
 	}
 	system(command)
-	#fas<-read.fasta(outname)
-	#fas
 } 
 
 
@@ -1483,10 +1446,11 @@ rgl_plot<-function(align_table_int_pos=align_table_int_pos, test=test, tab_align
 }
 
 # create phylogentic ML-tree based on the 16S sequences
-mafft(filename="16s_sequences.fa")
-tempf<-read.fasta("ncrna_aligned.fa")
-write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
-dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+temp_align<-tempfile()
+mafft(filename="16s_sequences.fa", outname=temp_align)
+tempf<-read.fasta(temp_align)
+write.fasta(tempf, file.out="16S_aligned.fa", names=names(tempf), nbchar=100000)
+dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
 dm <- dist.ml(dat, model="F81")
 treeNJ <- NJ(dm)
 fitStart = pml(treeNJ, dat, k=4)
@@ -1553,8 +1517,6 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 		}
 		nam2<-c(nam2,temp)
 	}
-	#tree_rib[[3]]<-paste(nam2,tree_rib[[3]])
-	
 	
 	#select top predictions for interaction site analysis
 	copra<-read.csv(copra_result, sep=",")
@@ -1778,7 +1740,6 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					peaks1<-condense_peak2(test)
 					ooi_peak<-test[[1]][1,"cluster_id"]
 					if(ooi_peak=="NA" & length(peaks1)>0){
-						#ooi_peak<-test[[2]][1,"cluster_id"]
 						ooi_peak<-peaks1[[1]][1]
 					}
 					ooi_peak<-gsub("\\|.*","",ooi_peak)

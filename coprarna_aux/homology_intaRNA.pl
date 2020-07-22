@@ -457,7 +457,6 @@ if (scalar(@CopraRNA_out_lines) <= 1) {
 }
 
 # trim off last column (initial_sorting) if CopraRNA 2 prediction mode
-system "awk -F',' '{ print \$NF }' CopraRNA_result.csv > CopraRNA_result.map_evo_align" if ($websrv);
 system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
 system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
 system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
@@ -475,16 +474,8 @@ if ($websrv) {
 	#######################################################
 	print "generate webserver output\n" if ($verbose); 
 	#######################################################
-
-    my $allrefs = $refseqaffiliations{$ARGV[6]};
-    my @splitallrefs = split(/\s/,$allrefs);
-
-    my $themainrefid = $splitallrefs[0]; # organism of interest RefSeq ID
-    my $orgofintTargets = $themainrefid . "_upfromstartpos_" . $upfromstartpos . "_down_" . $down . ".fa";
-    my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
 	system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prepare_webserver_output.r";
 
-    system "cp $orgofintTargets target_sequences_orgofint.fa";
 }
 
 system $PATH_COPRA_SUBSCRIPTS . "print_archive_README.pl > README.txt";

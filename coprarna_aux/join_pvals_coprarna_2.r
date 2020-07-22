@@ -2,7 +2,7 @@
 
 
 #call:
-#R --slave -f ~join_pvals_coprarna_2.r
+#R --slave -f ~join_pvals_coprarna_2.r --args ooi_only=FALSE prediction_on_subset=TRUE outlier_removal=TRUE 
  
 #Dependencies:
 suppressPackageStartupMessages(require(phangorn))
@@ -152,9 +152,12 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa", mode="fast"){
 	system(command)
 } 
 
+
+temp_align<-tempfile()
+
 if(weight_tree=="ML"){
-	mafft("16s_sequences.fa", outname="16s_sequences_mafft_align.fas", mode="accurate")
-	ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
+	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
+	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
 	dm <- dist.ml(ribo, model="F81")
 	treeNJ <- NJ(dm)
 	mt <- modelTest(ribo, tree=treeNJ, multicore=F)
@@ -166,16 +169,16 @@ if(weight_tree=="ML"){
 }
 
 if(weight_tree=="NJ"){
-	mafft("16s_sequences.fa", outname="16s_sequences_mafft_align.fas", mode="accurate")
-	ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
+	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
+	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
 	dm <- dist.ml(ribo, model="F81")
 	treeNJ <- NJ(dm)
 	weight<-tree_weights(midpoint(treeNJ), method=weight_method)
 }
 
 if(weight_tree=="upgma"){
-	mafft("16s_sequences.fa", outname="16s_sequences_mafft_align.fas", mode="accurate")
-	ribo<-read.phyDat("16s_sequences_mafft_align.fas", format="fasta", type="DNA")
+	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
+	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
 	dm <- dist.ml(ribo, model="F81")
 	fitJC<- upgma(dm)
 	weight<-tree_weights(fitJC, method=weight_method)

@@ -17,7 +17,6 @@ suppressPackageStartupMessages(require(parallel))
 initial.options <- commandArgs(trailingOnly = FALSE)
 path<-initial.options [4]
 path<-sub("copraRNA2_conservation_heatmaps.r","",path)
-#print(path)
 
 # preset path to required files, path can also be specified as argument
 coprarna_reference_file<-paste(path,"CopraRNA_available_organisms.txt",sep="")
@@ -195,10 +194,12 @@ peaks<-peak_list[selection]
 
 # calculate phylogenetic tree for heatmap clustering
 if(clustering=="sRNA"){
-	mafft(filename="input_sRNA.fa")
-	tempf<-read.fasta("ncrna_aligned.fa")
-	write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
-	dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+	temp_align<-tempfile()
+	temp_align2<-tempfile()
+	mafft(filename="input_sRNA.fa", outname=temp_align)
+	tempf<-read.fasta(temp_align)
+	write.fasta(tempf, file.out=temp_align2, names=names(tempf), nbchar=100000)
+	dat<-read.phyDat(temp_align2, format="fasta", type="DNA")
 	dm <- dist.ml(dat, model="F81")
 	treeNJ <- NJ(dm)
 	fitJC = pml(treeNJ, data=dat)
@@ -215,10 +216,7 @@ if(clustering=="ribosomal"){
 	if(length(fit2$tip.label)==(length(unique(fit2[[1]][,1]))+1)){
 		fit2<-chronos(fit2)
 	} else {
-		#mafft(filename="16s_sequences.fa")
-		#tempf<-read.fasta("ncrna_aligned.fa")
-		#write.fasta(tempf, file.out="ncrna_aligned.fa", names=names(tempf), nbchar=100000)
-		dat<-read.phyDat("ncrna_aligned.fa", format="fasta", type="DNA")
+		dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
 		dm <- dist.ml(dat, model="F81")
 		treeNJ <- NJ(dm)
 		fitJC = pml(treeNJ, data=dat)

@@ -1,11 +1,7 @@
 #!/usr/bin/env Rscript
 
-#dependencies:
-# mafft
-
 #call:
 # Rscript --slave refine_clustertab.r 
-# no arguments
 
 suppressPackageStartupMessages(require(seqinr))
 suppressPackageStartupMessages(require(doMC))
