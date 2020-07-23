@@ -404,7 +404,7 @@ gene_anno<-c()
 gene_anno2<-c()
 evo_analysis<-as.matrix(evo_analysis)
 for(i in 1:length(selection)){
-	co<-grep(genelist[i],evo_analysis[selection[i],])
+	co<-grep(genelist[i],evo_analysis[selection[i],])[1]
 	temp<-evo_analysis[selection[i],co]
 	if(length(temp)>0){
 		locus_tag<-gsub("\\(.*","",as.character(temp))
