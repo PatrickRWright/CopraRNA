@@ -28,8 +28,6 @@ rm -f weights.txt;
 rm -f CopraRNA_result.map_evo_align;
 rm -f markdown_final.Rmd;
 rm -f utr_seqs.fa;
-rm -f copra_heatmap.html;
-rm -f copraRNA.json;
 
 
 
