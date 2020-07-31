@@ -44,7 +44,6 @@ if(jal_cores>max_cores){
 	jal_cores<-max_cores
 }
 
-
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
 
@@ -463,13 +462,14 @@ for(i in d){
 
 file.copy("./CopraRNA2_result.html", "./results_html/CopraRNA2_result.html")
 
-system("zip -r copra_html.zip ./results_html")
-system("rm -rf ./results_html")
+
 
 system("rm -f *.md")
 
 
 if(noclean==0){
+	system("zip -r copra_html.zip ./results_html")
+	system("rm -rf ./results_html")
 	for(i in d){
 		system(paste("rm -f ./evo_alignments2/",i,"/*.txt",sep=""))
 		system(paste("rm -f ./evo_alignments2/",i,"/*.fasta",sep=""))
