@@ -17,7 +17,7 @@ dependencies:
   - blast-legacy
   - phantomjs
   - dialign-tx
-  - jalview
+  - jalview >=2.11.1.0
   - domclust
   - mafft
   - clustalo
