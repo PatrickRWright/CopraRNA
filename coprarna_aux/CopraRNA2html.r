@@ -46,7 +46,6 @@ if(jal_cores>max_cores){
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
-jalconfig<-paste(path,"jalview_config.jvl",sep="")
 
 # CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
@@ -203,9 +202,9 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 			na<-d[pos]
 			fol<-paste(align_folder,"/",na,"/",sep="")
 			if(file.exists(fol)){
-				jal<-paste("jalview ",jalconfig," -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -png  ",  paste(fol,na,"_mRNA.PNG", sep="") , sep="" )
+				jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -png  ",  paste(fol,na,"_mRNA.PNG", sep="") , sep="" )
 				system(jal)
-				jal<-paste("jalview ",jalconfig," -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste(fol,na,"_sRNA.PNG", sep="") , sep="" )
+				jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste(fol,na,"_sRNA.PNG", sep="") , sep="" )
 				system(jal)
 			}
 		}
