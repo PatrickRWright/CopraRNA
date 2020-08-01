@@ -164,6 +164,11 @@ my @datalines = ();
 # from the optimal results and not from the
 # mixture of optimal and suboptimals
 
+# remove interactions with full hybrids
+print "remove_full_hybrids\n"  if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_full_hybrids.r>> $OUT_ERR 1>&2"; 
+ 
+
 ## creates *_opt.intarna.csv and *_subopt.intarna.csv files
 system $PATH_COPRA_SUBSCRIPTS . "disentangle_sorted_intarna_CSV.pl"; 
 
@@ -178,10 +183,7 @@ print "$refineClusterCall\n"  if ($verbose);
 system "Rscript --slave $refineClusterCall"; 																			  
 
 
-# remove interactions with full hybrids
-print "remove_full_hybrids\n"  if ($verbose);
-system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "remove_full_hybrids.r>> $OUT_ERR 1>&2"; 
- 
+
 																			  
 																			  
 ## create opt_tags.clustered
