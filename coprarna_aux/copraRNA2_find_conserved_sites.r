@@ -729,9 +729,9 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 		}
 		if(length(fasta_temp2)>1){
 			tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
-			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			write.fasta(fasta_temp2, names=tab_comb[cands,"name"], file.out=tempfi)
 			# avoid massive information output of dialign-tx (> /dev/null)
+			tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
 			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
 			system(command)
 			fasta_temp2<-read.fasta(tempfi2)
@@ -754,8 +754,6 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
 				system(command)
 				fasta_s2<-read.fasta(tempfi2)
-				unlink(tempfi)
-				unlink(tempfi2)
 				
 				# after re-alignment, calculate pairwise positional overlaps and identities of the interactions assigned to peak ii
 				for(i in 1:length(cands)){
@@ -832,14 +830,13 @@ comb_peaks3<-function(tab_comb,summ2,alignment,sRNA_alignment2,out_comb, minpts=
 						pos<-match(clus[[jj]],tab_comb[,"name"])
 						for(jjj in 1:length(pos)){
 							out[[pos[jjj]]]<-c(out[[pos[jjj]]],na)
-						
 						}
-						
-						
-						
 					}
 				}
 			}
+		# cleanup
+		unlink(tempfi)
+		unlink(tempfi2)
 		}
 	}
 	out
@@ -1322,35 +1319,36 @@ rgl_plot<-function(align_table_int_pos=align_table_int_pos, test=test, tab_align
 		fasta_s<-fasta_s[-short]
 	}
 	if(length(fasta_temp2)>1){
-				tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
-				tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
-				write.fasta(fasta_temp2, names=tab_all[cands,"name"], file.out=tempfi)
-				# avoid massive information output of dialign-tx (> /dev/null)
-				command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
-				system(command)
-				fasta_temp2<-read.fasta(tempfi2)
-				s2=max(1,coo1[3]-2)
-				e2=min(coo1[4]+2,length(fasta_s[[1]]))
-				fasta_s<-lapply(fasta_s, cutalign, s=s2, e=e2)
-				fasta_s2<-lapply(fasta_s, remove_gaps)
-				short2<-which(unlist(lapply(fasta_s2,length))<2)
-				if(length(short2)>0){
-					fasta_s<-fasta_s[-short2]
-					fasta_s2<-fasta_s2[-short2]
-					short_cands2<-match(names(fasta_s2)[short], tab_all[cands,"name"])
-					cands<-cands[-short_cands2]
-					fasta_temp<-fasta_temp[-short2]
-					fasta_temp2<-fasta_temp2[-short2]
-				}
-				if(length(fasta_s2)>1){
-					write.fasta(fasta_s2, names=tab_all[cands,"name"], file.out=tempfi)
-					# avoid massive information output of dialign-tx (> /dev/null)
-					command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
-					system(command)
-					fasta_s2<-read.fasta(tempfi2)
-					unlink(tempfi)
-					unlink(tempfi2)
-	}
+		tempfi<-tempfile(pattern="CopraRNA2.findConservedSites.")
+		tempfi2<-tempfile(pattern="CopraRNA2.findConservedSites.")
+		write.fasta(fasta_temp2, names=tab_all[cands,"name"], file.out=tempfi)
+		# avoid massive information output of dialign-tx (> /dev/null)
+		command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
+		system(command)
+		fasta_temp2<-read.fasta(tempfi2)
+		s2=max(1,coo1[3]-2)
+		e2=min(coo1[4]+2,length(fasta_s[[1]]))
+		fasta_s<-lapply(fasta_s, cutalign, s=s2, e=e2)
+		fasta_s2<-lapply(fasta_s, remove_gaps)
+		short2<-which(unlist(lapply(fasta_s2,length))<2)
+		if(length(short2)>0){
+			fasta_s<-fasta_s[-short2]
+			fasta_s2<-fasta_s2[-short2]
+			short_cands2<-match(names(fasta_s2)[short], tab_all[cands,"name"])
+			cands<-cands[-short_cands2]
+			fasta_temp<-fasta_temp[-short2]
+			fasta_temp2<-fasta_temp2[-short2]
+		}
+		if(length(fasta_s2)>1){
+			write.fasta(fasta_s2, names=tab_all[cands,"name"], file.out=tempfi)
+			# avoid massive information output of dialign-tx (> /dev/null)
+			command<-paste("dialign-tx -D ", dialign_conf," ",tempfi, " ", tempfi2, " > /dev/null 2>> CopraRNA2_subprocess.oe")
+			system(command)
+			fasta_s2<-read.fasta(tempfi2)
+		}
+		# cleanup temp files
+		unlink(tempfi)
+		unlink(tempfi2)
 	}
 	ints<-vector("list",length(cands))
 	for(j in 1:length(cands)){
@@ -1446,9 +1444,12 @@ rgl_plot<-function(align_table_int_pos=align_table_int_pos, test=test, tab_align
 }
 
 # create phylogentic ML-tree based on the 16S sequences
+
 temp_align<-tempfile()
 mafft(filename="16s_sequences.fa", outname=temp_align)
 tempf<-read.fasta(temp_align)
+unlink(temp_align)
+
 write.fasta(tempf, file.out="16S_aligned.fa", names=names(tempf), nbchar=100000)
 dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
 dm <- dist.ml(dat, model="F81")

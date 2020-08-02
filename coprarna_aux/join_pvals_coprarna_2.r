@@ -153,11 +153,12 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa", mode="fast"){
 } 
 
 
-temp_align<-tempfile()
 
 if(weight_tree=="ML"){
+	temp_align<-tempfile()
 	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
 	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
+	unlink(temp_align)
 	dm <- dist.ml(ribo, model="F81")
 	treeNJ <- NJ(dm)
 	mt <- modelTest(ribo, tree=treeNJ, multicore=F)
@@ -169,16 +170,20 @@ if(weight_tree=="ML"){
 }
 
 if(weight_tree=="NJ"){
+	temp_align<-tempfile()
 	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
 	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
+	unlink(temp_align)
 	dm <- dist.ml(ribo, model="F81")
 	treeNJ <- NJ(dm)
 	weight<-tree_weights(midpoint(treeNJ), method=weight_method)
 }
 
 if(weight_tree=="upgma"){
+	temp_align<-tempfile()
 	mafft("16s_sequences.fa", outname=temp_align, mode="accurate")
 	ribo<-read.phyDat(temp_align, format="fasta", type="DNA")
+	unlink(temp_align)
 	dm <- dist.ml(ribo, model="F81")
 	fitJC<- upgma(dm)
 	weight<-tree_weights(fitJC, method=weight_method)

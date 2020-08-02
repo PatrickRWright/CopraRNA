@@ -194,12 +194,17 @@ peaks<-peak_list[selection]
 
 # calculate phylogenetic tree for heatmap clustering
 if(clustering=="sRNA"){
+	
 	temp_align<-tempfile()
-	temp_align2<-tempfile()
 	mafft(filename="input_sRNA.fa", outname=temp_align)
 	tempf<-read.fasta(temp_align)
+	unlink(tmp_align)
+	
+	temp_align2<-tempfile()
 	write.fasta(tempf, file.out=temp_align2, names=names(tempf), nbchar=100000)
 	dat<-read.phyDat(temp_align2, format="fasta", type="DNA")
+	unlink(tmp_align2)
+	
 	dm <- dist.ml(dat, model="F81")
 	treeNJ <- NJ(dm)
 	fitJC = pml(treeNJ, data=dat)
