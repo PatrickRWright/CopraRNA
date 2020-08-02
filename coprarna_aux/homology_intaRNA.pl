@@ -352,7 +352,7 @@ print "get cluster.tab with DomClust\n" if ($verbose);
 
 # 16s sequence parsing 
 # system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl  $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
-system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
+system "perl " . $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
 # print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
 # check 16s
 open(MYDATA, "16s_sequences.fa") or die("\nError: cannot open file 16s_sequences.fa in homology_intaRNA.pl\n\n");
