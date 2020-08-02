@@ -209,22 +209,22 @@ die("\nError: Duplicate organisms ($duplicate_fasta_header) are present in $sRNA
 
 # write input options to file
 open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
-    print WRITETOOPTIONS "sRNA FASTA:" . $sRNAs_fasta . "\n";
-    print WRITETOOPTIONS "nt upstream:" . $upstream . "\n";
-    print WRITETOOPTIONS "nt downstream:" . $downstream . "\n";
-    print WRITETOOPTIONS "region:" . $region . "\n";
-    print WRITETOOPTIONS "core count:" . $core_count . "\n";
-    print WRITETOOPTIONS "verbose:" . $verbose . "\n";
-    print WRITETOOPTIONS "websrv:" . $websrv . "\n";
-    print WRITETOOPTIONS "top count:" . $topcount . "\n";
-    print WRITETOOPTIONS "root:" . $root . "\n";
-    print WRITETOOPTIONS "enrich:" . $enrich . "\n";
-    print WRITETOOPTIONS "noclean:" . $noclean . "\n";
-    print WRITETOOPTIONS "version:CopraRNA ".$COPRARNA_VERSION."\n";
-    print WRITETOOPTIONS "genomePath:$genomePath\n";
-    print WRITETOOPTIONS "intarnaOptions:$intarnaParamFile\n";
-	print WRITETOOPTIONS "CopraRNA_expert_options:$CopraRNA_expert_options\n";	
-	print WRITETOOPTIONS "hybrid_threshold:$hybrid_threshold\n";
+    print WRITETOOPTIONS "sRNA FASTA=" . $sRNAs_fasta . "\n";
+    print WRITETOOPTIONS "nt upstream=" . $upstream . "\n";
+    print WRITETOOPTIONS "nt downstream=" . $downstream . "\n";
+    print WRITETOOPTIONS "region=" . $region . "\n";
+    print WRITETOOPTIONS "core count=" . $core_count . "\n";
+    print WRITETOOPTIONS "verbose=" . $verbose . "\n";
+    print WRITETOOPTIONS "websrv=" . $websrv . "\n";
+    print WRITETOOPTIONS "top count=" . $topcount . "\n";
+    print WRITETOOPTIONS "root=" . $root . "\n";
+    print WRITETOOPTIONS "enrich=" . $enrich . "\n";
+    print WRITETOOPTIONS "noclean=" . $noclean . "\n";
+    print WRITETOOPTIONS "version=CopraRNA ".$COPRARNA_VERSION."\n";
+    print WRITETOOPTIONS "genomePath=$genomePath\n";
+    print WRITETOOPTIONS "intarnaOptions=$intarnaParamFile\n";
+	print WRITETOOPTIONS "CopraRNA_expert_options=$CopraRNA_expert_options\n";	
+	print WRITETOOPTIONS "hybrid_threshold=$hybrid_threshold\n";
 	
 	
 	
