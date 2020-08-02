@@ -9,10 +9,18 @@ co<-readLines("CopraRNA_option_file.txt")
 hybrid_threshold<-as.numeric(gsub("hybrid_threshold:","",co[grep("hybrid_threshold:", co)]))
 
 
+# check_hybrid<-function(hybrid, srna_length){
+	# hybrid<-gsub(".*&","",hybrid)
+	# hybrid<-gsub("\\.","",hybrid)
+	# return(nchar(hybrid)/srna_length)
+# }
+
 check_hybrid<-function(hybrid, srna_length){
 	hybrid<-gsub(".*&","",hybrid)
-	hybrid<-gsub("\\.","",hybrid)
-	return(nchar(hybrid)/srna_length)
+	hybrid<-strsplit(hybrid,"\\.")[[1]]
+	longest<-which(nchar(hybrid)==max(nchar(hybrid)))[1]
+	hyb<-hybrid[longest]
+	return(nchar(hyb)/srna_length)
 }
 
 if(hybrid_threshold<=1){
@@ -23,12 +31,14 @@ if(hybrid_threshold<=1){
 	cluster<-read.csv("cluster.tab", sep="\t")
 	for(i in 1:length(sRNAs)){
 		le<-length(sRNAs[[i]])
-		intaRNA<-grep(paste(names(sRNAs)[i],".*.fa.intarna.csv",sep=""),d) 
-		intaRNA<-read.csv(d[intaRNA],sep=";")
+		intaRNA1<-grep(paste(names(sRNAs)[i],".*.fa.intarna.csv",sep=""),d) 
+		intaRNA<-read.csv(d[intaRNA1],sep=";")
 		hybrids<-unlist(lapply(intaRNA[,"hybridDP"],check_hybrid, srna_length=le))
 		long_hybrids<-which(hybrids>=hybrid_threshold)
 		if(length(long_hybrids)>0){
+			
 			removed<-rbind(removed,intaRNA[long_hybrids,])
+			intaRNA<-intaRNA[-long_hybrids,]
 			tags<-intaRNA[long_hybrids,1]
 			for(j in 1:length(tags)){
 				pos_col<-grep(tags[j],cluster)
@@ -49,4 +59,5 @@ if(hybrid_threshold<=1){
 	}
 	write.table(cluster,file="cluster.tab", sep="\t", quote=F, row.names=F)
 	write.table(removed,file="removed_full_hybrids.txt", sep="\t", quote=F, row.names=F)
+	write.table(intaRNA,file=d[intaRNA1],sep=";",quote=F, row.names=F)
 } 
