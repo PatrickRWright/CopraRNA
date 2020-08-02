@@ -36,7 +36,7 @@ if(length(empty)>0){
 }
 
 # jalview cores
-jal_cores<-as.numeric(gsub("jalview_cores:","",co[grep("jalview_cores:", cop_option)]))
+jal_cores<-as.numeric(gsub("jalview_cores:","",cop_option[grep("jalview_cores:", cop_option)]))
 if(jal_cores==0){
 	jal_cores<-max_cores
 }
@@ -44,7 +44,7 @@ if(jal_cores>max_cores){
 	jal_cores<-max_cores
 }
 # jalview max memory
-jal_maxmem<-as.numeric(gsub("jalview_maxmem:","",co[grep("jalview_maxmem:", cop_option)]))
+jal_maxmem<-as.numeric(gsub("jalview_maxmem:","",cop_option[grep("jalview_maxmem:", cop_option)]))
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
