@@ -72,7 +72,6 @@ my $genomePath = "."; # where to look for and store genome files
 my $intarnaParamFile = $PATH_COPRA . "coprarna_aux/intarna_options.cfg";
 my $CopraRNA_expert_options = $PATH_COPRA . "coprarna_aux/coprarna_options.cfg";
 my $hybrid_threshold = 0.8; # interactions are removed from the CopraRNA calculations if the hybrid covers >= "hybrid_threshold" of the sRNA
-my $jalview_cores = 5; # number of cores used for jalview during post-processing. 0 indicates as many cores as defined in core_count
 
 
 
@@ -82,7 +81,6 @@ GetOptions (
     'ntup:i'			=> \$upstream,
     'ntdown:i'			=> \$downstream,
     'cores:i'			=> \$core_count,
-	'jalview_cores:i'	=> \$jalview_cores,
     'region:s'			=> \$region, # one of "5utr", "3utr", "cds"
     'verbose'			=> \$verbose, # switch for verbose output during computation
     'websrv'			=> \$websrv, # switch for providing webserver output
@@ -126,7 +124,6 @@ print "\nCopraRNA ".$COPRARNA_VERSION."\n\n",
 " --ntup                    amount of nucleotides upstream of '--region' to parse for targeting (def:200)\n",
 " --ntdown                  amount of nucleotides downstream of '--region' to parse for targeting (def:100)\n",
 " --cores                   amount of cores to use for parallel computation (def:1)\n",
-" --jalview_cores           number of cores used for jalview during post-processing. 0 indicates as many cores as defined in cores (def:5)\n",
 " --verbose                 switch to print verbose output to terminal during computation (def:off)\n",
 " --websrv                  switch to provide webserver output files (def:off)\n",
 " --noclean                 switch to prevent removal of temporary files (def:off)\n",
@@ -217,7 +214,6 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "nt downstream:" . $downstream . "\n";
     print WRITETOOPTIONS "region:" . $region . "\n";
     print WRITETOOPTIONS "core count:" . $core_count . "\n";
-	print WRITETOOPTIONS "jalview_cores:" . $jalview_cores . "\n";
     print WRITETOOPTIONS "verbose:" . $verbose . "\n";
     print WRITETOOPTIONS "websrv:" . $websrv . "\n";
     print WRITETOOPTIONS "top count:" . $topcount . "\n";

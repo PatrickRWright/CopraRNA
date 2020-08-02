@@ -36,13 +36,15 @@ if(length(empty)>0){
 }
 
 # jalview cores
-jal_cores<-as.numeric(gsub("jalview_cores:","",co[grep("jalview_cores:", co)]))
+jal_cores<-as.numeric(gsub("jalview_cores:","",co[grep("jalview_cores:", cop_option)]))
 if(jal_cores==0){
 	jal_cores<-max_cores
 }
 if(jal_cores>max_cores){
 	jal_cores<-max_cores
 }
+# jalview max memory
+jal_maxmem<-as.numeric(gsub("jalview_maxmem:","",co[grep("jalview_maxmem:", cop_option)]))
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
@@ -202,9 +204,9 @@ jalview<-function(inpfile=inputfile, number=num, align_folder="./evo_alignments2
 			na<-d[pos]
 			fol<-paste(align_folder,"/",na,"/",sep="")
 			if(file.exists(fol)){
-				jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -png  ",  paste(fol,na,"_mRNA.PNG", sep="") , sep="" )
+				jal<-paste("jalview -jvmmemmax=",jal_maxmem," -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_mRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_mRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_mRNA_annotation.txt", sep=""),  " -png  ",  paste(fol,na,"_mRNA.PNG", sep="") , sep="" )
 				system(jal)
-				jal<-paste("jalview -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste(fol,na,"_sRNA.PNG", sep="") , sep="" )
+				jal<-paste("jalview -jvmmemmax=",jal_maxmem," -nodisplay -props ",jalprops, " -open ", paste(fol,na,"_sRNA_alignment.fasta", sep=""), " -features " ,paste(fol,na,"_sRNA_features.txt", sep=""), " -annotations " ,paste(fol, na,"_sRNA_annotation.txt", sep=""),  " -png ",  paste(fol,na,"_sRNA.PNG", sep="") , sep="" )
 				system(jal)
 			}
 		}
