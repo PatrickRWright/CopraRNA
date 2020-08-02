@@ -23,10 +23,10 @@ coprarna_reference_file<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
+max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 
 # number of top predictions which should be investigated
-top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
+top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 
 # if True the heatmaps are not done on the top predictions but on the locus tags given in the genelist.txt file
 select=FALSE

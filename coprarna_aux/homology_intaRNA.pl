@@ -32,7 +32,7 @@ sub getOptionValue
 ##########################################################################################
 {
 	my $option = $_[0];
-	my $value = `grep -m 1 -P '^\\s*$option:' CopraRNA_option_file.txt | sed 's/^\\s*$option://g'`;
+	my $value = `grep -m 1 -P '^\\s*$option=' CopraRNA_option_file.txt | sed 's/^\\s*$option=//g'`;
 	chomp $value;
 	return( $value );
 }

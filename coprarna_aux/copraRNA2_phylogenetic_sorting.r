@@ -22,7 +22,7 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
+max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 registerDoMC(max_cores)
 
 

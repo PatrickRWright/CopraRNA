@@ -21,7 +21,7 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
 # number of top predictions which should be investigated
 co<-readLines("CopraRNA_option_file.txt") 
-top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
+top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 
 # path to CopraRNA result file (in order to investigate the top predictions)
 copra_result<-"CopraRNA_result_all.csv"

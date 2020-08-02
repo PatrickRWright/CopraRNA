@@ -16,16 +16,15 @@ path<-sub("CopraRNA2html.r","",path)
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
+max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 registerDoMC(max_cores)
 
 #IntaRNA_option file
-int_opt<-grep("intarnaOptions",co)
-int_opt<-gsub("intarnaOptions:","",co[int_opt])
+int_opt<-gsub("intarnaOptions=","",co[grep("intarnaOptions=",co)])
 int_opt<-gsub("#","",readLines(int_opt))
 
 #CopraRNA expert options
-cop_option_file<-gsub("CopraRNA_expert_options:","",co[grep("CopraRNA_expert_options:", co)])
+cop_option_file<-gsub("CopraRNA_expert_options=","",co[grep("CopraRNA_expert_options=", co)])
 cop_option<-readLines(cop_option_file)
 cop_option<-gsub("\t.*","",cop_option)
 cop_option<-gsub("#.*","",cop_option)
@@ -44,7 +43,7 @@ if(jal_cores>max_cores){
 	jal_cores<-max_cores
 }
 # jalview max memory
-jal_maxmem<-as.numeric(gsub("jalview_maxmem=","",cop_option[grep("jalview_maxmem=", cop_option)]))
+jal_maxmem<-gsub("jalview_maxmem=","",cop_option[grep("jalview_maxmem=", cop_option)])
 
 # jalview properties file
 jalprops<-paste(path,"jalview_props.txt",sep="")
@@ -54,7 +53,7 @@ inputfile="CopraRNA_result_all.csv"
 dat<-read.csv(inputfile, sep=",")
 	
 # number of top predictions which should be investigated
-numMax<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
+numMax<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 # ensure number does not exceed available data
 num <- min(numMax, nrow(dat))
 
@@ -218,8 +217,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	ma<-readLines(markdown)
 	
 	opt<-readLines("CopraRNA_option_file.txt")
-	ver<-grep("version:", opt)
-	ver<-gsub("version:","", opt[ver])
+	ver<-gsub("version=","", opt[grep("version=", opt)])
 	ver<-paste0("Version: ",ver)
 	ma<-append(ma,ver, after=6)	
 	tab<-read.csv(inpfile, sep=",")
@@ -276,8 +274,7 @@ html_table<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num){
 	
 	wd<-getwd()
 	co<-readLines(paste(wd,"/CopraRNA_option_file.txt",sep=""))
-	noclean<-grep("noclean:", co)
-	noclean<-as.numeric(gsub("noclean:","",co[noclean]))
+	noclean<-as.numeric(gsub("noclean=","",co[grep("noclean=", co)]))
 
 	enrich1<-"./enriched_heatmap_big.pdf"
 	enrich_thumb<-"./enriched_heatmap_big.png"
@@ -441,8 +438,7 @@ html_table()
 # remove obsolete files
 
 co<-readLines("CopraRNA_option_file.txt")
-noclean<-grep("noclean:", co)
-noclean<-as.numeric(gsub("noclean:","",co[noclean]))
+noclean<-as.numeric(gsub("noclean=","",co[grep("noclean=", co)]))
 dir.create("./results_html")
 
 file.copy("./enriched_heatmap_big.pdf", "./results_html/enriched_heatmap_big.pdf")

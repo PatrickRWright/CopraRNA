@@ -28,11 +28,11 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores<-as.numeric(gsub("core count:","",co[grep("core count:", co)]))
+max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 registerDoMC(max_cores)
 
 # number of top predictions which should be investigated
-top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
+top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 
 
 # method to calculate pyhlogentic weights from the 16S alignment. "clustal" = ClustalW method, "copra" = CopraRNA_1 method

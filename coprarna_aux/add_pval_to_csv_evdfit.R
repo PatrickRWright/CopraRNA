@@ -69,7 +69,7 @@
 # end insert new functions
 
 # read options
-options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character")
+options <- read.table("CopraRNA_option_file.txt", sep="=",colClasses = "character")
 region <- as.character(options$V2[grep("region", options$V1)])
 
 # set energy column dependent on region selection

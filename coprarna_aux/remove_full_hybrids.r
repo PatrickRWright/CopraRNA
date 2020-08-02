@@ -6,7 +6,7 @@
 suppressPackageStartupMessages(require(seqinr))
 
 co<-readLines("CopraRNA_option_file.txt")
-hybrid_threshold<-as.numeric(gsub("hybrid_threshold:","",co[grep("hybrid_threshold:", co)]))
+hybrid_threshold<-as.numeric(gsub("hybrid_threshold=","",co[grep("hybrid_threshold=", co)]))
 
 
 # check_hybrid<-function(hybrid, srna_length){

@@ -699,7 +699,7 @@ if(numdens>numplot2){
 	numdens<-numplot2
 }
 
-options <- read.table("CopraRNA_option_file.txt", sep=":",colClasses = "character") 
+options <- read.table("CopraRNA_option_file.txt", sep="=",colClasses = "character") 
 up <- as.numeric(as.character(options$V2[grep("nt upstream", options$V1)]))
 down <- as.numeric(options$V2[grep("nt downstream", options$V1)])
 type <- as.character(options$V2[grep("region", options$V1)])

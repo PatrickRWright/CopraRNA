@@ -9,7 +9,7 @@ output_file <- args[3]
 
 # number of top predictions which should be investigated
 co<-readLines("CopraRNA_option_file.txt") 
-top<-as.numeric(gsub("top count:","",co[grep("top count:", co)]))
+top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 
 
 

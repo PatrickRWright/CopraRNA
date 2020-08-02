@@ -9,7 +9,7 @@ suppressPackageStartupMessages(require(doMC))
 
 # register cores for parallel processing
 co<-readLines("CopraRNA_option_file.txt") 
-max_cores <- min( detectCores(), as.numeric(gsub("core count:","",co[grep("core count:", co)])), na.rm = TRUE)
+max_cores <- min( detectCores(), as.numeric(gsub("core count=","",co[grep("core count=", co)])), na.rm = TRUE)
 registerDoMC(max_cores)
 
 

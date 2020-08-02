@@ -8,10 +8,6 @@ use warnings;
 my $CopraRNA_out = $ARGV[0];
 my $intarna_out = $ARGV[1];
 
-# check CopraRNA1 switch 
-my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`;
-chomp $cop1;
-
 open(MYDATA, $CopraRNA_out) or die("Error: cannot open file $CopraRNA_out at prepare_output_for_websrv_new.pl\n");
     my @CopraRNA_out_lines = <MYDATA>;
 close MYDATA;
@@ -106,11 +102,7 @@ for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
         print WRITEINTERNAL ",";       
  
         # these are the interaction properties
-        if ($cop1) {
-            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . $split[-1];
-        } else {
-            print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . "0\n";
-        }       
+        print WRITEINTERNAL $intarna_array[7] . "," . $intarna_array[10] . "," . $intarna_array[14] . "," . $intarna_array[12] . "," . $intarna_array[13] . "," . "0\n";
     }
 }
 

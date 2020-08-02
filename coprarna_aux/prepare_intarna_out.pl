@@ -28,11 +28,11 @@ $ABS_PATH =~ s|[^/]+$||g;
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
 
 # get core count from option file
-my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; 
+my $cores = `grep 'core count=' CopraRNA_option_file.txt | grep -oP '\\d+'`; 
 chomp $cores;
 
 # check for verbose printing
-my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; 
+my $verbose = `grep 'verbose=' CopraRNA_option_file.txt | sed 's/verbose://g'`; 
 chomp $verbose;
 
 
