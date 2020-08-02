@@ -279,7 +279,7 @@ vari<-foreach(ji=1:max_cores)  %dopar% {
 }
 
 # cleanup temp files
-file.remove(thread2tmpfile); 
+unlink(thread2tmpfile); 
 
 
 final_clus1<-list()

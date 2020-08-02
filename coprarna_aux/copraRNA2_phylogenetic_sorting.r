@@ -273,7 +273,7 @@ build_anno<-function(ooi="NC_000911"){
 	}
 
 	# cleanup temp files
-	file.remove(thread2tmpfile); 
+	unlink(thread2tmpfile); 
 
 	dat<-dat_old
 	dat<-cbind(dat,align_pos)

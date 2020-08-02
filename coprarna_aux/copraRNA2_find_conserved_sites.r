@@ -1783,7 +1783,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	}
 
 	# cleanup temp files
-	file.remove(thread2tmpfile); 
+	unlink(thread2tmpfile); 
 
 	dat<-dat_old
 	int_sites<-vector("list", nrow(dat))
