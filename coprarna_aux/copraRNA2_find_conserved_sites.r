@@ -31,7 +31,7 @@ co<-readLines("CopraRNA_option_file.txt")
 max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 registerDoMC(max_cores)
 
-par_file<-gsub("intarnaOptions:","",co[grep("intarnaOptions:", co)])
+par_file<-gsub("intarnaOptions=","",co[grep("intarnaOptions=", co)])
 
 
 
