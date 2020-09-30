@@ -97,6 +97,10 @@ if(prediction_on_subset==T){
 	load("orgs_selection.Rdata") 
 }
 
+if(order_method=="phylogenetic"){
+	load("order_table_all_orgs.Rdata") 
+}
+
 tree_weights<-function(tree, method="clustal"){
 	tip<-Ntip(tree)
 	node<-Nnode(tree)
@@ -263,7 +267,7 @@ for(ii in namegenomes){
 	####
 
 	if(order_method=="phylogenetic"){
-		load("order_table_all_orgs.Rdata")  
+		#load("order_table_all_orgs.Rdata")  
 		order_table<-order_table_all_orgs[[ooi]]
 		order_table<-order_table[,selected_genomes]
 		
