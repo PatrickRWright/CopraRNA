@@ -21,7 +21,7 @@ path<-sub("copraRNA2_find_conserved_sites.r","",path)
 # preset path to required files, path can also be specified as argument
 copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 dialign_conf<-paste(path,"dialign_conf/",sep="")
-par_file<-paste(path,"intarna_options.cfg",sep="")
+#par_file<-paste(path,"intarna_options.cfg",sep="")
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
@@ -30,6 +30,10 @@ ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 co<-readLines("CopraRNA_option_file.txt") 
 max_cores<-as.numeric(gsub("core count=","",co[grep("core count=", co)]))
 registerDoMC(max_cores)
+
+par_file<-gsub("intarnaOptions=","",co[grep("intarnaOptions=", co)])
+
+
 
 # number of top predictions which should be investigated
 top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
@@ -97,6 +101,7 @@ jalview_anno<-function(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation
 		peaks<-peaks[-na]
 		colo3<-colo3[-na]
 	}
+	colo3<-gsub("#","",colo3)
 	anno_mRNA<-paste(peaks, "\t", colo3, sep="")
 	anno_sRNA<-anno_mRNA
 	tab<-tab_aligned

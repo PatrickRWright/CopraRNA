@@ -217,22 +217,40 @@ if(clustering=="sRNA"){
 if(clustering=="ribosomal"){
 	
 	load("16S_tree.Rdata")
-	fit2<-midpoint(fit2)
-	if(length(fit2$tip.label)==(length(unique(fit2[[1]][,1]))+1)){
-		fit2<-chronos(fit2)
-	} else {
+	
+	out<-tryCatch({
+	#	if(length(fit2$tip.label)==(length(unique(fit2[[1]][,1]))+1)){
+			fit2<-midpoint(fit2)
+			fit2<-chronos(fit2)
+		# } else {
+			# dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
+			# dm <- dist.ml(dat, model="F81")
+			# treeNJ <- NJ(dm)
+			# fitJC = pml(treeNJ, data=dat)
+			# fit2<-fitJC$tree
+			# fit2<-midpoint(fit2)
+			# fit2<-chronos(fit2)
+			
+		# }
+		clus<-as.hclust.phylo2((fit2))
+		ord<-clus$label
+		ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
+		return(list(fit2,clus,ord,ord2))
+	}, error = function(e) {
+		fit2<-NA
 		dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
 		dm <- dist.ml(dat, model="F81")
-		treeNJ <- NJ(dm)
-		fitJC = pml(treeNJ, data=dat)
-		fit2<-fitJC$tree
-		fit2<-midpoint(fit2)
-		fit2<-chronos(fit2)
-	}
-	clus<-as.hclust.phylo2((fit2))
-	ord<-clus$label
-	ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
+		clus<-hclust(dm)
+		ord<-clus$label
+		ord2<-match(ord, gsub("\\..*","",colnames(int_opt)))
+		return(list(fit2,clus,ord,ord2))
+	})
+	fit2<-out[[1]]
+	clus<-out[[2]]
+	ord<-out[[3]]
+	ord2<-out[[4]]
 }
+
 
 # calculate p_values based on IntaRNA energies
 intarna_link<-function(all_orgs){
@@ -555,9 +573,16 @@ lgd_list = list(lgd)
 # draw combined heatmap
 pdf("conservation_heatmap.pdf", width = 2.3+ncol(int_opt)*0.2, height = 3.4+nrow(int_opt)*0.2,useDingbats=F)
 col_col<-rep("black", ncol(int_opt))
-col_col[clus[[3]][match(oois, clus[[4]])]]<-"orangered"
 c_lty<-rep(1, ncol(int_opt))
-c_lty[clus[[3]][match(oois, clus[[4]])]]<-2
+if(is.na(fit2)==F){	
+	col_col[clus[[3]][match(oois, clus[[4]])]]<-"orangered"
+	c_lty[clus[[3]][match(oois, clus[[4]])]]<-2
+} else{ 
+	col_col[match(oois, clus[[4]])]<-"orangered"
+	c_lty[match(oois, clus[[4]])]<-2
+}
+
+
 a<-Heatmap(	int_opt,
 			col=my_palette,
 			cluster_rows = F, 
@@ -601,9 +626,16 @@ for(jj in 1:length(selection)){
 	int_opt4<-t(as.matrix(int_opt3[jj,]))
 	int_sub4<-t(as.matrix(int_sub3[jj,]))
 	col_col<-rep("black", ncol(int_opt2))
-	col_col[clus[[3]][match(oois, clus[[4]])]]<-"orangered"
 	c_lty<-rep(1, ncol(int_opt2))
-	c_lty[clus[[3]][match(oois, clus[[4]])]]<-2
+	if(is.na(fit2)==F){	
+		col_col[clus[[3]][match(oois, clus[[4]])]]<-"orangered"
+		c_lty[clus[[3]][match(oois, clus[[4]])]]<-2
+	} else{ 
+		col_col[match(oois, clus[[4]])]<-"orangered"
+		c_lty[match(oois, clus[[4]])]<-2
+	}
+	
+	
 	se<-seq(-1,100)
 	s<-match(min(int_opt2),se)
 	e<-match(max(int_opt2),se)
