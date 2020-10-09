@@ -69,8 +69,6 @@ my $enrich = getOptionValue("enrich");
 open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); 
 
 
-
-
 ##########################################################################################
 sub removeInvalidGenomeFiles
 ##########################################################################################
@@ -112,9 +110,6 @@ $dgl->wait_all_children;
 ######################################################################## END OF SUBROUTINE
 
 
-
-
-
 ##########################################################################################
 sub downloadGenomeAndLink
 ##########################################################################################
@@ -127,14 +122,13 @@ sub downloadGenomeAndLink
     
   	# download genome file if needed
 	unless ( -e "$genomePath/$refseqoutputfile" ) {
-	  	my $gbCall = $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $genomePath/$refseqoutputfile";
+	  	my $gbCall = $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $genomePath/$refseqoutputfile -c $cores -gPath $genomePath";
     	print $gbCall . "\n" if ($verbose); 
       	system $gbCall;
 	}
   	# link genome file locally if not present
   	if ( (not -e "$refseqoutputfile") and (-e "$genomePath/$refseqoutputfile") ) {
 	        system ("ln -s $genomePath/$refseqoutputfile .");
-		# print("ln -s $genomePath/$refseqoutputfile .");
   	}
     
 }
@@ -160,12 +154,14 @@ foreach(@keggtorefseqnew) {
     # split off quadruplecode (pseudokegg id)
     my @split = split("\t", $_);
     my $all_refseqs = $split[1];
+    if ($split[1]) {
     chomp $all_refseqs;
     # split up refseq ids
     my @split_refseqs = split(/\s/, $all_refseqs);
     foreach(@split_refseqs) {
         $refseqaffiliations{$_} = $all_refseqs;
         
+        }
     }
 }
 
@@ -195,7 +191,9 @@ $orgcount = (scalar(@ARGV) - 6);
 my $RefSeqIDs = `grep ">" input_sRNA.fa | tr '\n' ' ' | sed 's/>//g'`; 
 my @split_RefIds = split(/\s+/, $RefSeqIDs);
 
-my $dwn = new Parallel::ForkManager($cores);
+my $dwnCall = "python ". $PATH_COPRA_SUBSCRIPTS  . "download_genomes.py -g @split_RefIds -c $cores -p $genomePath/";
+system $dwnCall;
+
 foreach(@split_RefIds) {
     my $currRefSeqID = $_;
     my $presplitreplicons = $refseqaffiliations{$currRefSeqID};
@@ -204,12 +202,6 @@ foreach(@split_RefIds) {
     foreach my $accessionnumber (@replikons) {
 	my $refseqoutputfile = "$accessionnumber.gb.gz";
         $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb.gz" . ",";
-        if ( (not -e "$refseqoutputfile") and (not -e "$genomePath/$refseqoutputfile") ){
-
-	$dwn->start and next;
-        my $dwnCall = "python ". $PATH_COPRA_SUBSCRIPTS  . "download_genomes.py -g $accessionnumber -p $genomePath/";
-        system $dwnCall;
-        $dwn->finish;    }
     }
            
 	# remove trailing comma
@@ -219,8 +211,6 @@ foreach(@split_RefIds) {
 
     
 }
-$dwn->wait_all_children; 
-
 ## RefSeq correct download check for 2nd try
 removeInvalidGenomeFiles();
 
@@ -308,7 +298,7 @@ $pm->wait_all_children;
 
 unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
 ###########################################
-print "get cluster.tab with DomClust\n" if ($verbose);
+print "get cluster.tab with Diamond\n" if ($verbose);
 ###########################################
 
     ### get AA fasta for homolog clustering
@@ -318,11 +308,15 @@ print "get cluster.tab with DomClust\n" if ($verbose);
     }
 
     # prep for DomClust
-	print "formatdb for all.fas\n" if ($verbose);
-    system "formatdb -i all.fas" unless (-e "all.fas.blast.gz"); 
-    # blast sequences
-	print "blastall for all.fas\n" if ($verbose);
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 2>> $OUT_ERR | gzip -9 > all.fas.blast.gz " unless (-e "all.fas.blast.gz"); # change the -a parameter to qdjust core usage 
+    print "diamond clustering for all.fas\n" if ($verbose);
+    unless (-e "all.fas.blast.gz") {
+    print "makedb all.fas \n" if ($verbose);
+    system "diamond makedb --in all.fas -d sequenceDB";
+    print "diamond blastp sequenceDB \n" if ($verbose);
+    system "diamond blastp -q all.fas --threads $cores --db sequenceDB.dmnd --out all.fas.blast --outfmt 6 --more-sensitive";
+    print "gzip -9 all.fas.blast \n" if ($verbose);
+    system "gzip -9 all.fas.blast";
+
     # remove empty error file
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast.gz > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
@@ -341,7 +335,7 @@ print "get cluster.tab with DomClust\n" if ($verbose);
 	    }
     }
 
-    
+    }
     system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
     if (-s "duplicated_CDS.txt") {
         print ERRORLOG "duplicated CDS for some genes. Please check locus tags:\n";
@@ -351,9 +345,7 @@ print "get cluster.tab with DomClust\n" if ($verbose);
 }
 
 # 16s sequence parsing 
-# system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl  $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
-system "perl " . $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
-# print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk3.pl $core_count $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
+system "perl " . $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
 # check 16s
 open(MYDATA, "16s_sequences.fa") or die("\nError: cannot open file 16s_sequences.fa in homology_intaRNA.pl\n\n");
     my @sixteenSseqs = <MYDATA>;
@@ -379,8 +371,6 @@ if ($sixteenScounter ne $orgcount) {
 
 ## prepare single organism whole genome target predictions 
 system "echo $GenBankFiles > merged_refseq_ids.txt"; # need this for iterative region plot construction
-
-# my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
 my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $core_count $intarnaParamFile $GenBankFiles";
 print $prepare_intarna_out_call . "\n" if ($verbose);
 system $prepare_intarna_out_call;
@@ -423,17 +413,12 @@ my @split = split(/\s/, $refseqaffiliations{$ARGV[6]});
 # get the first id entry
 my $ooi_refseq_id = $split[0];
 
-
-
-
 ######################################################
 print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
 ######################################################
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR 1>&2"; 
 # perform actual CopraRNA 2 p-value combination
 system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR 1>&2"; 
-
-
 
 # truncate final output // 
 system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv"; 
