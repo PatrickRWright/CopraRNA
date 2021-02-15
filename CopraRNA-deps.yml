@@ -14,8 +14,8 @@ dependencies:
   - grep
   - coreutils 
   - embassy-phylip
-  - blast-legacy
   - phantomjs
+  - bioconda diamond
   - dialign-tx
   - jalview >=2.11.1.0
   - domclust
@@ -36,6 +36,11 @@ dependencies:
   - libopenblas
   - r-phangorn
   - bioconductor-complexheatmap
+  - bioconductor-genbankr
+  - bioconductor-topgo
+  - bioconductor-gosemsim
+  - bioconductor-annotationforge
+  - r-tidyr
   - r-domc
   - r-knitr
   - r-rmarkdown
