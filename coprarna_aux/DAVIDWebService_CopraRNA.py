@@ -51,13 +51,16 @@ errors = 0
 
 #setup_logging()
 
+
+
+
 #logging.getLogger('suds.client').setLevel(logging.DEBUG)
 
-url = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
+url = 'https://david.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
 print ('url=%s' % url)
 # create a service client using the wsdl.
 client = Client(url)
-ws = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
+ws = 'https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
 client.wsdl.services[0].setlocation(ws)
 
 exit
