@@ -50,3 +50,4 @@ dependencies:
   - r-cowplot
   - python
   - suds-jurko
+  - python-wget
