@@ -41,6 +41,7 @@ dependencies:
   - bioconductor-gosemsim
   - bioconductor-annotationforge
   - r-tidyr
+  - mscorefonts
   - open-fonts
   - r-domc
   - r-knitr
