@@ -471,18 +471,18 @@ if ($enrich) {
 	#######################################################
 
     ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
-    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; 
-    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ##  only removing obsolete spaces and keeping others
-	# ensure there is some enrichment output
-	if( -s "DAVID_enrichment_grepped_temp.txt" ) {
-        system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; 
-    	if ( -s "termClusterReport.txt" ) {
-	        open(MYDATA, "termClusterReport.txt");
-            my @enrichment_lines = <MYDATA>;
-       		close MYDATA;
+#    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; 
+#    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ##  only removing obsolete spaces and keeping others
+#	 ensure there is some enrichment output
+#	if( -s "DAVID_enrichment_grepped_temp.txt" ) {
+#        system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; 
+#    	if ( -s "termClusterReport.txt" ) {
+#	        open(MYDATA, "termClusterReport.txt");
+#            my @enrichment_lines = <MYDATA>;
+#       		close MYDATA;
             ## enrichment visualization
             system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; 
-            system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R --args CopraRNA_result_all.csv termClusterReport.txt enrichment.txt";
+            system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "enrichment.r --args num=200";
             system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; 
             system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; 
             system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; 
@@ -491,12 +491,12 @@ if ($enrich) {
             system "rm index-thumb.html"; 
             system "rm index-pdf.html"; 
             ## end add enrichment vis
-        } else {
-			system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-		}
-    } else {
-		system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-	}
+#        } else {
+#			system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+#		}
+#    } else {
+#		system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+#	}
 
     ##### end DAVID enrichment
 

@@ -280,27 +280,27 @@ chomp $organismOfInterest;
 # final optimal IntaRNA result for organism of interest
 my $MainFinalCSV = $organismOfInterest . "_upfromstartpos_" . $upstream . "_down_" . $downstream . "_opt.intarna.csv";
 
-if ($enrich) {
-	############################################################
-    print "Performing auxiliary enrichment\n" if ($verbose);
-	############################################################
-    # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
-    system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
-    system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
-    system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## aux einrich for same amout as regular enrichment
-    system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt";
-    system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
-    system "echo 'locus_tag,start_tar,stop_tar,start_query,stop_query,energy,p-value,gene_name,gene_id,annotation,functional_terms' > aux_table.csv";
-    system "awk -F';' '{ print \$1\",\"\$9\",\"\$10\",\"\$11\",\"\$12\",\"\$15\",\"\$36\",\"\$37\",\"\$38\",\"\$39 }' intarna_websrv_table_ncbi.csv > intarna_websrv_table_ncbi_awk.csv";
-    my $aux_gids = `grep -oP ';\\d+\\(' org_of_interest_aux_enrichment.txt | sed 's/[;(]//g' | sort -u | tr '\n' ';'`;
-    chop $aux_gids; # remove trailing ';' 
-    my @split_aux_gids = split(/;/, $aux_gids);
-    foreach(@split_aux_gids) {
-        system "grep -P ',$_,' intarna_websrv_table_ncbi_awk.csv | tr '\n' ',' >> aux_table.csv";
-        system "grep -P '$_' org_of_interest_aux_enrichment.txt | awk -F';' '{ print \$1 }' | tr '\n' ';' | sed 's/,/ /' | sed 's/.\$//' >> aux_table.csv";
-        system "echo >> aux_table.csv";
-    }
-}
+# if ($enrich) {
+	# ############################################################
+    # print "Performing auxiliary enrichment\n" if ($verbose);
+	# ############################################################
+    # # add IntaRNA single organisms chart reports for aux enrichment // sort by p-value
+    # system "env LC_ALL=C sort -t';' -g -k36 $MainFinalCSV -o intarna_websrv_table.csv";
+    # system $PATH_COPRA . "coprarna_aux/add_GI_genename_annotation_intarna.pl";
+    # system $PATH_COPRA . "coprarna_aux/DAVIDWebService_IntaRNA_chartReport.py intarna_websrv_table_ncbi.csv $enrich > IntaRNA_chartReport.txt"; ## aux einrich for same amout as regular enrichment
+    # system "grep -P 'geneIds\\s=|termName\\s=' IntaRNA_chartReport.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' | sed 's/\"//g' > IntaRNA_chartReport_grepped.txt";
+    # system $PATH_COPRA . "coprarna_aux/find_single_specific_targets_in_termCluster.pl > org_of_interest_aux_enrichment.txt";
+    # system "echo 'locus_tag,start_tar,stop_tar,start_query,stop_query,energy,p-value,gene_name,gene_id,annotation,functional_terms' > aux_table.csv";
+    # system "awk -F';' '{ print \$1\",\"\$9\",\"\$10\",\"\$11\",\"\$12\",\"\$15\",\"\$36\",\"\$37\",\"\$38\",\"\$39 }' intarna_websrv_table_ncbi.csv > intarna_websrv_table_ncbi_awk.csv";
+    # my $aux_gids = `grep -oP ';\\d+\\(' org_of_interest_aux_enrichment.txt | sed 's/[;(]//g' | sort -u | tr '\n' ';'`;
+    # chop $aux_gids; # remove trailing ';' 
+    # my @split_aux_gids = split(/;/, $aux_gids);
+    # foreach(@split_aux_gids) {
+        # system "grep -P ',$_,' intarna_websrv_table_ncbi_awk.csv | tr '\n' ',' >> aux_table.csv";
+        # system "grep -P '$_' org_of_interest_aux_enrichment.txt | awk -F';' '{ print \$1 }' | tr '\n' ';' | sed 's/,/ /' | sed 's/.\$//' >> aux_table.csv";
+        # system "echo >> aux_table.csv";
+    # }
+# }
 
 # output warnings
 #system "awk -F ';' '{if (\$2 > 0.5) { print toupper(\$1) \" may be overweighted. It has weight\"; printf(\"\%.2f\", \$2); print \". You should consider checking the 16S rDNA tree. We suggest removal of outliers from your input and restarting.\";} }' zscore.weight | tr '\n' ' ' > weights.warning";
