@@ -15,7 +15,7 @@ dependencies:
   - coreutils 
   - embassy-phylip
   - phantomjs
-  - bioconda diamond
+  - diamond
   - dialign-tx
   - jalview >=2.11.1.0
   - domclust
@@ -41,6 +41,7 @@ dependencies:
   - bioconductor-gosemsim
   - bioconductor-annotationforge
   - r-tidyr
+  - open-fonts
   - r-domc
   - r-knitr
   - r-rmarkdown
@@ -50,3 +51,4 @@ dependencies:
   - r-cowplot
   - python
   - suds-jurko
+  - python-wget
