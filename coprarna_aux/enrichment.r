@@ -330,7 +330,7 @@ anno<-enrich_list[[ooi]][[4]]
 
 pack<-require(paste0("org.",gsub("_","",ooi),".eg.db"),character.only=TRUE)
 
-if(pack==F){
+
 
 	fSym<-cbind(seq(1:nrow(cd)),seq(1:nrow(cd)),toupper(as.character(cd[,"locus_tag"])),as.character(cd[,"gene"]))
 	colnames(fSym) <- c("GID","ENTREZID","SYMBOL","GENENAME")
@@ -416,7 +416,7 @@ fGO<-data.frame(GID=as.integer(fGO[,1]),GO=fGO[,2], EVIDENCE=rep("NO",nrow(fGO))
 
 out<-list(fGO,fSym, fChr)
 #save(out, file="out.Rdata")
-
+if(pack==F){
 
 ## Then call the function
 makeOrgPackage(gene_info=fSym, chromosome=fChr, go=fGO,
@@ -596,9 +596,57 @@ out_en[[ii]]<-list(list(res,sim.df),best)
 
 }
 
+enri<-c()
+# 	for(i in 1:length(selection)){
+		tmp<-enrich_list[[1]][[1]][[1]]
+		tmp2<-enrich_list[[1]][[1]][[2]]
+		tmp3<-enrich_list[[1]][[1]][[3]]
+		enri<-rbind(enri,tmp,tmp2,tmp3)
+
 for(i in 1:3){
-	tmp<-out_en[[i]][[1]][[1]]
-	write.table(tmp, file=paste(go[i],"_enrichment_initial_set.txt",sep=""),sep="\t", quote=F, row.names=FALSE)
+	temp<-out_en[[i]][[1]][[1]]
+	locus_tags<-c()
+	gene_names<-c()
+	cop_ranks<-c()
+	if(nrow(temp)>0){
+		for(j in 1:nrow(temp)){
+			#terml<-c(terml,paste0(temp[j,"term"],"~",temp[j,"ID"]))
+
+			#pos<-match(temp[j,"ID"], enri[,"GO.ID"])
+			term<-temp[j,"ID"]	
+
+			anno<-cbind(anno,an)
+			tmp<-grep(term,enri[,1])
+			#tmp_fc<-enri[tmp,"Significant"]/enri[tmp,"Expected"]
+			#fc<-c(fc,tmp_fc)
+			if(length(tmp)>0){
+				genes<-strsplit(enri[tmp,"genes"],split=",")
+				le<-unlist(lapply(genes,length))
+				genes<-unlist(genes)
+				pos_cop<-unlist(lapply(genes, grep,cop[,1], ignore.case=T))
+				#pval_cop<-copra_results[[1]][pos_cop,"p-value"]
+				#pval<-rep(enri[tmp,"classicFS"],le)
+				ranks<-unlist(strsplit(enri[tmp,"ranks"],split=","))
+				cop_ranks<-c(cop_ranks,paste(ranks,collapse=","))
+				pos<-match(toupper(genes),toupper(anno[,ncol(anno)]))
+				gene<-as.character(anno[pos,9])
+				gene<-paste(gene,collapse=",")
+				genes<-paste(genes,collapse=",")
+				gene_names<-c(gene_names,gene)
+				locus_tags<-c(locus_tags,genes)
+				#des<-as.character(anno[pos,12])
+				#org<-as.character(anno[pos,5])
+				#tmp1<-cbind(genes,gene,pval,org,ranks,des)
+				#tmp1<-cbind(rep(948746,le), pval_cop, genes, paste0(genes," - " , gene),paste0(genes," - " , gene),rep(NA,le),rep(NA,le),rep(NA,le),rep(NA,le),rep(NA,le),rep(NA,le))
+				#out<-rbind(out,tmp1)
+				#term_list[[length(term_list)+1]]<-genes
+				#names(term_list)[length(term_list)]<-paste0(temp[j,"term"],"~",temp[j,"ID"])
+			}
+		}
+	}
+
+	temp<-cbind(temp,gene_names,cop_ranks,locus_tags)
+	write.table(temp, file=paste(go[i],"_enrichment_initial_set.txt",sep=""),sep="\t", quote=F, row.names=FALSE)
 }
 
 out_res<-list()
@@ -671,7 +719,7 @@ for(i in 1:3){
 			#pos<-match(temp[j,"ID"], enri[,"GO.ID"])
 			term<-temp[j,"ID"]	
 
-			anno<-cbind(anno,an)
+			#anno<-cbind(anno,an)
 			tmp<-grep(term,enri[,1])
 			tmp_fc<-enri[tmp,"Significant"]/enri[tmp,"Expected"]
 			fc<-c(fc,tmp_fc)
