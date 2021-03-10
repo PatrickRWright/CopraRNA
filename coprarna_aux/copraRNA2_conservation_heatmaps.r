@@ -570,8 +570,12 @@ legen<-c("#FFFFFF", "#b0b0b0")
 lgd = Legend(labels = leg, title = 'site\nconservation',title_position = "topcenter", legend_gp = gpar(fill = legen),border = "black",title_gp = gpar(font=2))
 lgd_list = list(lgd)
 
+width = min(10,2.3+ncol(int_opt)*0.2)
+height = 3.4+nrow(int_opt)*0.2
+
+
 # draw combined heatmap
-pdf("conservation_heatmap.pdf", width = 2.3+ncol(int_opt)*0.2, height = 3.4+nrow(int_opt)*0.2,useDingbats=F)
+pdf("conservation_heatmap.pdf", width = max(4.5,2.3+ncol(int_opt)*0.2), height = 3.4+nrow(int_opt)*0.2,useDingbats=F)
 col_col<-rep("black", ncol(int_opt))
 c_lty<-rep(1, ncol(int_opt))
 if(is.na(fit2)==F){	
