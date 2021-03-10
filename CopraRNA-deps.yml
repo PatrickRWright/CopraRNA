@@ -53,3 +53,4 @@ dependencies:
   - python
   - suds-jurko
   - python-wget
+  - zip
