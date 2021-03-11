@@ -1460,9 +1460,15 @@ dat<-read.phyDat("16S_aligned.fa", format="fasta", type="DNA")
 dm <- dist.ml(dat, model="F81")
 treeNJ <- NJ(dm)
 fitStart = pml(treeNJ, dat, k=4)
-fitJC = optim.pml(fitStart, model="GTR", optGamma=T, rearrangement="stochastic",ratchet.par = list(iter = 5L, maxit = 20L, prop = 1/3),control = pml.control(epsilon = 1e-08, maxit = 10,
-trace = 1L))
-fit2<<-(fitJC$tree)
+
+
+if(length(treeNJ$tip.label)/length(unique(as.vector(treeNJ[[1]])))>=2/3){
+	fitJC = optim.pml(fitStart, model="GTR", optGamma=T, rearrangement="stochastic",ratchet.par = list(iter = 5L, maxit = 20L, prop = 1/3),control = pml.control(epsilon = 1e-08, maxit = 10,
+	trace = 1L))	
+	fit2<<-(fitJC$tree)
+} else {
+	fit2<<-treeNJ
+}
 save(fit2, file="16S_tree.Rdata")
 weight1<-read.csv("weights.txt",skip=1, header=F, sep="\t")
 weight<-weight1[,2]
@@ -1734,11 +1740,13 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				x<-align_table_int_pos
 				w<-2000
 				h<-ncol(x)/nrow(x)*w
+				tryCatch({
 				png(paste(na3,"/spot_probabilities.png",sep=""), width = w, height = h)	
 					filled.contour(1:nrow(x),1:ncol(x),x,col=topo.colors(20), xlab="mRNA_alignment [nt]",ylab="sRNA_alignment [nt]",main=paste(tab[1,"name"]," combined interaction spot-probabilities",sep=""),zlim=c(0,1), 
 						plot.axes = {contour(1:nrow(x),1:ncol(x),x, nlevels = 20, drawlabels = TRUE, axes = FALSE, rame.plot = FALSE, add = TRUE);axis(1); axis(2)}
 					)
 				dev.off()
+				})
 								
 				peaks1<-list()
 				if(length(test[[3]])>0){
@@ -1767,7 +1775,9 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 				tab_aligned[,"name"]<-gsub("_opt","",tab_aligned[,"name"])
 				tabsub_aligned[,"name"]<-gsub("_sub","",tabsub_aligned[,"name"])
 				jalview_anno(tab_aligned, tabsub_aligned,peaks1, test,ooi, nam2=nam2,alignment,sRNA_alignment2 ,name=paste(na3,"/",tab[1,"name"],sep=""),all_orgs=all_orgs)
+				tryCatch({
 				tr<-peak_tree(tab_aligned, tabsub_aligned,peaks1,test, ooi=conservation_oois, nam2,alignment,sRNA_alignment2 ,all_orgs,name=name,fit2,na3=na3)
+				})
 				#rgl_plot(align_table_int_pos=align_table_int_pos, test=test, tab_aligned=tab_aligned,tabsub_aligned=tabsub_aligned,alignment=alignment,sRNA_alignment2=sRNA_alignment2,na3=na3,peaks1=peaks1,tab=tab)
 				if(length(test[[3]])>0){
 					op<-which(is.na(tab_aligned[,"cluster_id"])==F)
