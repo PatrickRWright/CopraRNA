@@ -330,7 +330,7 @@ for(ii in namegenomes){
 		spa<-spa+1
 		spal<-c(spal,rest)
 	}
-	out2<-rep((list(rep(NA,nrow(int_table)))), spa)
+	#out2<-rep((list(rep(NA,nrow(int_table)))), spa)
 	count_vect1<-cumsum(c(1,spal[1:(length(spal)-1)]))
 	count_vect2<-cumsum(spal)
 
@@ -379,6 +379,9 @@ for(ii in namegenomes){
 	}
 
 	out_evo<-do.call(pmin, c(out,list(na.rm=T)))
+	rm(out)	
+	rm(h)
+	gc()
 	out_fdr<-p.adjust(out_evo, method="BH")
 	out_evo<-cbind(out_fdr,out_evo)
 	colnames(out_evo)<-c("fdr","p-value")
@@ -411,9 +414,17 @@ for(ii in namegenomes){
 	}
 	copra_results[[ii]]<-out_evo
 	#write.table(out_evo, file=name2,sep=",", quote=F, row.names=F)
+	
 }
 
 write.table(copra_results[[1]], file="CopraRNA_result_all.csv",sep=",", quote=F, row.names=F)
 save(copra_results, file="copra_results_all.Rdata")
 
+top1<-grep("top count=", co)
+top<-co[top1]
+top<-as.numeric(gsub("top count=","",top))
+if(top>nrow(copra_results[[1]])){
+	co[top1]<-paste0("top count=",nrow(copra_results[[1]]))
+}
 
+writeLines(co, con="CopraRNA_option_file.txt")

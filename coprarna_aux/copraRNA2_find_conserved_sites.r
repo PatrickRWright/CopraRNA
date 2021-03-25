@@ -1532,6 +1532,7 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 	
 	#select top predictions for interaction site analysis
 	copra<-read.csv(copra_result, sep=",")
+	top<-min(top, nrow(copra))
 	ex<-as.numeric(as.character(copra[1:top,"initial_sorting"]))
 	ooi_pos<-grep(ooi, colnames(copra))
 	ooi_pos2<-grep(ooi, colnames(dat))
@@ -1787,6 +1788,11 @@ build_anno<-function(ooi="NC_000911", conservation_oois=ooi){
 					colnames(sites1)<-all_orgs
 					sites1[1,unlist(tab_aligned[op,"orgs"])]<-unlist(tab_aligned[op,"cluster_id"])
 					sites1[2,unlist(tabsub_aligned[su,"orgs"])]<-unlist(tabsub_aligned[su,"cluster_id"])
+					int_sites[[i]]<-sites1
+					peak_list[[i]]<-peaks1
+				} else {
+					sites1<-rep(NA, length(all_orgs))
+					sites1<-rbind(sites1,sites1)
 					int_sites[[i]]<-sites1
 					peak_list[[i]]<-peaks1
 				}
