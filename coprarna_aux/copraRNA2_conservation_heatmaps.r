@@ -586,9 +586,16 @@ if(is.na(fit2)==F){
 	c_lty[match(oois, clus[[4]])]<-2
 }
 
-
+	se<-seq(-1,100)
+	s<-match(min(int_opt),se)
+	e<-match(max(int_opt),se)
+	my_palette3<-my_palette[s:e]
+	s<-match(min(int_sub),se)
+	e<-match(max(int_sub),se)
+	my_palette4<-my_palette2[s:e]
+	
 a<-Heatmap(	int_opt,
-			col=my_palette,
+			col=my_palette3,
 			cluster_rows = F, 
 			cluster_columns =clus, 
 			show_heatmap_legend = F,
@@ -605,7 +612,7 @@ a<-Heatmap(	int_opt,
 				rect_gp = gpar(col = "lightgrey", lty = 1, lwd = 0.15)
 				if(int_sub[i,j]>-1){
 					grid.polygon(x = c(x1-0.45*w1,x1+0.45*w1,x1-0.45*w1), y = c(y1-0.45*h1,y1+0.45*h1,y1+0.45*h1),  
-						gp = gpar(fill=my_palette2[int_sub[i,j]+2], col=my_palette2[int_sub[i,j]+2]))
+						gp = gpar(fill=my_palette4[int_sub[i,j]+2], col=my_palette4[int_sub[i,j]+2]))
 				}
 				if((int_sub[i,j]>=1 &  int_sub3[i,j]=="++") ){
 					grid.polygon(x = c(x1-0.42*w1,x1+0.42*w1,x1+0.42*w1,x1-0.42*w1), y = c(y1-0.42*h1,y1-0.42*h1,y1+0.42*h1,y1+0.42*h1),  
