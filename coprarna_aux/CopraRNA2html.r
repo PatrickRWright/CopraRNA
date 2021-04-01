@@ -50,8 +50,9 @@ jalprops<-paste(path,"jalview_props.txt",sep="")
 
 # CopraRNA result file 
 inputfile="CopraRNA_result_all.csv"
+
 dat<-read.csv(inputfile, sep=",")
-	
+
 # number of top predictions which should be investigated
 numMax<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
 # ensure number does not exceed available data
@@ -67,11 +68,12 @@ copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
 oois<-ooi
 
-
 interactions<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num, outname=""){
 
 	ooi<-ooi1
 	dat<-read.csv(inpfile, sep=",")
+	
+
 	dat<-as.matrix(dat)
 	e<-grep("Annotation", colnames(dat))
 	oois<-colnames(dat)[4:(e-1)]
@@ -79,7 +81,9 @@ interactions<-function(ooi1=ooi, oois1=oois, inpfile=inputfile, number=num, outn
 
 	int<-list()
 	for(i in 1:length(oois)){
-		tmp<-grep(paste(oois[i],"_upfrom.*_down_.*.fa.intarna.sorted.csv$",sep=""),dir())
+	print(paste0(i,"/",length(oois)))
+		tmp<-grep(paste(oois[i],"_upfrom.*_down_.*.fa.intarna.csv$",sep=""),dir())
+		#tmp<-grep(paste(oois[i],"_upfrom.*_down_.*.fa.intarna.sorted.csv$",sep=""),dir())
 		tmp<-read.csv(dir()[tmp],sep=";")
 		int[[length(int)+1]]<-as.matrix(tmp)
 	}
@@ -428,7 +432,10 @@ Nucleic Acids Research, 46(W1), W25-W29, 2018.
 	rmarkdown::render("./markdown_final.Rmd",output_file='CopraRNA2_result.html',intermediates_dir=getwd(),knit_root_dir=getwd(),output_dir=getwd(),clean =F)
 }
 
+
+	
 interactions()	
+
 jalview()
 html_table()
 

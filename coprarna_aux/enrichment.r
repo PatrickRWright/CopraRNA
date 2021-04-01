@@ -15,8 +15,8 @@ require(AnnotationForge)
 
 # get absolute path  
 #path="/home/jens/CopraRNA-git/coprarna_aux/"
-#path="~/media/jens@margarita/CopraRNA-git/coprarna_aux/"
-#genomes_path="~/media/jens@margarita/For_CopraRNA2.0/Genomes/"
+path="~/media/jens@margarita/CopraRNA-git/coprarna_aux/"
+genomes_path="~/media/jens@margarita/For_CopraRNA2.0/Genomes/"
 genomes_path=getwd()
 genomes_path<-paste0(genomes_path,"/")
 initial.options <- commandArgs(trailingOnly = FALSE)
@@ -476,6 +476,7 @@ if(is.null(fGO)==F){
 			term<-c(term,tmp2[th2,2])
 			#}
 		#}
+		if(length(term)>0){
 		k<-which(pval=="< 1e-30")
 		if(length(k)>0){
 			pval[k]<-"1e-30"
@@ -597,7 +598,11 @@ if(is.null(fGO)==F){
 
 	out_en[[ii]]<-list(list(res,sim.df),best)
 
+	} else {
+		out_en[[ii]]<-NA
 	}
+	
+}
 
 	enri<-c()
 	# 	for(i in 1:length(selection)){
@@ -607,6 +612,7 @@ if(is.null(fGO)==F){
 			enri<-rbind(enri,tmp,tmp2,tmp3)
 
 	for(i in 1:3){
+		if(is.na(out_en[[i]])==F){
 		temp<-out_en[[i]][[1]][[1]]
 		locus_tags<-c()
 		gene_names<-c()
@@ -650,12 +656,13 @@ if(is.null(fGO)==F){
 
 		temp<-cbind(temp,gene_names,cop_ranks,locus_tags)
 		write.table(temp, file=paste(go[i],"_enrichment_initial_set.txt",sep=""),sep="\t", quote=F, row.names=FALSE)
+		}
 	}
 
 	out_res<-list()
 
 	for(j in 1:3){
-
+		if(is.na(out_en[[j]])==F){
 	sim.df<-out_en[[j]][[1]][[2]]
 	res<-out_en[[j]][[1]][[1]]
 	best<-out_en[[j]][[2]]
@@ -691,10 +698,12 @@ if(is.null(fGO)==F){
 		}
 	}
 		out2<-out2[order(out2[,"both"], decreasing=T),]	  
-		out_res[[go[j]]]<-out2	  
+		out_res[[go[j]]]<-out2	
+		#names(out_res)[[go[j]]]<-go[j]
+		}		
 	}
 
-	names(out_res)<-go
+	#names(out_res)<-go
 
 
 	enri<-c()
@@ -711,7 +720,7 @@ if(is.null(fGO)==F){
 	out<-c()
 	term_list<-list()
 	type<-c()
-	for(i in 1:3){
+	for(i in 1:length(out_res)){
 		temp<-out_res[[i]]
 		
 		if(nrow(temp)>0){
@@ -768,3 +777,7 @@ if(is.null(fGO)==F){
 	write.table(out, file="enrichment.txt", sep="\t",col.names = FALSE,row.names = FALSE, quote=FALSE)
 
 }
+
+remove.packages(paste0("org.",gsub("_","",ooi),".eg.db"))
+system(paste0("rm -r -f ./", paste0("org.",gsub("_","",ooi),".eg.db")))
+
