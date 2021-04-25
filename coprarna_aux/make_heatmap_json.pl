@@ -57,7 +57,7 @@ sub readTable{
 	my @jsonOut    = ();
 	my $flagF      = 1;		# flagF=1 is needed only once
 		
-	open(INFILE, "<$fileName")  || die "File not found - \"CopraRNA-File\"!\n";
+	open(INFILE, "<$fileName")  || die "File not found - \"$fileName\"!\n";
 		while(<INFILE>){
 			chomp($_);
 			

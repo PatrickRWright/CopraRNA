@@ -2,23 +2,31 @@
 
 use strict;
 use warnings;
-
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
 use Bio::SeqIO;
 
 open(MYDATA, "intarna_websrv_table.csv") or die("Error: cannot open file intarna_websrv_table.csv\n");
     my @intarna_websrv_lines = <MYDATA>;
 close MYDATA;
 
-open(WRITETABLE, ">intarna_websrv_table_ncbi.csv");
-
-my @gbks = <*gb>;
+my @gbks = <*gb.gz>;
 my %ltagToRestHash = ();
 
 foreach(@gbks) {
         my $gbkFile = $_;
         chomp $gbkFile;
 
-        my $in  = Bio::SeqIO->new(-file => $gbkFile , '-format' => 'genbank');
+        my $fileHandle = undef;
+        if ($gbkFile =~ m/.+\.gz$/) {
+        	$fileHandle = new IO::Uncompress::Gunzip $gbkFile or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+        } else {
+        	$fileHandle = IO::File->new($gbkFile, "r");
+        }
+
+        my $in  = Bio::SeqIO->new(-fh => $fileHandle , '-format' => 'genbank');
         while ( my $seq = $in->next_seq() ) {
             foreach my $sf ( $seq->get_SeqFeatures() ) {
                 if( $sf->primary_tag eq 'CDS' ) {
@@ -67,10 +75,14 @@ foreach(@gbks) {
         } 
 }
 
+
+
+open(WRITETABLE, ">intarna_websrv_table_ncbi.csv");
+
 foreach my $line (@intarna_websrv_lines) {
     chomp $line;
     print WRITETABLE $line;
-    if ($line =~ m/id1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;/) { ## edit 2.0.5.1 // correct header
+    if ($line =~ m/id1;id2;seq1;seq2;subseq1;subseq2;subseqDP;subseqDB;start1;end1;start2;end2;hybridDP;/) {
         print WRITETABLE ";genename;entrez_gene_id;annotation\n";
         next;
     }

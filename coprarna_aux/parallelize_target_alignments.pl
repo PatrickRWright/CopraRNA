@@ -10,7 +10,7 @@ use Parallel::ForkManager;
 my $input_table = $ARGV[0]; # CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv
 
 # get core count from option file
-my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`;
+my $cores = `grep 'core count=' CopraRNA_option_file.txt | grep -oP '\\d+'`;
 chomp $cores;
  
 open(MYDATA, $input_table) or die("\nError: cannot open file $input_table at parallelize_target_alignments.pl\n\n");

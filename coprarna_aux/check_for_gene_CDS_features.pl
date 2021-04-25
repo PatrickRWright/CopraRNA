@@ -2,7 +2,10 @@
 
 use strict;
 use warnings;
-
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
 use Bio::SeqIO;
 
 # this script checks if a gene feature is available but no CDS feature
@@ -18,7 +21,15 @@ my $refid = $ARGV[0];
 my $CDScount = 0;
 my $GENEcount = 0;
 
-my $seqin = Bio::SeqIO->new( -format => 'genbank', -file => $refid);
+# need the full path of gunzip for Bio::SeqIO call
+
+my $fileHandle = undef;
+if ($refid =~ m/.+\.gz$/) {
+	$fileHandle = new IO::Uncompress::Gunzip $refid or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+} else {
+	$fileHandle = IO::File->new($refid, "r");
+}
+my $seqin = Bio::SeqIO->new( -format => 'genbank', -fh => $fileHandle );
 
 while( (my $seq = $seqin->next_seq()) ) {
     foreach my $sf ( $seq->get_SeqFeatures() ) {

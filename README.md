@@ -56,61 +56,34 @@ It is also possible to run CopraRNA [via a provided Docker container](#biocontai
 <a name="deps" />
 ## Dependencies
 
-The specified versions are tested and functional.
+We provide a [list of dependencies](CopraRNA-deps.yml) within the file [CopraRNA-deps.yml](CopraRNA-deps.yml).
 
-- bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
-- gawk 4.1.3                                                           // conda install gawk
-- sed 4.2.2.165-6e76-dirty                                             // conda install sed
-- grep 2.14                                                            // conda install grep
-- GNU coreutils 8.25                                                   // conda install coreutils 
-- IntaRNA 2.1.0                                                        // conda install intarna
-- EMBOSS package 6.5.7 - distmat (creates distance matix from msa)    // conda install emboss
-- embassy-phylip 3.69.650 - fneighbor (creates tree from dist matrix)  // conda install embassy-phylip
-- ncbiblast-2.2.22                                                     // conda install blast-legacy
-- DomClust 1.2.8a                                                      // conda install domclust
-- MAFFT 7.310                                                          // conda install mafft
-- clustalo 1.2.3                                                       // conda install clustalo
-- phantomjs 2.1.1-0                                                    // conda install phantomjs
-
-- Perl (5.22.0) Module(s):                                             // conda install perl
-
-    - List::MoreUtils 0.413                                                // conda install perl-list-moreutils
-    - Parallel::ForkManager 1.17                                           // conda install perl-parallel-forkmanager
-    - Getopt::Long 2.45                                                    // conda install perl-getopt-long
-    - Bio::SeqIO (bioperl 1.6.924)                                         // conda install perl-bioperl
-    - Bio::DB::EUtilities 1.75                                             // conda install perl-bio-eutilities
-    - Cwd 3.56                                                             // included in the conda perl installation       
-
-- R statistics 3.2.2                                                   // conda install r-base==3.2.2
-
-    - seqinr 3.1\_3                                                       // conda install r-seqinr 
-    - robustrankaggreg 1.1                                                // conda install r-robustrankaggreg
-    - pheatmap 1.0.8                                                      // conda install r-pheatmap
-
-- python                                                              // conda install python
-
-    - sys                                                                  // available from conda python
-    - logging                                                              // available from conda python
-    - traceback                                                            // available from conda python 
-    - suds.metrics (suds-jurko 0.6)                                        // conda install suds-jurko
-    - suds         (suds-jurko 0.6)                                        // conda install suds-jurko
-    - suds.client  (suds-jurko 0.6)                                        // conda install suds-jurko
-    - datetime                                                             // available from conda python
+You can easily create a [`conda` environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) using the following command (after installing `conda`)
+```bash
+# within CopraRNA project folder
+# once
+conda env create --file CopraRNA-deps.yml
+chmod a+x CopraRNA.pl
+# always once within a shell session
+conda activate CopraRNA-deps
+# call CopraRNA
+./CopraRNA.pl -help
+```
 
 <br /><br />
 <a name="instconda" />
 ## CopraRNA via conda (bioconda channel)
 The most easy way to locally install CopraRNA is via conda using the 
-[bioconda](https://bioconda.github.io/) 
-channel (linux only). This way, you will install CopraRNA along
+[bioconda](https://bioconda.github.io/recipes/coprarna/README.html) 
+channel (linux and osx only). This way, you will install CopraRNA along
 with all dependencies.
 Follow
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/coprarna/README.html)
 to get detailed information. We recommend installing into a dedicated environment, to avoid conflicts with
-other installed tools. Following two commands install CopraRNA into the enviroment and activate it:
+other installed tools (or their versions). Following two commands install CopraRNA into the enviroment `CopraRNA` and activate it:
 ```bash
-conda create -n coprarnaenv -c bioconda -c conda-forge coprarna
-source activate coprarnaenv
+conda create -n CopraRNA -c r -c conda-forge -c bioconda coprarna
+conda activate CopraRNA
 ```
 <br /><br />
 <a name="biocontainer" />
@@ -119,7 +92,7 @@ source activate coprarnaenv
 
 CopraRNA can be retrieved and used as docker container with all dependencies via [docker](https://docs.docker.com/engine/installation/). Once you have docker installed simply type (with changed version):
 ```bash
-       docker run -i -t quay.io/biocontainers/coprarna:2.1.0--0 /bin/bash
+       docker run -i -t quay.io/biocontainers/coprarna:3.0.0--0 /bin/bash
 ```
 <br /><br />
 <a name="instgithub" />
@@ -136,7 +109,7 @@ If you installed all dependencies you should be able to directly use the source.
 
 Example call:
 ```bash
-CopraRNA2.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 200 -cores 4
+CopraRNA.pl -srnaseq sRNAs.fa -ntup 200 -ntdown 100 -region 5utr -enrich 200 -topcount 100 -cores 4
 ```
 
 The following options are available:
@@ -150,23 +123,16 @@ The following options are available:
 - `--ntup` : amount of nucleotides upstream of '--region' to parse for targeting (def:200)
 - `--ntdown` : amount of nucleotides downstream of '--region' to parse for targeting (def:100)
 - `--cores` : amount of cores to use for parallel computation (def:1)
-- `--rcsize` : minimum amount (%) of putative target homologs that need to be available for a target cluster 
-               to be considered in the CopraRNA1 part (see --cop1) of the prediction (def:0.5)
-- `--winsize`                 IntaRNA target (--tAccW) window size parameter (def:150)
-- `--maxbpdist`               IntaRNA target (--tAccL) maximum base pair distance parameter (def:100)
-- `--cop1`                    switch for CopraRNA1 prediction (def:off)
-- `--cons`                    controls consensus prediction (def:0)
-    - '0' for off
-    - '1' for organism of interest based consensus
-    - '2' for overall consensus based prediction
 - `--verbose` : switch to print verbose output to terminal during computation (def:off)
 - `--websrv` : switch to provide webserver output files (def:off)
 - `--noclean` : switch to prevent removal of temporary files (def:off)
 - `--enrich` : if entered then DAVID-WS functional enrichment is calculated with given amount of top predictions (def:off)
-- `--nooi` : if set then the CopraRNA2 prediction mode is set not to focus on the organism of interest (def:off)
-- `--ooifilt` : post processing filter for organism of interest p-value 0=off (def:0)
 - `--root` : specifies root function to apply to the weights (def:1)
-- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:200)
+- `--topcount` : specifies the amount of top predictions to return and use for the extended regions plots (def:100)
+- `--genomePath`: path where NCBI genome files (`*.gb`) are to be stored (def:`.` i.e. working directory). Set this path if you (want to) store all your genomes in a dedicated folder to be shared by different CopraRNA calls.
+- `--intarnaOptions` : path for IntaRNA parameter file.
+- `--CopraRNA_expert_options` : path to parameter file for CopraRNA expert or experimental options.
+- `--hybrid_threshold` : interactions are removed from the CopraRNA calculations if the hybrid covers >= hybrid_threshold of the sRNA.
 
 <br /><br />
 <a name="updateava" />

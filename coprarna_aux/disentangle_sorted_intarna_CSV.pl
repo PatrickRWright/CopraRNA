@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 
-# written for ## edit 2.0.4
 # run this in a CopraRNA output dir without arguments
 # the directory has to have run a CopraRNA job that returned
 # one suboptimal interaction within the IntaRNA part 

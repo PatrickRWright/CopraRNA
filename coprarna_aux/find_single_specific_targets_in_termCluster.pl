@@ -7,7 +7,7 @@ use warnings;
 # for the organism of interest
 
 # read in main termClusterReport
-open(DATA,"termClusterReport.txt") or die ("\nError: cannot open termClusterReport.txt at find_single_specific_targets_in_termCluster.pl\n\n"); ## edit 2.0.6
+open(DATA,"termClusterReport.txt") or die ("\nError: cannot open termClusterReport.txt at find_single_specific_targets_in_termCluster.pl\n\n");
     my @mainClustering = <DATA>;
 close DATA;
 
@@ -22,20 +22,20 @@ print "term;predicted_targets EntrezGeneID(locus_tag|gene_name|target_start|targ
 my %mainClusteringHash = ();
 my %singleOrgClusteringHash = ();
 
-my $currEnrichmentScore = 0; ## edit 2.0.2
+my $currEnrichmentScore = 0;
 
 foreach (@mainClustering) {
-    if ($_ =~ m/Enrichment\s+Score:\s+(\d+\.\d+)/) { ## edit 2.0.2
+    if ($_ =~ m/Enrichment\s+Score:\s+(\d+\.\d+)/) {
         $currEnrichmentScore = $1;
     }
     my @tabSplit = split(/\t/, $_);
     if (exists $tabSplit[1] and exists $tabSplit[5]) { # skip "Enrichment Score:" and empty lines
         # only for enrichment scores >= 1
-        $mainClusteringHash{$tabSplit[1]} = $tabSplit[5] unless ($tabSplit[1] eq "Term" or $currEnrichmentScore < 1); ## edit 2.0.2
+        $mainClusteringHash{$tabSplit[1]} = $tabSplit[5] unless ($tabSplit[1] eq "Term" or $currEnrichmentScore < 1);
     }
 }
 
-for (my $i=0;$i<scalar(@singleOrgClustering);$i=$i+2) { ## edit 2.0.3.1
+for (my $i=0;$i<scalar(@singleOrgClustering);$i=$i+2) {
 
     my $gidLine = $singleOrgClustering[$i];
     chomp $gidLine;
@@ -73,9 +73,9 @@ foreach my $key (keys %mainClusteringHash) {
                 chomp $IntaRNA_ncbi_line;
                 my @split = split(/;/,$IntaRNA_ncbi_line);
                 my $ltag = $split[0];
-                my $geneName = $split[36]; ## edit 2.0.5.1 
-                my $tarStart = $split[8]; ## edit 2.0.5.1
-                my $tarStop = $split[9]; ## edit 2.0.5.1
+                my $geneName = $split[36];
+                my $tarStart = $split[8];
+                my $tarStop = $split[9];
                 my $added_info = "(" . $ltag . "|" . $geneName . "|" . $tarStart . "|" . $tarStop . ");";
                 $printLine = $printLine . $added_info;
             }

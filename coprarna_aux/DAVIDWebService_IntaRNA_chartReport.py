@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import sys
+
+if len(sys.argv) < 3:
+   print("\ncall: DAVIDWebService_IntaRNA_chartReport.py <CSV-file-with-entrex_gene_id-col> <enrich_count>\n");
+   exit(-1);
+
 IntaRNA_result = sys.argv[1]
 enrich_count = int(sys.argv[2])
 #print IntaRNA_result
@@ -8,15 +13,17 @@ enrich_count = int(sys.argv[2])
 with open(IntaRNA_result) as file:
     IntaRNA_lines = file.readlines()
 
+# identify entrez_gene_id column index
+entrezIdCol = IntaRNA_lines[0].split(";").index("entrez_gene_id")
+
 #print IntaRNA_lines[1]
 
 backgroundList = []
 # go through IntaRNA output line by line and extract Entrez Gene Ids
 for i in range(1,len(IntaRNA_lines)): # range omits the right boundary
-    # split
-    curr_line = IntaRNA_lines[i]
-    split = curr_line.split(";")
-    entrezID = split[37] ## edit 2.0.5.1 // changed to 37 because of new IntaRNA output
+    # extract entrezID for this line
+    entrezID = IntaRNA_lines[i].split(";")[entrezIdCol]
+    # store id
     backgroundList.append(entrezID)
 
 backgroundList = list(map(str,backgroundList))
@@ -33,9 +40,9 @@ backgroundIds = ",".join(backgroundList)
 
 #sys.exit()
 
-sys.path.append('../')
+#sys.path.append('../')
 
-import logging
+#import logging
 import traceback as tb
 import suds.metrics as metrics
 from suds import *
@@ -54,14 +61,16 @@ client = Client(url)
 ws = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
 client.wsdl.services[0].setlocation(ws)
 
-exit
+#exit
 #
 # print the service (introspection)
 #
 print (client)
 
 #authenticate user email 
-print (client.service.authenticate('patrickrw@gmx.net'))
+print (client.service.authenticate('rna@informatik.uni-freiburg.de'))
+
+print(str(inputIds))
 
 # add enrich_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'

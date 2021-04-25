@@ -2,18 +2,20 @@
 
 use strict;
 use warnings;
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
+use Bio::SeqIO;
 
 # replaces get_genname_genid_note_from_gbk_opt.pl
 # and now works with tags.clustered files as
 # input to annotate IntaRNA result parts
 
-use Bio::SeqIO;
-
 my $finallist = $ARGV[0];
-my $tags_clusterd = $ARGV[1]; ## edit 2.0.6
+my $tags_clusterd = $ARGV[1];
 my %ltaggennamehash = ();
 my $ltag = "";
-my @gbklines = ();
 my $genname = "";
 my $note = "";
 my $genid = "";
@@ -25,18 +27,24 @@ my $argofinterestswitch = 1;
 
 print "p-value,";
 
-for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) { ## edit 2.0.6
+for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) {
         $columncount++;
         my @splitarg = split(/,/, $ARGV[$i]);
-        if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb/) { ## edit 2.0.2
+        if ($splitarg[0] =~ m/(N[ZC]_.+?)\.gb(\.gz)?/) {
             my $temp = $1;
             chomp $temp;
             # print RefSeq IDs header
             print "$temp,";
         }
-        foreach (@splitarg) {
+        foreach my $genomeFile (@splitarg) {
+          my $fileHandle = undef;
+          if ($genomeFile =~ m/.+\.gz$/) {
+          	$fileHandle = new IO::Uncompress::Gunzip $genomeFile or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+          } else {
+          	$fileHandle = IO::File->new($genomeFile, "r");
+          }
 
-        my $seqio_object = Bio::SeqIO->new(-file => $_);
+        my $seqio_object = Bio::SeqIO->new(-fh => $fileHandle, -format => 'genbank');
         my $seq_object = $seqio_object->next_seq;
 
         for my $feat_object ($seq_object->get_SeqFeatures) {
@@ -78,9 +86,9 @@ for(my $i=2;$i<=(scalar(@ARGV)-1);$i++) { ## edit 2.0.6
                 $ltagcolumnhash{$ltag} = $columncount; 
             }
             if ($ltag ne "N/A" and $genname ne "N/A") {
-                $genname =~ s/,/;/g; ## edit 1.2.0
-                $genname =~ s/\(//g; ## edit 1.2.7
-                $genname =~ s/\)//g; ## edit 1.2.7 
+                $genname =~ s/,/;/g;
+                $genname =~ s/\(//g;
+                $genname =~ s/\)//g; 
                 $ltaggennamehash{$ltag} = $genname;
             }
             if ($ltag ne "N/A" and $genid ne "N/A" and $genid =~ m/GeneID:/) {
@@ -113,20 +121,26 @@ close DATA;
 foreach my $line (@datalines) {
     my @splitarg = split(/;/, $line);
     foreach(@splitarg) { chomp $_; }
-    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-2] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11]; ## edit 2.0.6 // changed indices to accomodate for tags.clustered file
+    $pvalenergy = "|" . $splitarg[14] . "|" . $splitarg[-3] . "|" . $splitarg [8] . "|" . $splitarg [9] . "|" . $splitarg [10] . "|" . $splitarg [11];
     chomp $pvalenergy;
     $pvalenergyhash{lc($splitarg[0])} = $pvalenergy;
 }
 
 my %annotationhash = (); #locustags -> annotation
 
-my @splitThirdArgv = split(/,/,$ARGV[2]); ## edit 2.0.6
+my @splitThirdArgv = split(/,/,$ARGV[2]);
 
-foreach (@splitThirdArgv) {
-    my $in  = Bio::SeqIO->new(-file => $_ , '-format' => 'genbank');
+foreach my $genomeFile (@splitThirdArgv) {
+    my $fileHandle = undef;
+    if ($genomeFile =~ m/.+\.gz$/) {
+    	$fileHandle = new IO::Uncompress::Gunzip $genomeFile or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+    } else {
+    	$fileHandle = IO::File->new($genomeFile, "r");
+    }
+    my $in  = Bio::SeqIO->new(-fh => $fileHandle, '-format' => 'genbank');
     while ( my $seq = $in->next_seq() ) {
         foreach my $sf ( $seq->get_SeqFeatures() ) {
-            if( $sf->primary_tag eq 'CDS' ) { ## edit 1.2.0
+            if( $sf->primary_tag eq 'CDS' ) {
             # add exception for "hypothetical protein" annotation
             my $product = "";
             my @products = ();
@@ -156,7 +170,7 @@ foreach (@splitThirdArgv) {
                 my $func = $funclist[0];
                 $annotationhash{$ltag} = $func;
             }
-            } ## edit 1.2.0
+            }
         }
     }    
 }
@@ -218,7 +232,7 @@ foreach (@finallistlines) {
 $nscount++;
 }
 # print annotation
-for(my $i=$commacount; $i < (scalar(@ARGV)-1); $i++) { ## edit 2.0.6
+for(my $i=$commacount; $i < (scalar(@ARGV)-1); $i++) {
         print ",";
 }
 

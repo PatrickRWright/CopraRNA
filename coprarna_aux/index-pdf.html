@@ -84,23 +84,24 @@
     	d3.json("copraRNA.json", function(data){
     		var colN = 0;
         	var rowN = 0;
-    		data.forEach(function(d,i) {
-        		colN = d.fMax;
-        		rowN = d.sMax;
-        		
-        		var tmpL = d.feature.length;
-        		
-        		if(tmpL > maxLabel){
-        			maxLabel = tmpL;
-        		}
-        		
-        		if(i == 0){
-        			var str   = d.group;
-        			groupPara = str.split(';');
-        		}
-    		});
-    		
-    		
+        	if (data != null) {
+	    		data.forEach(function(d,i) {
+	        		colN = d.fMax;
+	        		rowN = d.sMax;
+	        		
+	        		var tmpL = d.feature.length;
+	        		
+	        		if(tmpL > maxLabel){
+	        			maxLabel = tmpL;
+	        		}
+	        		
+	        		if(i == 0){
+	        			var str   = d.group;
+	        			groupPara = str.split(';');
+	        		}
+	    		});
+        	}    		
+   		
     		groupPara.forEach(function(d,i){
     			tmpMax = d.split(":");
 				
