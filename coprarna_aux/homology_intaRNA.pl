@@ -21,8 +21,10 @@ my $down = $ARGV[2]; # 100
 my $mrnapart = $ARGV[3]; # cds or 5utr or 3utr
 my $core_count = $ARGV[4];
 my $intarnaParamFile = $ARGV[5];
+my $domclust_c = $ARGV[6];
 my $GenBankFiles = "";
 my $orgcount = 0;
+
 
 ##########################################################################################
 sub getOptionValue
@@ -171,7 +173,7 @@ system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa";
 my $no_of_args = scalar(@ARGV); 
 
 # assign correct refseq IDs for each sequence
-for (my $i=6;$i<scalar(@ARGV);$i++) {
+for (my $i=7;$i<scalar(@ARGV);$i++) {
     # split up the refseq list for one organism
     my @split = split(/\s/, $refseqaffiliations{$ARGV[$i]});
     # get the first id entry
@@ -322,7 +324,7 @@ print "get cluster.tab with Diamond\n" if ($verbose);
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
 	print "domclust for all.fas.*\n" if ($verbose);
-    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> ".$OUT_ERR;
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c$domclust_c -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> ".$OUT_ERR;
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
     if ($domclustExitStatus != 0) {
@@ -409,7 +411,7 @@ system "paste padj.csv CopraRNA2_prep_anno_addhomologs.csv -d ',' > CopraRNA2_pr
 system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; 
 
 # get ooi refseq id
-my @split = split(/\s/, $refseqaffiliations{$ARGV[6]});
+my @split = split(/\s/, $refseqaffiliations{$ARGV[7]});
 # get the first id entry
 my $ooi_refseq_id = $split[0];
 
