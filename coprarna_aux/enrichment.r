@@ -477,127 +477,133 @@ if(is.null(fGO)==F){
 			#}
 		#}
 		if(length(term)>0){
-		k<-which(pval=="< 1e-30")
-		if(length(k)>0){
-			pval[k]<-"1e-30"
+			if(length(term)>1){
+			k<-which(pval=="< 1e-30")
+			if(length(k)>0){
+				pval[k]<-"1e-30"
+			}
+			pval<-as.numeric(pval)
+			term<-term[order(pval)]
+			term2<-term2[order(pval)]
+			pval<-sort(pval)
+			count<-table(term)
+			term_dup<-which(duplicated(term2))
+			numbers<-table(term2)
+			if(length(term_dup>0)){
+				term<-term[-term_dup]
+				term2<-term2[-term_dup]
+				pval<-pval[-term_dup]
+			}
+
+			best<-unique(best)
+
+
+
+
+
+		term2<-unique(term2)
+		term_list[[ii]]<-term2
+		ma<-match(term2,names(numbers))
+
+		m2<-match(term2,names(IC))
+		IC_temp=IC[m2]
+
+		na<-which(is.na(IC_temp))
+
+		names(IC_temp)[na]<-"GO:1905039"
+		IC_temp[na]<-0
+		sim <- mgoSim(term2, term2,
+						  semData=ecoGO,
+						  measure="Wang",#Jiang
+						  combine=NULL)
+		res<-data.frame(ID=term2,term,pVAL=pval,count=(numbers)[ma], IC=IC_temp)
+		res[which(is.finite(res$IC)==F),"IC"]<-max(is.finite(res$IC))
+
+		full_anno<-c()
+		for(i in 1:length(enrich_list)){
+			tmp3<-enrich_list[[i]][[1]][[ii]]
+			if(is.null(tmp3)==F){
+				full_anno<-rbind(full_anno,as.matrix(tmp3))
+			}
 		}
-		pval<-as.numeric(pval)
-		term<-term[order(pval)]
-		term2<-term2[order(pval)]
-		pval<-sort(pval)
-		count<-table(term)
-		term_dup<-which(duplicated(term2))
-		numbers<-table(term2)
-		if(length(term_dup>0)){
-			term<-term[-term_dup]
-			term2<-term2[-term_dup]
-			pval<-pval[-term_dup]
+
+
+		gene_cont<-vector("list", length(term2))
+		names(gene_cont)<-term2
+		for(i in 1:length(term2)){
+			t1<-full_anno[grep(term2[i],full_anno[,1]),"genes"]
+			t1<-unlist(strsplit(t1,","))
+			gene_cont[[i]]<-t1
 		}
 
-		best<-unique(best)
-
-
-
-
-
-	term2<-unique(term2)
-	term_list[[ii]]<-term2
-	ma<-match(term2,names(numbers))
-
-	m2<-match(term2,names(IC))
-	IC_temp=IC[m2]
-
-	na<-which(is.na(IC_temp))
-
-	names(IC_temp)[na]<-"GO:1905039"
-	IC_temp[na]<-0
-	sim <- mgoSim(term2, term2,
-					  semData=ecoGO,
-					  measure="Wang",#Jiang
-					  combine=NULL)
-	res<-data.frame(ID=term2,term,pVAL=pval,count=(numbers)[ma], IC=IC_temp)
-	res[which(is.finite(res$IC)==F),"IC"]<-max(is.finite(res$IC))
-
-	full_anno<-c()
-	for(i in 1:length(enrich_list)){
-		tmp3<-enrich_list[[i]][[1]][[ii]]
-		if(is.null(tmp3)==F){
-			full_anno<-rbind(full_anno,as.matrix(tmp3))
+		term_over<-matrix(,length(term2),length(term2))
+		for(i in 1:(length(term2))){
+		#print(i)
+			for(j in (i):length(term2)){
+				t1<-gene_cont[[i]]
+				t2<-gene_cont[[j]]
+				tmp<-length(intersect(t1,t2))/min(length(t1),length(t2))
+				term_over[i,j]<-term_over[j,i]<-tmp
+			}
 		}
-	}
 
-
-	gene_cont<-vector("list", length(term2))
-	names(gene_cont)<-term2
-	for(i in 1:length(term2)){
-		t1<-full_anno[grep(term2[i],full_anno[,1]),"genes"]
-		t1<-unlist(strsplit(t1,","))
-		gene_cont[[i]]<-t1
-	}
-
-	term_over<-matrix(,length(term2),length(term2))
-	for(i in 1:(length(term2))){
-	#print(i)
-		for(j in (i):length(term2)){
-			t1<-gene_cont[[i]]
-			t2<-gene_cont[[j]]
-			tmp<-length(intersect(t1,t2))/min(length(t1),length(t2))
-			term_over[i,j]<-term_over[j,i]<-tmp
+		number_sig_genes<-rep(NA, length(term2))
+		names(number_sig_genes)<-term2
+		for(i in term2){
+			tmp<-which(full_anno[,1]==i & full_anno[,"classicFS"] <= thres)
+			tmp<-full_anno[tmp,"genes"]
+			tmp<-length(unlist(strsplit(tmp, ",")))
+			number_sig_genes[i]<-tmp
 		}
-	}
-
-	number_sig_genes<-rep(NA, length(term2))
-	names(number_sig_genes)<-term2
-	for(i in term2){
-		tmp<-which(full_anno[,1]==i & full_anno[,"classicFS"] <= thres)
-		tmp<-full_anno[tmp,"genes"]
-		tmp<-length(unlist(strsplit(tmp, ",")))
-		number_sig_genes[i]<-tmp
-	}
 
 
-	com<-(((-log(as.numeric(res$pVAL))/max(-log(as.numeric(res$pVAL))))**1)*((res$count.Freq/max(res$count.Freq)))*res$IC/max(res$IC[is.finite(res$IC)]))**(1/3)
+		com<-(((-log(as.numeric(res$pVAL))/max(-log(as.numeric(res$pVAL))))**1)*((res$count.Freq/max(res$count.Freq)))*res$IC/max(res$IC[is.finite(res$IC)]))**(1/3)
 
 
-	res$both<-com
-	res$number_sig_genes<-number_sig_genes
+		res$both<-com
+		res$number_sig_genes<-number_sig_genes
 
-	colnames(term_over)<-rownames(term_over)<-term2
-	ID<-term2	
-	go1 <- go2 <- overlap <- NULL
+		colnames(term_over)<-rownames(term_over)<-term2
+		ID<-term2	
+		go1 <- go2 <- overlap <- NULL
 
-	ov.df <- as.data.frame(term_over)
-	ov.df$go1 <- row.names(ov.df)
-	ov.df <- gather(ov.df, go2, overlap, -go1)
-	ov.df <- ov.df[!is.na(ov.df$overlap),]				  
+		ov.df <- as.data.frame(term_over)
+		ov.df$go1 <- row.names(ov.df)
+		ov.df <- gather(ov.df, go2, overlap, -go1)
+		ov.df <- ov.df[!is.na(ov.df$overlap),]				  
 
-		  
-					  
-	by="both"				  
+			  
+						  
+		by="both"				  
 
 
-					  
-	go1 <- go2 <- similarity <- NULL
+						  
+		go1 <- go2 <- similarity <- NULL
 
-	sim.df <- as.data.frame(sim)
-	sim.df$go1 <- row.names(sim.df)
-	sim.df <- gather(sim.df, go2, similarity, -go1)
-	sim.df <- sim.df[!is.na(sim.df$similarity),]
+		sim.df <- as.data.frame(sim)
+		sim.df$go1 <- row.names(sim.df)
+		sim.df <- gather(sim.df, go2, similarity, -go1)
+		sim.df <- sim.df[!is.na(sim.df$similarity),]
 
-	pos<-na.omit(match(paste(sim.df[,1],sim.df[,2]),paste(ov.df[,1],ov.df[,2])))
+		pos<-na.omit(match(paste(sim.df[,1],sim.df[,2]),paste(ov.df[,1],ov.df[,2])))
 
-	sim.df$overlap<-ov.df$overlap[pos]
+		sim.df$overlap<-ov.df$overlap[pos]
 
-	## feature 'by' is attached to 'go1'
-	sim.df <- merge(sim.df, res[, c("ID", by)], by.x="go1", by.y="ID")
+		## feature 'by' is attached to 'go1'
+		sim.df <- merge(sim.df, res[, c("ID", by)], by.x="go1", by.y="ID")
 
 
 
-	sim.df$go2 <- as.character(sim.df$go2)
+		sim.df$go2 <- as.character(sim.df$go2)
 
 
-	out_en[[ii]]<-list(list(res,sim.df),best)
-
+		out_en[[ii]]<-list(list(res,sim.df),best)
+		} else {
+			tmp4<-tmp2[th2,]
+			colnames(tmp4)[1]<-"ID"
+			colnames(tmp4)[2]<-"term"
+			out_en[[ii]]<-list(list(tmp4,sim.df),best)
+		}
 	} else {
 		out_en[[ii]]<-NA
 	}
@@ -611,7 +617,7 @@ if(is.null(fGO)==F){
 			tmp3<-enrich_list[[1]][[1]][[3]]
 			enri<-rbind(enri,tmp,tmp2,tmp3)
 
-	for(i in 1:3){
+	for(i in 1:length(out_en)){
 		if(is.na(out_en[[i]])==F){
 		temp<-out_en[[i]][[1]][[1]]
 		locus_tags<-c()
@@ -663,13 +669,16 @@ if(is.null(fGO)==F){
 
 	for(j in 1:3){
 		if(is.na(out_en[[j]])==F){
+		
+	res<-out_en[[j]][[1]][[1]]	
+	if(nrow(res)>1){
 	sim.df<-out_en[[j]][[1]][[2]]
-	res<-out_en[[j]][[1]][[1]]
+	
 	best<-out_en[[j]][[2]]
 	ID<-res$ID
 	select_fun<-max	
 
-
+	
 	sim.df<-sim.df[order(sim.df$both, decreasing=T),]
 
 	GO_to_remove <- character()
@@ -700,7 +709,11 @@ if(is.null(fGO)==F){
 		out2<-out2[order(out2[,"both"], decreasing=T),]	  
 		out_res[[go[j]]]<-out2	
 		#names(out_res)[[go[j]]]<-go[j]
-		}		
+		}	
+		}	else {
+			out2<-res
+			out_res[[go[j]]]<-out2	
+		}
 	}
 
 	#names(out_res)<-go
