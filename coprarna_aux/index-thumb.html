@@ -23,10 +23,12 @@
     	d3.json("copraRNA.json", function(data){
     		var colN = 0;
         	var rowN = 0;
-    		data.forEach(function(d,i) {
-        		colN = d.fMax;
-        		rowN = d.sMax;
-    		});
+        	if (data != null) {
+	    		data.forEach(function(d,i) {
+	        		colN = d.fMax;
+	        		rowN = d.sMax;
+	    		});
+        	}
     		
        		width  = colN * 35;
     		height = rowN * 35;

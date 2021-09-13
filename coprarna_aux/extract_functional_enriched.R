@@ -1,26 +1,33 @@
-## edit 1.2.7 new script
+
 ## script by Jens Georg
 
-args <- commandArgs(trailingOnly = TRUE) ## edit 2.0.5.1
-inputFile_CopraRNA <- args[1] ## edit 2.0.5.1
-inputFile_DAVID <- args[2] ## edit 2.0.5.1
-output_file <- args[3] ## edit 2.0.5.1
+args <- commandArgs(trailingOnly = TRUE)
+inputFile_CopraRNA <- args[1]
+inputFile_DAVID <- args[2]
+output_file <- args[3]
 
-x<-read.delim(inputFile_DAVID, header=FALSE) ## edit 2.0.5.1
+
+# number of top predictions which should be investigated
+co<-readLines("CopraRNA_option_file.txt") 
+top<-as.numeric(gsub("top count=","",co[grep("top count=", co)]))
+
+
+
+x<-read.delim(inputFile_DAVID, header=FALSE)
 
 y<-grep("Enrichment Score", x[,2])
 kk<-c()
 
 for(i in 1:length(y)){
-k<-as.character(x[y[i],2])
-k<-sub("Enrichment Score: ","",k)
-kk<-c(kk,k)
+    k<-as.character(x[y[i],2])
+    k<-sub("Enrichment Score: ","",k)
+    kk<-c(kk,k)
 }
 
 kk<-as.numeric(kk)
 ks<-which(kk >= 1)
 if(length(ks)<1){
-ks<-1
+	ks<-1
 }
 
 
@@ -30,9 +37,7 @@ ks<-seq(1,length(ks)+1)
 scores<-kk[ka]
 
 if(length(y)==(length(ks)-1)){
-
-y<-c(y,nrow(x)+1)
-
+	y<-c(y,nrow(x)+1)
 }
 
 kk<-cbind(paste(as.character(x[y[ks]+2,1]),as.character(x[y[ks]+2,2]),sep=": "),kk[ks])
@@ -78,7 +83,7 @@ id<-c()
 		}
 	id1<-c()
 	for(i in 1:length(id)){
-		id1<-c(id1,as.numeric(strsplit(id[i],",")[[1]])) ## edit 2.0.3.1 # removed space in separator
+		id1<-c(id1,as.numeric(strsplit(id[i],",")[[1]]))
 		}
 	id1<-unique(id1)
 	}
@@ -112,11 +117,11 @@ for(i in 1:nrow(res)){
 #res<-rbind(terms,res)
 	
 #----------------	
-x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",") ## edit 2.0.5.1
+x<-read.csv(inputFile_CopraRNA, header=TRUE,sep=",")
 
-l<-(strsplit(as.character(x[1:300,3]), "\\|"))
+l<-(strsplit(as.character(x[1:top,4]), "\\|"))
 
-ll<-matrix(,200,8)
+ll<-matrix(,top,8)
 
 colnames(ll)<-c("GeneName", "IntaRNA energy","IntaRNA p-Value","start mRNA", "end mRNA", "start ncRNA", "end ncRNA", "Entrez GeneID")
 
@@ -127,7 +132,7 @@ for(i in 1:nrow(ll)){
 
 }
 
-ll<-cbind(x[1:200,2],ll)
+ll<-cbind(x[1:top,2],ll)
 
 lll<-which(is.na(ll[,2])==TRUE)
 
@@ -158,12 +163,12 @@ id2<-id1
 p<-c()
 for(i in 1:length(id2)){
 
-pp<-grep(id2[i],x[,3])
+pp<-grep(id2[i],x[,4])
 p<-c(p,pp[1])
 
 }
 
-res2<-cbind(id2,as.character(x[p,3]),x[p,2])	
+res2<-cbind(id2,as.character(x[p,4]),x[p,2])	
 	
 #---------------------	
 

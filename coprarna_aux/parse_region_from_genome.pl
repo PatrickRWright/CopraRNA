@@ -2,8 +2,13 @@
 
 use strict;
 use warnings;
-
+# file handles
+use IO::File;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+# genbank file parsing
 use Bio::SeqIO;
+
+unless( scalar @ARGV == 4 ) { die("usage: ./parse_region_from_genome.pl genomefile(.gz) ntup(number) ntdown(number) region(i.e. 5utr/3utr/cds) > outfile.fas\n"); }
 
 my $gbk = $ARGV[0];
 my $up = $ARGV[1];
@@ -14,10 +19,24 @@ unless(defined $ARGV[0] and $ARGV[1] and $ARGV[2] and $ARGV[3]) { die("usage: ./
 
 # comment: with up 200 donw 100 the startcodon is on position 201 202 203 of the 300 nt long string
 
-my $in  = Bio::SeqIO->new(-file => $gbk , '-format' => 'genbank');
+my $fileHandle = undef;
+if ($gbk =~ m/.+\.gz$/) {
+	$fileHandle = new IO::Uncompress::Gunzip $gbk or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+} else {
+	$fileHandle = IO::File->new($gbk, "r");
+}
+my $fileHandle2 = undef;
+if ($gbk =~ m/.+\.gz$/) {
+	$fileHandle2 = new IO::Uncompress::Gunzip $gbk or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+} else {
+	$fileHandle2 = IO::File->new($gbk, "r");
+}
+
+
+my $in  = Bio::SeqIO->new(-fh => $fileHandle , '-format' => 'genbank');
 my $seq = $in->next_seq();
 
-my $in2  = Bio::SeqIO->new(-file => $gbk , '-format' => 'genbank');
+my $in2  = Bio::SeqIO->new(-fh => $fileHandle2 , '-format' => 'genbank');
 
 if ($region eq "5utr") {
     while ( my $seq2 = $in2->next_seq() ) {
@@ -209,14 +228,14 @@ sub get_region
                     if (($pos - $downstream) < 1) {
                         my $printseq = reverse($seq_obj->subseq(1, ($pos + $upstream)));
                         $printseq =~ tr/[g,a,t,c,G,A,T,C]/[c,t,a,g,C,T,A,G]/;
-                        if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                        if (length($printseq) >= 150) {
                             return ">$ltag\n$printseq\n";
                         } else { return; }
                     }
                     if (($pos + $upstream) > $genomelength) {
                         my $printseq = reverse($seq_obj->subseq(($pos - $downstream + 1), $genomelength));
                         $printseq =~ tr/[g,a,t,c,G,A,T,C]/[c,t,a,g,C,T,A,G]/;
-                        if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                        if (length($printseq) >= 150) {
                             return ">$ltag\n$printseq\n";
                         } else { return; }
                     }
@@ -247,13 +266,13 @@ sub get_region
                 unless($circularTest) { # only do this if genome is not curcular
                      if (($pos - $upstream) < 1) {
                          my $printseq = $seq_obj->subseq(1, ($pos + $downstream - 1));
-                         if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                         if (length($printseq) >= 150) {
                              return ">$ltag\n$printseq\n";
                          } else { return; }
                      }
                      if (($pos + $downstream) > $genomelength) {
                          my $printseq = $seq_obj->subseq(($pos - $upstream), $genomelength);
-                         if (length($printseq) >= 150) { ## edit 2.0.2, changed this 140 -> 150
+                         if (length($printseq) >= 150) {
                              return ">$ltag\n$printseq\n";
                          } else { return; }
                      }

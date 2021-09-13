@@ -1,0 +1,56 @@
+name: CopraRNA-deps
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+  - conda
+  - anaconda
+dependencies:
+  - biopython
+  - bzip2
+  - gawk
+  - sed
+  - grep
+  - coreutils 
+  - embassy-phylip
+  - phantomjs
+  - diamond
+  - dialign-tx
+  - jalview >=2.11.1.0
+  - domclust
+  - mafft
+  - clustalo
+  - intarna >=3.1.5
+  - perl
+  - perl-list-moreutils
+  - perl-parallel-forkmanager
+  - perl-getopt-long
+  - perl-bioperl
+  - perl-bio-eutilities
+  - perl-io-uncompress-gunzip 
+  - perl-io-gzip 
+  - perl-io-all
+  - r-base >=3.6.0
+  - r-seqinr 
+  - libopenblas
+  - r-phangorn
+  - bioconductor-complexheatmap
+  - bioconductor-genbankr
+  - bioconductor-topgo
+  - bioconductor-gosemsim
+  - bioconductor-annotationforge
+  - r-tidyr
+  - mscorefonts
+  - open-fonts
+  - r-domc
+  - r-knitr
+  - r-rmarkdown
+  - r-dt  
+  - r-ggplot2
+  - bioconductor-ggtree
+  - r-cowplot
+  - python
+  - suds-jurko
+  - python-wget
+  - zip

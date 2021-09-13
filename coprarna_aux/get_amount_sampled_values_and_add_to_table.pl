@@ -3,8 +3,8 @@
 use warnings;
 use strict;
 
-my $inputTable = $ARGV[0]; ## edit 2.0.5.1
-my $cop2 = $ARGV[1]; ## edit 2.0.5.1 // 1=yes 0=no
+my $inputTable = $ARGV[0];
+my $cop2 = $ARGV[1]; ## 1=yes 0=no
 
 open(MYDATA, $inputTable) or die("\nError: cannot open $inputTable at get_amount_sampled_values_and_add_to_table.pl\n\n");
     my @resultLines = <MYDATA>;
@@ -28,7 +28,7 @@ for (my $i=1;$i<scalar(@resultLines);$i++) {
         $emptyCount++ if ($_ eq ""); 
     }
     # workaround for the webserver output // CopraRNA2 never samples
-    $emptyCount = 0 if ($cop2); ## edit 2.0.5.1
+    $emptyCount = 0 if ($cop2);
     print ",$emptyCount\n";
 }
 

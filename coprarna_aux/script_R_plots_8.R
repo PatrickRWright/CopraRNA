@@ -1,6 +1,9 @@
+#!/usr/bin/env Rscript
+
+
 # call
-# R --slave -f ../script_R_plots_8.R --args CopraRNA_result_all.csv 200
-# script by Jens Georg
+# R --slave -f ./script_R_plots_8.R --args CopraRNA_result_all.csv 200
+
 
 # numplot2:		The number of best predictions for which the targets sequences of 
 #                       the input organisms are aligned and displayed in the 
@@ -11,9 +14,16 @@
 #                       mRNA_regions_with_histogram.pdf file (default = 15)
 # numdens:              The number of predictions that are represented in the histogram (default = 100).
 
+suppressPackageStartupMessages(require(seqinr))
+
 args <- commandArgs(trailingOnly = TRUE)
 inputFile <- args[1]
-numplot2 <- as.numeric(args[2])
+numplot2arg <- as.numeric(args[2])
+
+# get number of lines in input file
+nrowInput <- as.numeric(system(paste("wc -l",inputFile," | cut -d' ' -f1"), intern = TRUE))
+# correct output to available data in input if needed
+numplot2 <- min( numplot2arg, (nrowInput-1) )
 
 map<-function(y){
 se<-y
@@ -55,12 +65,11 @@ mafft<-function(filename="ncrna.fa", outname="ncrna_aligned.fa"){
 }	
 	
 	
-require(seqinr)
 
 #daten preprozessierung
 
 pre<-function(up=200,down=100){
-da<-read.csv(inputFile) ## edit 2.0.2
+da<-read.csv(inputFile)
 
 #danc<-read.fasta("ncrna.fa")
 #d<-clustalW(danc,clustal.path="clustalw")
@@ -69,7 +78,7 @@ names(d)<-gsub("ncRNA_","",names(d))
 d<-map(d)
 
 en<-grep("Annotation", colnames(da))
-da2<-da[,3:(en-1)]
+da2<-da[,4:(en-1)]
 namegenomes<-colnames(da2)
 genomes<-list()
 
@@ -139,7 +148,6 @@ mRNAalign<-function(x, nu, le) {
 pred_results<-x[[1]]
 sequences<-x[[2]]
 
-
 # bn<- matrix(,Anzahl von geplotteten predictions(num), Anzahl von Organismen (le)) Inhalt: Locustag´s 
 #   [,1]      [,2]     [,3]        
 #1  "mm_2442" "NA"     "mbar_a3378"
@@ -148,9 +156,9 @@ sequences<-x[[2]]
 #4  "mm_1574" "ma0314" "NA"    
 
 bn<-matrix(,nu,1)
-	for(j in 1: le){
+for(j in 1:le){
 	bn<-cbind(bn,pred_results[[j+1]][1:nu,1])
-	}
+}
 bn<-bn[,2:ncol(bn)]
 
 for(i in 1:ncol(bn)){
@@ -299,7 +307,6 @@ gap_list<-vector("list", length(seqs)*length(seqs[[1]]))
 
 
 for(i in 1:length(seqs)){
-	
 	for(j in 1:length(seqs[[1]])){
 		su<-0
 		if(rescale==TRUE){
@@ -691,11 +698,11 @@ if(numplot2<numplot){
 if(numdens>numplot2){
 	numdens<-numplot2
 }
-require(seqinr)
-options <- read.table("CopraRNA_option_file.txt", sep=":") ## edit 2.0.4 // removed coprarna_pars.txt
-up <- as.numeric(as.character(options$V2[2])) ## edit 2.0.4 // removed coprarna_pars.txt
-down <- as.numeric(as.character(options$V2[3])) ## edit 2.0.4 // removed coprarna_pars.txt
-type <- as.character(options$V2[4]) ## edit 2.0.4 // removed coprarna_pars.txt
+
+options <- read.table("CopraRNA_option_file.txt", sep="=",colClasses = "character") 
+up <- as.numeric(as.character(options$V2[grep("nt upstream", options$V1)]))
+down <- as.numeric(options$V2[grep("nt downstream", options$V1)])
+type <- as.character(options$V2[grep("region", options$V1)])
 if(type=="CDS"){
 	fulllength<-TRUE
 	}
@@ -718,26 +725,27 @@ position_data<-mRNAalign(x, numplot2, le)
 plot_pars<-plot_parameter(position_data, center=center, rescale=TRUE)
 density_pars<-dens_pars(plot_pars,numdens)
 
-na<-"mRNA_regions_with_histogram.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"mRNA_regions_with_histogram"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
 dev.off()
-
-na<-"mRNA_regions_extended_list.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
-plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
-dev.off()
-
-
-na<-"mRNA_regions_with_histogram.ps"
-postscript(file=na)
+png(file=paste(na,"png",sep="."),  width=1200, height=800)
+#postscript(file=paste(na,"ps",sep="."))
 plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
 dev.off()
+# png(file="thumbnail_mRNA.png",  width = 40, height = 32)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function(x,numplot, density_pars, plot_pars,center,type=type, numdens=numdens)
+# dev.off()
 
-na<-"mRNA_regions_extended_list.ps"
-postscript(file=na)
+na<-"mRNA_regions_extended_list"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
 dev.off()
+# png(file=paste(na,"png",sep="."),  width=1200, height=800)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function2(x,numperpage,numplot2, density_pars, plot_pars,center,type=type)
+# dev.off()
 
 
 
@@ -747,27 +755,27 @@ sRNA_position_data<-sRNA_align(x, numplot2, le)
 sRNA_plot_pars<-plot_parameter(sRNA_position_data, center=center, rescale=FALSE)
 sRNA_density_pars<-dens_pars(sRNA_plot_pars,numdens)
 
-na<-"sRNA_regions_with_histogram.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
+na<-"sRNA_regions_with_histogram"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
 dev.off()
-
-
-na<-"sRNA_regions_with_extended_list.pdf"
-pdf(file=na, paper="a4r", width=0, height=0)
-plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
-dev.off()
-
-na<-"sRNA_regions_with_histogram.ps"
-postscript(file=na)
+png(file=paste(na,"png",sep="."),  width=1200, height=800)
+#postscript(file=paste(na,"ps",sep="."))
 plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
 dev.off()
+# png(file="thumbnail_sRNA.png",  width=170, height=170)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function(x,numplot, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE, numdens=numdens)
+# dev.off()
 
-
-na<-"sRNA_regions_with_extended_list.ps"
-postscript(file=na)
+na<-"sRNA_regions_with_extended_list"
+pdf(file=paste(na,"pdf",sep="."), paper="a4r", width=0, height=0)
 plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
 dev.off()
+# png(file=paste(na,"png",sep="."),  width=1200, height=800)
+# #postscript(file=paste(na,"ps",sep="."))
+# plot_function2(x,numperpage,numplot2, sRNA_density_pars, sRNA_plot_pars,center,type="none", sRNA=TRUE)
+# dev.off()
 
 
 }

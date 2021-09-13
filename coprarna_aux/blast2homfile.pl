@@ -4,7 +4,7 @@
 
 $infile = $ARGV[0];
 
-$distconv = 1; ## edit 2.0.5.1 // this is no longer a parameter // needed to be done like this to change shebang
+$distconv = 1;
 $skip_sort = 0; ## added to make checks explicit instead of checking against undef values
 
 $EVAL_CUT = 0.01;
@@ -12,13 +12,14 @@ $BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 
 if (! $skip_sort) {
 	## eliminate comment lines (when using blastall -m 9)
-	$infile = "egrep -v '^#' $infile | " .
-	## excahnge name1 and name2, and also start and end positions
+	$infile = ($infile =~ m/.+\.gz/ ? "z" : "") .
+				"grep -v -P '^#' $infile | " .
+	## exchange name1 and name2, and also start and end positions
 	q{awk ' BEGIN {OFS="\t"}
 		$1<=$2 {print}
 		$1>$2 {print $2,$1,$3,$4,$5,$6,$9,$10,$7,$8,$11,$12}' | } .
 	## sort by name pair followed by E-value
-	"sort -T . -k 1,2 -k 11,11g | "; ## edit 2.0.6 // added -T to prevent tmp space limitation
+	"sort -T . -k 1,2 -k 11,11g | "; ## -T to prevent tmp space limitation
 }
 
 open(IN, $infile) || die ("ERROR blast2homfile.pl : cannot open input file $infile");
@@ -36,7 +37,6 @@ while (<IN>) {
 	$score /= $BITUNIT;
 	$dist = 100 - $ident;
 
-        ## edit 2.0.1
         # fix for negative value in log(), low sequence identity causes this issue and 
         # terminates the program 
         $temp1 = $dist / 100;

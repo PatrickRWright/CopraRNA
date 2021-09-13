@@ -11,7 +11,7 @@ prep_lines <- c()
 for (i in unique(data$clusternumber)) { 
     curr_cluster<-data[which(data$clusternumber==i),]
     curr_cluster <- curr_cluster[order(curr_cluster$id2),] 
-    curr_cluster_string <- paste(c(0,as.character(curr_cluster$d1),as.character('')), collapse=";")
+    curr_cluster_string <- paste(c(0,as.character(curr_cluster$id1),as.character('')), collapse=";")
     prep_lines <- c(prep_lines, curr_cluster_string)
 }
 

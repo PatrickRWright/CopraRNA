@@ -3,7 +3,7 @@
 import sys
 CopraRNA_result = sys.argv[1]
 # amount of top predictions to enrich with
-enrichment_count = int(sys.argv[2]) ## edit 2.0.5.1
+enrichment_count = int(sys.argv[2])
 #print CopraRNA_result
 
 with open(CopraRNA_result) as file:
@@ -15,17 +15,21 @@ for i in range(1,len(CopraRNA_lines)): # range omits the right boundary
     # split
     curr_line = CopraRNA_lines[i]
     split = curr_line.split(",")
-    orgOfIntEntry = split[2]
-    if orgOfIntEntry:
+    orgOfIntEntry = split[3]
+    if orgOfIntEntry and orgOfIntEntry.find(":") > -1:
         splitOrgOfInt = orgOfIntEntry.split(":")
         entrezID = splitOrgOfInt[1][:-1]
         backgroundList.append(entrezID)
+
+if not backgroundList:
+    print ("could not extract background geneIDs of organism of interest from "+CopraRNA_result);
+    sys.exit(-1);
 
 backgroundList = list(map(str,backgroundList))
 
 print ("background:" + str(len(backgroundList)))
 
-inputList = backgroundList[0:enrichment_count] ## edit 2.0.5.1 // dynamic list length
+inputList = backgroundList[0:enrichment_count]
 print ("input:" + str(len(inputList)))
 
 inputIds = ",".join(inputList)
@@ -33,14 +37,12 @@ inputIds = ",".join(inputList)
 backgroundIds = ",".join(backgroundList)
 #print backgroundIds
 
-#sys.exit()
+# lets see if we need this line...
+#sys.path.append('../')
 
-sys.path.append('../')
-
-import logging
+#import logging
 import traceback as tb
 import suds.metrics as metrics
-#from tests import *
 from suds import *
 from suds.client import Client
 from datetime import datetime
@@ -49,13 +51,16 @@ errors = 0
 
 #setup_logging()
 
+
+
+
 #logging.getLogger('suds.client').setLevel(logging.DEBUG)
 
-url = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
+url = 'https://david.ncifcrf.gov/webservice/services/DAVIDWebService?wsdl'
 print ('url=%s' % url)
 # create a service client using the wsdl.
 client = Client(url)
-ws = 'https://david-d.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
+ws = 'https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap11Endpoint/'
 client.wsdl.services[0].setlocation(ws)
 
 exit
@@ -65,7 +70,7 @@ exit
 print (client)
 
 #authenticate user email 
-print (client.service.authenticate('patrickrw@gmx.net'))
+print (client.service.authenticate('rna@informatik.uni-freiburg.de'))
 
 # add enrichment_count (amount) predicted
 idType = 'ENTREZ_GENE_ID'
@@ -86,7 +91,6 @@ print (client.service.getDefaultCategoryNames())
 #print client.service.getChartReport(thd, count)
 
 #getTermClusterReport
-## edit 2.0.6 changing parameters to high
 overlap = 3
 initialSeed = 2
 finalSeed = 2

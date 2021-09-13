@@ -2,67 +2,145 @@
 
 use strict;
 use warnings;
-use Cwd 'abs_path'; ## edit 2.0.5.1
+use Cwd 'abs_path'; 
+use Parallel::ForkManager;
 
 # get absolute path
-my $ABS_PATH = abs_path($0); ## edit 2.0.5.1
+my $ABS_PATH = abs_path($0); 
 # remove script name at the end
 # match all non slash characters at the end of the string
-$ABS_PATH =~ s|[^/]+$||g; ## edit 2.0.5.1
+$ABS_PATH =~ s|[^/]+$||g; 
 my $PATH_COPRA_SUBSCRIPTS = $ABS_PATH;
+
+# files dedicated to capture output of subcalls for debugging
+my $OUT_ERR = "CopraRNA2_subprocess.oe";
 
 my $ncrnas = $ARGV[0]; # input_sRNA.fa
 my $upfromstartpos = $ARGV[1]; # 200
 my $down = $ARGV[2]; # 100
 my $mrnapart = $ARGV[3]; # cds or 5utr or 3utr
+my $core_count = $ARGV[4];
+my $intarnaParamFile = $ARGV[5];
+my $domclust_c = $ARGV[6];
 my $GenBankFiles = "";
 my $orgcount = 0;
 
-my $cores = `grep 'core count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.4
-chomp $cores; ## edit 2.0.4
 
-# check if CopraRNA1 prediction should be made
-my $cop1 = `grep 'CopraRNA1:' CopraRNA_option_file.txt | sed 's/CopraRNA1://g'`; ## edit 2.0.5.1
-chomp $cop1;
+##########################################################################################
+sub getOptionValue
+##########################################################################################
+# @param 1 option name from CopraRNA_option_file.txt file
+# @return the respective value from CopraRNA_option_file.txt
+##########################################################################################
+{
+	my $option = $_[0];
+	my $value = `grep -m 1 -P '^\\s*$option=' CopraRNA_option_file.txt | sed 's/^\\s*$option=//g'`;
+	chomp $value;
+	return( $value );
+}
+######################################################################## END OF SUBROUTINE
 
-# check nooi switch
-my $nooi = `grep 'nooi:' CopraRNA_option_file.txt | sed 's/nooi://g'`; ## edit 2.0.6
-chomp $nooi;
+
+my $cores = getOptionValue("core count");
 
 # check for verbose printing
-my $verbose = `grep 'verbose:' CopraRNA_option_file.txt | sed 's/verbose://g'`; ## edit 2.0.5.1
-chomp $verbose;
+my $verbose = getOptionValue("verbose");
+
+# check for genomePath
+my $genomePath = getOptionValue("genomePath");
+# sanity check
+if ($genomePath eq "") {
+	$genomePath = ".";
+}
 
 # get amount of top predictions to return
-my $topcount = `grep 'top count:' CopraRNA_option_file.txt | grep -oP '\\d+'`; ## edit 2.0.5.1
-chomp $topcount;
+my $topcount = getOptionValue("top count");
 $topcount++; # need this to include the header
 
 # check for websrv output printing
-my $websrv = `grep 'websrv:' CopraRNA_option_file.txt | sed 's/websrv://g'`; ## edit 2.0.5.1
-chomp $websrv;
+my $websrv = getOptionValue("websrv");
 
 # check for enrichment on/off and count
-my $enrich = `grep 'enrich:' CopraRNA_option_file.txt | sed 's/enrich://g'`; ## edit 2.0.5.1
-chomp $enrich;
+my $enrich = getOptionValue("enrich"); 
 
-# get window size option
-my $winsize = `grep 'win size:' CopraRNA_option_file.txt | sed 's/win size://g'`; ## edit 2.0.5.1
-chomp $winsize;
 
-# get maximum base pair distance 
-my $maxbpdist = `grep 'max bp dist:' CopraRNA_option_file.txt | sed 's/max bp dist://g'`; ## edit 2.0.5.1
-chomp $maxbpdist;
+####################################
+# open error stream
+####################################
 
-# get consensus prediction option
-my $cons = `grep 'cons:' CopraRNA_option_file.txt | sed 's/cons://g'`; ## edit 2.0.6
-chomp $cons;
+open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); 
 
-# get ooifilt
-my $ooi_filt = `grep 'ooifilt:' CopraRNA_option_file.txt | sed 's/ooifilt://g'`;
-chomp $ooi_filt;
 
-open ERRORLOG, ">>err.log" or die("\nError: cannot open file err.log in homology_intaRNA.pl\n\n"); ## edit 2.0.2 
+##########################################################################################
+sub removeInvalidGenomeFiles
+##########################################################################################
+# @param 0 (optional) error message to be displayed for each removed invalid file
+# @return the number of deleted files
+##########################################################################################
+{
+    my $errorMsg = "";
+    if (scalar(@_) > 0) {
+    	$errorMsg = $_[0];
+    }
+    
+    my $deletedFiles = 0;
+    my $dgl = new Parallel::ForkManager($cores);
+
+    # iterate all "gb" files
+    foreach my $gbFile (<*.gb.gz>) {
+        $dgl->start and next;
+    	my $lastTwoLines = `zcat $gbFile | tail -n 2 | tr -d "\n"`;
+    
+    	# proper gb file ends with "//" line
+    	unless ( $lastTwoLines =~ m/.*\/\/\s*$/ ) {
+    		`rm -f $gbFile`; # remove link
+    		`rm -f $genomePath/$gbFile`; # remove gb file to try download again later
+    		# count deletion
+    		$deletedFiles++;
+    		# print error message if given
+    		unless ($errorMsg eq "") {
+    			print ERRORLOG "Genome file $gbFile : $errorMsg\n";
+    		}
+    	} # if invalid file
+        $dgl->finish;
+    } # for all gbFiles
+    
+    return( $deletedFiles );
+$dgl->wait_all_children;
+
+}
+######################################################################## END OF SUBROUTINE
+
+
+##########################################################################################
+sub downloadGenomeAndLink
+##########################################################################################
+# @param 1 accession number of the genome to download if not already present
+##########################################################################################
+{
+	my $accessionnumber = $_[0];
+
+    my $refseqoutputfile = "$accessionnumber.gb.gz";
+    
+  	# download genome file if needed
+	unless ( -e "$genomePath/$refseqoutputfile" ) {
+	  	my $gbCall = $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $genomePath/$refseqoutputfile -c $cores -gPath $genomePath";
+    	print $gbCall . "\n" if ($verbose); 
+      	system $gbCall;
+	}
+  	# link genome file locally if not present
+  	if ( (not -e "$refseqoutputfile") and (-e "$genomePath/$refseqoutputfile") ) {
+	        system ("ln -s $genomePath/$refseqoutputfile .");
+  	}
+    
+}
+######################################################################## END OF SUBROUTINE
+
+# finds replikons genomes 
+
+####################################
+print " create kegg 2 refseq mapping\n" if ($verbose);
+####################################
 
 my $keggtorefseqnewfile = $PATH_COPRA_SUBSCRIPTS . "kegg2refseqnew.csv";
 # RefSeqID -> space separated RefSeqIDs // 'NC_005140' -> 'NC_005139 NC_005140 NC_005128'
@@ -78,19 +156,24 @@ foreach(@keggtorefseqnew) {
     # split off quadruplecode (pseudokegg id)
     my @split = split("\t", $_);
     my $all_refseqs = $split[1];
+    if ($split[1]) {
     chomp $all_refseqs;
     # split up refseq ids
     my @split_refseqs = split(/\s/, $all_refseqs);
     foreach(@split_refseqs) {
         $refseqaffiliations{$_} = $all_refseqs;
+        
+        }
     }
 }
 
 # add "ncRNA_" to fasta headers
-system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa"; ## edit 2.0.5.1 // replaced put_ncRNA_fasta_together.pl with this statement
+system "sed 's/>/>ncRNA_/g' $ncrnas > ncrna.fa"; 
+
+my $no_of_args = scalar(@ARGV); 
 
 # assign correct refseq IDs for each sequence
-for (my $i=4;$i<scalar(@ARGV);$i++) {
+for (my $i=7;$i<scalar(@ARGV);$i++) {
     # split up the refseq list for one organism
     my @split = split(/\s/, $refseqaffiliations{$ARGV[$i]});
     # get the first id entry
@@ -103,442 +186,326 @@ for (my $i=4;$i<scalar(@ARGV);$i++) {
 $ncrnas = "ncrna.fa";
 
 # get Orgcount
-$orgcount = (scalar(@ARGV) - 4);
+$orgcount = (scalar(@ARGV) - 6);
 
-## prepare input for combine_clusters.pl
+
 ## Download Refseq files by Refseq ID 
-my $RefSeqIDs = `grep ">" input_sRNA.fa | tr '\n' ' ' | sed 's/>//g'`; ## edit 2.0.5.1
+my $RefSeqIDs = `grep ">" input_sRNA.fa | tr '\n' ' ' | sed 's/>//g'`; 
 my @split_RefIds = split(/\s+/, $RefSeqIDs);
+
+my $dwnCall = "python ". $PATH_COPRA_SUBSCRIPTS  . "download_genomes.py -g @split_RefIds -c $cores -p $genomePath/";
+system $dwnCall;
 
 foreach(@split_RefIds) {
     my $currRefSeqID = $_;
-
     my $presplitreplicons = $refseqaffiliations{$currRefSeqID};
-    my @replikons = split(/\s/, $presplitreplicons); # added this
-    
-    foreach(@replikons) {
-        my $refseqoutputfile = $_ . ".gb"; # added .gb
-        $GenBankFiles = $GenBankFiles . $refseqoutputfile . ",";
-        my $accessionnumber = $_;
-        print $PATH_COPRA_SUBSCRIPTS  . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb \n" if ($verbose); ## edit 1.2.1 ## edit 2.0.2
-        system $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accessionnumber -g $accessionnumber.gb"; ## edit 1.2.1 ## edit 2.0.2
+    my @replikons = split(/\s/, $presplitreplicons);
+  
+    foreach my $accessionnumber (@replikons) {
+	my $refseqoutputfile = "$accessionnumber.gb.gz";
+        $GenBankFiles = $GenBankFiles . $accessionnumber . ".gb.gz" . ",";
     }
+           
+	# remove trailing comma
     chop $GenBankFiles;
+	# add space separator to begin next block of genome files
     $GenBankFiles = $GenBankFiles . " ";
+
+    
 }
+## RefSeq correct download check for 2nd try
+removeInvalidGenomeFiles();
 
-## RefSeq correct download check for 2nd try ## edit 1.2.5
-my @files = ();
-@files = <*gb>;
 
-foreach(@files) {
-    open(GBDATA, $_) or die("\nError: cannot open file $_ in homology_intaRNA.pl\n\n");
-        my @gblines = <GBDATA>;
-    close GBDATA;
-
-    my $lastLine = $gblines[-2]; ## edit 2.0.2
-    my $lastLine_new = $gblines[-1]; ## edit 2.0.3, because of new file donwload the bottom differs
-    if ($lastLine =~ m/^\/\//) {
-        # all is good
-    } elsif ($lastLine_new =~ m/^\/\//) {
-        # all is good
-    } else {
-        system "rm $_"; # remove file to try download again later
-    }
-}
-
-## refseq availability check
-@files = ();
+## list of available refseq files
+my @gbFiles = ();
 
 my @totalrefseqFiles = split(/\s|,/, $GenBankFiles);
 my $consistencyswitch = 1;
 
 my $limitloops = 0;
+my $sleeptimer = 30;
 
-my $sleeptimer = 30; ## edit 1.2.0
 while($consistencyswitch) {
-    @files = ();
-    @files = <*gb>;
-    foreach(@totalrefseqFiles) {
-        chomp $_;
-        my $value = $_;
-        if(grep( /^$value$/, @files )) { 
+    @gbFiles = <*.gb.gz>;
+    foreach my $gbFile (@totalrefseqFiles) {
+	chomp $gbFile;
+        if(grep( /^$gbFile$/, @gbFiles )) { 
             $consistencyswitch = 0;
         } else {
              $limitloops++;
              $consistencyswitch = 1;
- 
-             if($limitloops > 100) { 
-                 $consistencyswitch = 0;
-                 print ERRORLOG "Not all RefSeq *gb files downloaded correctly. Restart your job.\n"; 
-                 last;
+             if($limitloops > 1000) { 
+                $consistencyswitch = 0;
+				die( "Could not download all RefSeq *gb files... Restart your job.\n", 1 ); 
              }
-             my $accNr = $_;
-             chop $accNr;
-             chop $accNr;
-             chop $accNr;
-             sleep $sleeptimer; ## edit 1.2.0
-             $sleeptimer = $sleeptimer * 1.1; ## edit 1.2.0
-             print "next try: " . $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accNr -g $accNr.gb\n" if ($verbose); ## edit 1.2.0 ## edit 1.2.1 ## edit 2.0.2
-             system $PATH_COPRA_SUBSCRIPTS . "get_refseq_from_refid.pl -acc $accNr -g $accNr.gb"; ## edit 1.2.1 ## edit 2.0.2
+	# extract genome ID from genome file name
+             my $accNr = $gbFile;
+	     if ($gbFile =~ m/^(.+)\.gb(\.gz)?$/) {
+		$accNr = $1;
+	     }
+ 	     # print("downloadGenomeAndLink\n");
+	     downloadGenomeAndLink( $accNr );
              last;
         }
+	
     }
 }
+
 
 ### end availability check
 
 
-### refseq correct DL check kill job ## edit 1.2.5
-@files = <*gb>;
+### refseq correct DL check kill job 
+if ( 0 < removeInvalidGenomeFiles("Genome file did not download correctly. This is probably due to a connectivity issue with the NCBI servers. Please retry later..") ) {
+	die( "Not all RefSeq *gb files downloaded correctly. Restart your job.\n", 1 );
+}
 
-foreach(@files) {
-    open(GBDATA, $_) or die("\nError: cannot open file $_ in homology_intaRNA.pl\n\n");
-        my @gblines = <GBDATA>;
-    close GBDATA;
+###########################################
+print "check sanity of CDS features\n" if ($verbose);
+###########################################
+my $pm = new Parallel::ForkManager($cores);
+foreach my $gbFile (@gbFiles) {
 
-    my $lastLine = $gblines[-2]; ## edit 2.0.2
-    my $lastLine_new = $gblines[-1]; ## edit 2.0.3, because of new file donwload the bottom differs
-    if ($lastLine =~ m/^\/\//) {
-        # all is good
-    } elsif ($lastLine_new =~ m/^\/\//) {
-        # all is good
-    } else {
-        print ERRORLOG "File $_ did not download correctly. This is probably due to a connectivity issue on your or the NCBI's side. Please try to resubmit your job later (~2h.).\n"; # kill ## edit 2.0.2
+	## fixing issue with CONTIG and ORIGIN both in gb file (can't parse without this) 
+	# check if gbFile has to be corrected
+	my $gbContainsCONTIG = `zgrep -m 1 -c -P "^CONTIG" $gbFile`;
+	if ($gbContainsCONTIG > 0) {
+		# remove "CONTIG" string
+    	system "zcat $gbFile | sed '/^CONTIG/d' | gzip -9 > tmp.gz; mv -f tmp.gz $gbFile"; ## d stands for delete
+	}
+
+    $pm->start and next; 
+	# check for CDS features
+    system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $gbFile >> gene_CDS_exception.txt";
+    $pm->finish;
+}
+$pm->wait_all_children;
+{ 
+    open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
+        my @exception_lines = <MYDATA>;
+    close MYDATA;
+    
+    if (scalar(@exception_lines) >= 1) {
+        my $exceptionRefSeqs = "";
+        foreach(@exception_lines) {
+            my @split = split(/\s+/,$_);
+            $exceptionRefSeqs = $exceptionRefSeqs . $split[-1] . " ";
+        }
+        print ERRORLOG "Error: gene but no CDS features present in $exceptionRefSeqs.\n This is most likely connected to currently corrupted RefSeq record(s) at the NCBI.\nPlease resubmit your job without the currently errorous organism(s) or wait some time with your resubmission.\nUsually the files are fixed within ~1 week.\n"; 
     }
-}
-
-
-## fixing issue with CONTIG and ORIGIN both in gbk file (can't parse without this) ## edit 1.2.4
-
-@files = <*gb>;
-
-foreach (@files) {
-    system "sed -i '/^CONTIG/d' $_"; ## d stands for delete
-}
-
-#### end quickfix
-
-## edit 1.2.2 adding new exception check
-@files = <*gb>;
-
-foreach (@files) {
-    system $PATH_COPRA_SUBSCRIPTS . "check_for_gene_CDS_features.pl $_ >> gene_CDS_exception.txt";
-}
-
-open(MYDATA, "gene_CDS_exception.txt") or die("\nError: cannot open file gene_CDS_exception.txt at homology_intaRNA.pl\n\n");
-    my @exception_lines = <MYDATA>;
-close MYDATA;
-
-
-if (scalar(@exception_lines) >= 1) {
-    my $exceptionRefSeqs = "";
-    foreach(@exception_lines) {
-        my @split = split(/\s+/,$_);
-        $exceptionRefSeqs = $exceptionRefSeqs . $split[-1] . " ";
-    }
-    print ERRORLOG "Error: gene but no CDS features present in $exceptionRefSeqs.\n This is most likely connected to currently corrupted RefSeq record(s) at the NCBI.\nPlease resubmit your job without the currently errorous organism(s) or wait some time with your resubmission.\nUsually the files are fixed within ~1 week.\n"; ## edit 1.2.2 added \n ## edit 2.0.2
 }
 ## end CDS gene exception check
 
 
-## get cluster.tab with DomClust
-unless (-e "cluster.tab") { # only do if cluster.tab has not been imported ## edit 2.0.4 changed this to -e
+unless (-e "cluster.tab") { # only do if cluster.tab has not been imported
+###########################################
+print "get cluster.tab with Diamond\n" if ($verbose);
+###########################################
 
     ### get AA fasta for homolog clustering
 
-    @files = <*gb>;
-
-    foreach(@files) {
-        system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $_ >> all.fas"; ## edit 2.0.5.1 // removed unless 
+    foreach my $gbFile (@gbFiles) {
+        system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $gbFile >> all.fas"; 
     }
 
     # prep for DomClust
-    system "formatdb -i all.fas" unless (-e "all.fas.blast"); ## edit 2.0.1
-    # blast sequences
-    my $blastallErrorFile = "blastall.error";
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> $blastallErrorFile" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage ## edit 2.0.1 // ## edit 2.0.5.1 // added 2> /dev/null to prevent output to the terminal
+    print "diamond clustering for all.fas\n" if ($verbose);
+    unless (-e "all.fas.blast.gz") {
+    print "makedb all.fas \n" if ($verbose);
+    system "diamond makedb --in all.fas -d sequenceDB";
+    print "diamond blastp sequenceDB \n" if ($verbose);
+    system "diamond blastp -q all.fas --threads $cores --db sequenceDB.dmnd --out all.fas.blast --outfmt 6 --more-sensitive";
+    print "gzip -9 all.fas.blast \n" if ($verbose);
+    system "gzip -9 all.fas.blast";
+
     # remove empty error file
-    system("rm -f $blastallErrorFile") if ( -z $blastallErrorFile );
-    system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; ## edit 2.0.5.1 // removed -distconv this is now fixed within the script
+    system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast.gz > all.fas.hom"; 
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    my $domclustErrorFile = "domclust.error";
-    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
+	print "domclust for all.fas.*\n" if ($verbose);
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c$domclust_c -p0.5 -V0.6 -C80 -o5 > cluster.tab 2>> ".$OUT_ERR;
     $domclustExitStatus /= 256; # get original exit value
     # ensure domclust went fine
     if ($domclustExitStatus != 0) {
     	# restart domclust with --nobreak option
-	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
+	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2>> $OUT_ERR"; 
 	    $domclustExitStatus /= 256; # get original exit value
 	    # check if second run was successful
 	    if ($domclustExitStatus != 0) {
 	    	die("\nERROR: 'domclust' returned with non-zero exit status $domclustExitStatus.\n\n");
 	    }
     }
-    # remove empty error file
-    system("rm -f $domclustErrorFile") if ( -z $domclustErrorFile );
 
-    # edit 2.0.2
-    system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
-    if (-s "N_chars_in_CDS.txt") {
-        print ERRORLOG "'N' characters found in nucleotide CDS. Please remove organism(s) with locus tags:\n";
-        system "cat err.log N_chars_in_CDS.txt >> err.log";
     }
-
+    system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
+    if (-s "duplicated_CDS.txt") {
+        print ERRORLOG "duplicated CDS for some genes. Please check locus tags:\n";
+		my $fileContent = do{local(@ARGV,$/)="duplicated_CDS.txt";<>};
+		print ERRORLOG $fileContent . "\n";
+    }
 }
 
 # 16s sequence parsing 
-print $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
-
+system "perl " . $PATH_COPRA_SUBSCRIPTS . "parse_16s_from_gbk.pl $core_count $GenBankFiles > 16s_sequences.fa" unless (-e "16s_sequences.fa");
 # check 16s
 open(MYDATA, "16s_sequences.fa") or die("\nError: cannot open file 16s_sequences.fa in homology_intaRNA.pl\n\n");
     my @sixteenSseqs = <MYDATA>;
 close MYDATA;
 
 my $sixteenScounter = 0;
-my $temp_16s_ID = ""; ## edit 2.0.2
+my $temp_16s_ID = ""; 
 foreach (@sixteenSseqs) {
     if ($_ =~ m/>/) {
-        $temp_16s_ID = $_; ## edit 2.0.2
-        chomp $temp_16s_ID; ## edit 2.0.2
+        $temp_16s_ID = $_; 
+        chomp $temp_16s_ID;
         $sixteenScounter++;
-    } else {
-        if ($_ =~ m/N/) { print ERRORLOG "\nError: 'N' characters present in 16s_sequences.fa. Remove $temp_16s_ID from the input for the job to execute correctly.\n"; } ## edit 2.0.2
+    #} else {
+       # if ($_ =~ m/N/) { print ERRORLOG "\nError: 'N' characters present in 16s_sequences.fa. Remove $temp_16s_ID from the input for the job to execute correctly.\n"; }
     }
 }
 
 if ($sixteenScounter ne $orgcount) {
-    my $no16sOrgs = `(grep ">" 16s_sequences.fa && grep ">" input_sRNA.fa) | sort | uniq -u | tr '\n' ' '`; ## edit 2.0.3
-    chomp $no16sOrgs; ## edit 2.0.3
-    print ERRORLOG "\nError: wrong number of sequences in 16s_sequences.fa.\nOne (or more) of your entered organisms does not contain a correctly annotated 16s rRNA sequence and needs to be removed.\nPlease remove $no16sOrgs\n"; ## edit 2.0.2 
+    my $no16sOrgs = `cat 16s_sequences.fa input_sRNA.fa | grep ">"  | sort | uniq -u | tr '\n' ' '`; 
+    chomp $no16sOrgs;
+    print ERRORLOG "\nError: wrong number of sequences in 16s_sequences.fa.\nOne (or more) of your entered organisms does not contain a correctly annotated 16s rRNA sequence and needs to be removed.\nPlease remove $no16sOrgs\n";
 }
 
 ## prepare single organism whole genome target predictions 
-system "echo $GenBankFiles > merged_refseq_ids.txt"; ## edit 2.0.2 # need this for iterative region plot construction
+system "echo $GenBankFiles > merged_refseq_ids.txt"; # need this for iterative region plot construction
+my $prepare_intarna_out_call = $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $core_count $intarnaParamFile $GenBankFiles";
+print $prepare_intarna_out_call . "\n" if ($verbose);
+system $prepare_intarna_out_call;
+## end
 
-print $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "prepare_intarna_out.pl $ncrnas $upfromstartpos $down $mrnapart $GenBankFiles";
-## end  edit 2.0.0
+# prepare input for CopraRNA 2 combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prep_cop2.R --args opt_tags.clustered"; ## prepare lines for CopraRNA 2 combination
 
-# do CopraRNA combination 
-## edit 2.0.4 // removed all N*final.csv files as input to combine_clusters.pl
-print $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount\n" if ($verbose);
-system $PATH_COPRA_SUBSCRIPTS . "combine_clusters.pl $orgcount";
+# without pvalue sampling
+system "env LC_ALL=C sort -g -k1 CopraRNA2_prep.csv > CopraRNA2_prep_sorted.csv";
 
 # make annotations
-system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA1_with_pvsample_sorted.csv opt_tags.clustered_rcsize $GenBankFiles > CopraRNA1_anno.csv" if ($cop1); ## edit 2.0.6
-system $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv"; ## edit 2.0.6
+my $annotateCall = undef;
+  $annotateCall = $PATH_COPRA_SUBSCRIPTS . "annotate_raw_output.pl CopraRNA2_prep_sorted.csv opt_tags.clustered $GenBankFiles > CopraRNA2_prep_anno.csv";
+
+print "\n$annotateCall\n" if ($verbose);
+system $annotateCall; 
 
 # get additional homologs in cluster.tab
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA1_anno.csv cluster.tab > CopraRNA1_anno_addhomologs.csv" if ($cop1); ## edit 2.0.6
-system $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv"; ## edit 2.0.6
+my $parseHomologsCall = undef;
+	$parseHomologsCall = $PATH_COPRA_SUBSCRIPTS . "parse_homologs_from_domclust_table.pl CopraRNA2_prep_anno.csv cluster.tab > CopraRNA2_prep_anno_addhomologs.csv";
 
-# add corrected p-values (padj) - first column
-system "awk -F',' '{ print \$1 }' CopraRNA1_anno_addhomologs.csv > CopraRNA1_pvalues.txt" if ($cop1); ## edit 2.0.6
+print "$parseHomologsCall\n" if ($verbose);
+system $parseHomologsCall; 
+
+ 
 # just for formatting
-system "awk -F',' '{ print \$1 }' CopraRNA2_prep_anno_addhomologs.csv > CopraRNA2_pvalues.txt"; ## edit 2.0.6
-
-system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA1_pvalues.txt" if ($cop1); ## edit 2.0.6
-system "paste padj.csv CopraRNA1_anno_addhomologs.csv -d ',' > CopraRNA1_anno_addhomologs_padj.csv" if ($cop1); ## edit 2.0.6
+system "awk -F',' '{ print \$1 }' CopraRNA2_prep_anno_addhomologs.csv > CopraRNA2_pvalues.txt";
 
 # just for formatting
 system "R --slave -f $PATH_COPRA_SUBSCRIPTS/calc_padj.R --args CopraRNA2_pvalues.txt";
-system "paste padj.csv CopraRNA2_prep_anno_addhomologs.csv -d ',' > CopraRNA2_prep_anno_addhomologs_padj.csv"; ## edit 2.0.6
+system "paste padj.csv CopraRNA2_prep_anno_addhomologs.csv -d ',' > CopraRNA2_prep_anno_addhomologs_padj.csv"; 
 
-# add amount sampled values CopraRNA 1 // CopraRNA 2 has no sampling
-system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA1_anno_addhomologs_padj.csv 0 > CopraRNA1_anno_addhomologs_padj_amountsamp.csv" if ($cop1); ## edit 2.0.6
+
 # make consistent names
-system "mv CopraRNA1_anno_addhomologs_padj_amountsamp.csv CopraRNA1_final_all.csv" if ($cop1); ## edit 2.0.6
-system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; ## edit 2.0.6
+system $PATH_COPRA_SUBSCRIPTS . "get_amount_sampled_values_and_add_to_table.pl CopraRNA2_prep_anno_addhomologs_padj.csv 1 > CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv"; 
 
 # get ooi refseq id
-my @split = split(/\s/, $refseqaffiliations{$ARGV[4]});
+my @split = split(/\s/, $refseqaffiliations{$ARGV[7]});
 # get the first id entry
 my $ooi_refseq_id = $split[0];
 
-unless ($cop1) {
-    # align homologous targets
-    system $PATH_COPRA_SUBSCRIPTS . "parallelize_target_alignments.pl CopraRNA2_prep_anno_addhomologs_padj_amountsamp.csv";
-    # run position script
-    system "cp " . $PATH_COPRA_SUBSCRIPTS . "CopraRNA_available_organisms.txt ."; ## edit 2.0.6
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args $ooi_refseq_id 2> /dev/null > /dev/null"; ## edit 2.0.6
-    # perform actual CopraRNA 2 p-value combination
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna2.R --args $ooi_refseq_id ooi_consensus overall_consensus 2> /dev/null > /dev/null"; ## edit 2.0.6
-    
-}
+######################################################
+print "compute phylogenetic distances to the ooi UTRs\n" if ($verbose);
+######################################################
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_phylogenetic_sorting.r 2>> $OUT_ERR 1>&2"; 
+# perform actual CopraRNA 2 p-value combination
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "join_pvals_coprarna_2.r 2>> $OUT_ERR 1>&2"; 
 
-# truncate final output // ## edit 2.0.5.1
-system "head -n $topcount CopraRNA1_final_all.csv > CopraRNA1_final.csv" if ($cop1); ## edit 2.0.6
-unless ($cop1) {
-    system "head -n $topcount CopraRNA2_final_all_ooi.csv > CopraRNA2_final_ooi.csv"; ## edit 2.0.6
-    system "head -n $topcount CopraRNA2_final_all_balanced.csv > CopraRNA2_final_balanced.csv"; ## edit 2.0.6
-    system "head -n $topcount CopraRNA2_final_all_balanced_consensus.csv > CopraRNA2_final_balanced_consensus.csv"; ## edit 2.0.6
-    system "head -n $topcount CopraRNA2_final_all_ooi_consensus.csv > CopraRNA2_final_ooi_consensus.csv"; ## edit 2.0.6
-    system "head -n $topcount CopraRNA2_final_all_ooi_ooiconsensus.csv > CopraRNA2_final_ooi_ooiconsensus.csv"; ## edit 2.0.6
-}
+# truncate final output // 
+system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv"; 
 
-# figure out which result is the primary result ## edit 2.0.6
-if ($cop1) { # CopraRNA 1 is the primary requested result
-    system "cp CopraRNA1_final.csv CopraRNA_result.csv";    
-    system "cp CopraRNA1_final_all.csv CopraRNA_result_all.csv";    
-} elsif ($nooi and (not $cons)) { # CopraRNA 2 with balanced mode is the requested result
-    system "cp  CopraRNA2_final_balanced.csv CopraRNA_result.csv";
-    system "cp  CopraRNA2_final_all_balanced.csv CopraRNA_result_all.csv";
-} elsif ($nooi and ($cons eq 2)) { # CopraRNA 2 balanced prediction with overall consensus
-    system "cp CopraRNA2_final_balanced_consensus.csv CopraRNA_result.csv"; 
-    system "cp CopraRNA2_final_all_balanced_consensus.csv CopraRNA_result_all.csv";
-} elsif ($cons eq 1) { # CopraRNA 2 ooi prediction with ooi consensus
-    system "cp CopraRNA2_final_ooi_ooiconsensus.csv CopraRNA_result.csv";
-    system "cp CopraRNA2_final_all_ooi_ooiconsensus.csv CopraRNA_result_all.csv"; 
-} elsif ($cons eq 2) { # CopraRNA 2 ooi prediction with overall consensus
-    system "cp CopraRNA2_final_ooi_consensus.csv CopraRNA_result.csv";
-    system "cp CopraRNA2_final_all_ooi_consensus.csv CopraRNA_result_all.csv"; 
-} else { # CopraRNA 2 with org of interest focus (standard)
-    system "cp CopraRNA2_final_ooi.csv CopraRNA_result.csv";
-    system "cp CopraRNA2_final_all_ooi.csv CopraRNA_result_all.csv";
-}
+#######################################################
+print "find conserved sites, plot CopraRNA evo heatmap, jalview files for selection\n" if ($verbose);
+#######################################################
+print "copraRNA2_find_conserved_sites.r\n" if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_find_conserved_sites.r 2>> $OUT_ERR 1>&2";
+print "copraRNA2_conservation_heatmaps.r\n" if ($verbose);
+system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "copraRNA2_conservation_heatmaps.r 2>> $OUT_ERR 1>&2"; 
 
-# filtering for ooi single p-value
-if ($ooi_filt) {
-
-    my @not_filtered_list = (); # values below the p-value threshold
-    my @filtered_list = ();     # values empty or above the p-value threshold
-
-    open(MYDATA, "CopraRNA_result_all.csv") or die("\nError: cannot open file CopraRNA_result_all.csv at homology_intaRNA.pl\n\n");
-        my @CopraRNA_all_out_lines = <MYDATA>;
-    close MYDATA;
-
-    push(@not_filtered_list, $CopraRNA_all_out_lines[0]); # header
-
-    for (my $i=1;$i<scalar(@CopraRNA_all_out_lines);$i++) {
-        my $curr_line = $CopraRNA_all_out_lines[$i];
-        my @split = split(/,/,$curr_line);
-        my $curr_ooi_cell = $split[2];
-        if ($curr_ooi_cell) {
-            my @split_ooi_cell = split(/\|/,$curr_ooi_cell);
-            my $curr_ooi_pv = $split_ooi_cell[2];
-            if($curr_ooi_pv<=$ooi_filt) { # smaller or eq to the set ooi_filt threshold
-                push(@not_filtered_list, $curr_line);
-            } else { # bigger tahn the set ooi_filt threshold
-                push(@filtered_list, $curr_line);
-            }
-        } else { # empty cell
-            push(@filtered_list, $curr_line);
-        }
-    }
-    # print
-    open WRITEFILT, ">", "CopraRNA_result_all_filt.csv";
-
-    foreach(@not_filtered_list) {
-        print WRITEFILT $_;
-    }
-    foreach(@filtered_list) {
-        print WRITEFILT $_;
-    }
-    close WRITEFILT;
-    system "cp CopraRNA_result_all_filt.csv CopraRNA_result_all.csv";
-    system "head -n $topcount CopraRNA_result_all.csv > CopraRNA_result.csv";
-}
-
-# plot CopraRNA 2 evo heatmap
-unless ($cop1) {
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "evo_heatmap.R 2> /dev/null > /dev/null"; ## edit 2.0.6
-    system "rm CopraRNA_available_organisms.txt"; ## edit 2.0.6
-}
 
 # check for run fail CopraRNA
 open(MYDATA, "CopraRNA_result.csv") or die("\nError: cannot open file CopraRNA_result.csv at homology_intaRNA.pl\n\n");
     my @CopraRNA_out_lines = <MYDATA>;
 close MYDATA;
 
-if (scalar(@CopraRNA_out_lines) <= 1) { ## edit 2.0.6
-    print ERRORLOG "Error: No predictions in CopraRNA_result.csv. CopraRNA run failed.\n"; ## edit 2.0.2
+if (scalar(@CopraRNA_out_lines) <= 1) { 
+    print ERRORLOG "Error: No predictions in CopraRNA_result.csv. CopraRNA run failed.\n"; 
 }
 
 # trim off last column (initial_sorting) if CopraRNA 2 prediction mode
-unless ($cop1) {
-     system "awk -F',' '{ print \$NF }' CopraRNA_result.csv > CopraRNA_result.map_evo_align" if ($websrv);
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
-     system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
-     system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
-     system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
-     # change header
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
-     system "sed -i 's/p.value/p-value/g' CopraRNA_result.csv";
-     system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
-     system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
-     system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
-}
+system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result.csv > CopraRNA_result_temp.csv";
+system "mv CopraRNA_result_temp.csv CopraRNA_result.csv";
+system "awk -F, -vOFS=, '{NF-=1;print}' CopraRNA_result_all.csv > CopraRNA_result_all_temp.csv";
+system "mv CopraRNA_result_all_temp.csv CopraRNA_result_all.csv";
+# change header
+system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result.csv";
+system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result.csv";
+system "sed -i 's/p.value/p-value/g' CopraRNA_result.csv";
+system "sed -i 's/,Additional.homologs,/,Additional homologs,/g' CopraRNA_result_all.csv";
+system "sed -i 's/,Amount.sampled/,Amount sampled/g' CopraRNA_result_all.csv";
+system "sed -i 's/p.value/p-value/g' CopraRNA_result_all.csv";
 
-if ($websrv) { # only if webserver output is requested via -websrv ## edit 2.0.5.1
 
-    my $allrefs = $refseqaffiliations{$ARGV[4]};
-    my @splitallrefs = split(/\s/,$allrefs);
+if ($websrv) { 
+	#######################################################
+	print "generate webserver output\n" if ($verbose); 
+	#######################################################
+	system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "prepare_webserver_output.r";
 
-    my $themainrefid = $splitallrefs[0]; # organism of interest RefSeq ID
-    my $orgofintTargets = $themainrefid . "_upfromstartpos_" . $upfromstartpos . "_down_" . $down . ".fa";
-    my $orgofintsRNA = "ncRNA_" . $themainrefid . ".fa";
-
-    # returns comma separated locus tags (first is always refseq ID). Example: NC_000913,b0681,b1737,b1048,b4175,b0526,b1093,b1951,,b3831,b3133,b0886,,b3176 
-    my $top_predictons_locus_tags = `awk -F',' '{print \$3}' CopraRNA_result.csv | sed 's/(.*)//g' | tr '\n' ','`; ## edit 2.0.6 switched to generic output file
-
-    # split
-    my @split = split(/,/, $top_predictons_locus_tags);
-    
-    # remove RefSeqID
-    shift @split;
-
-    foreach (@split) {
-        if ($_) {
-            system "grep -iA1 '$_' $orgofintTargets >> CopraRNA_top_targets.fa";
-        }
-    }
-
-    system "IntaRNA_1ui.pl -t CopraRNA_top_targets.fa -m $orgofintsRNA -o -w $winsize -L $maxbpdist > Cop_IntaRNA1_ui.intarna";
-    # fix for ambiguous nt in intarna output
-    system "sed -i '/contains ambiguous IUPAC nucleotide encodings/d' Cop_IntaRNA1_ui.intarna";
-
-    system $PATH_COPRA_SUBSCRIPTS . "prepare_output_for_websrv_new.pl CopraRNA_result.csv Cop_IntaRNA1_ui.intarna";
-    system "mv coprarna_internal_table.csv coprarna_websrv_table.csv";
-
-    system "cp $orgofintTargets target_sequences_orgofint.fa";
 }
 
 system $PATH_COPRA_SUBSCRIPTS . "print_archive_README.pl > README.txt";
 
-if ($enrich) { ## edit 2.0.5.1 // ## edit 2.0.6 changes in file names
+if ($enrich) { 
+	#######################################################
+	print "create DAVID enrichment table\n" if ($verbose); 
+	#######################################################
 
-    ##### create DAVID enrichment table
     ## this has all been changed to python in version 2.0.3.1 because the DAVID-WS perl client was flawed
-    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; ## edit 2.0.5.1 // added $enrich as input 
-    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ## edit 2.0.6 // only removing obsolete spaces and keeping others
-    system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; ## edit 2.0.3.1
-
-    open(MYDATA, "termClusterReport.txt") or system "echo 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-        my @enrichment_lines = <MYDATA>;
-    close MYDATA;
-
-    unless($enrichment_lines[0]) {
-        system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
-    }
+#    system $PATH_COPRA_SUBSCRIPTS . "DAVIDWebService_CopraRNA.py CopraRNA_result_all.csv $enrich > DAVID_enrichment_temp.txt"; 
+#    system "grep -P 'termName\\s=|categoryName\\s=|score\\s=|listHits\\s=|percent\\s=|ease\\s=|geneIds\\s=|listTotals\\s=|popHits\\s=|popTotals\\s=|foldEnrichment\\s=|bonferroni\\s=|benjamini\\s=|afdr\\s=' DAVID_enrichment_temp.txt | sed 's/^[ ]*//g' | sed 's/ = /=/g' | sed 's/, /,/g' > DAVID_enrichment_grepped_temp.txt"; ##  only removing obsolete spaces and keeping others
+#	 ensure there is some enrichment output
+#	if( -s "DAVID_enrichment_grepped_temp.txt" ) {
+#        system $PATH_COPRA_SUBSCRIPTS . "make_enrichment_table_from_py_output.pl DAVID_enrichment_grepped_temp.txt > termClusterReport.txt"; 
+#    	if ( -s "termClusterReport.txt" ) {
+#	        open(MYDATA, "termClusterReport.txt");
+#            my @enrichment_lines = <MYDATA>;
+#       		close MYDATA;
+            ## enrichment visualization
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; 
+            system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "enrichment.r --args num=200";
+            system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; 
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; 
+            system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; 
+            system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; 
+            system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; 
+            system "rm index-thumb.html"; 
+            system "rm index-pdf.html"; 
+            ## end add enrichment vis
+#        } else {
+#			system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+#		}
+#    } else {
+#		system "echo -e 'If you are reading this, then your prediction did not return an enrichment, your organism of interest is not in the DAVID database\nor the DAVID webservice is/was termporarily down. You can either rerun your CopraRNA\nprediction or create your enrichment manually at the DAVID homepage.' > termClusterReport.txt";
+#	}
 
     ##### end DAVID enrichment
 
-    ## enrichment visualization ## edit 1.2.5
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "copra_heatmap.html ."; ## edit 1.2.5 ## edit 1.2.7 (edited html file)
-    system "R --slave -f " . $PATH_COPRA_SUBSCRIPTS . "extract_functional_enriched.R --args CopraRNA_result_all.csv termClusterReport.txt enrichment.txt"; ## edit 1.2.5 ## edit 1.2.7 (edited R code) ## edit 2.0.5.1 added args
-    system $PATH_COPRA_SUBSCRIPTS . "make_heatmap_json.pl enrichment.txt"; ## edit 1.2.5
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-thumb.html ."; ## edit 1.2.5
-    system "cp $PATH_COPRA_SUBSCRIPTS" . "index-pdf.html ."; ## edit 1.2.6
-    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-thumb.html enriched_heatmap_big.png"; ## edit 2.0.6 // phantomjs now via conda and in path
-    system "phantomjs " . $PATH_COPRA_SUBSCRIPTS . "rasterize.js " . "./index-pdf.html enriched_heatmap_big.pdf"; ## edit 2.0.6
-    system "rm index-thumb.html"; ## edit 1.2.5
-    system "rm index-pdf.html"; ## edit 1.2.6
-    ## end add enrichment vis
 }
 
+
+# close error stream and be done
 close ERRORLOG;
+exit(0);
 
