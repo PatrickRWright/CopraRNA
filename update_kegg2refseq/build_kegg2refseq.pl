@@ -77,7 +77,7 @@ foreach my $line (@genomeInfo) {
 close (HP);
 close (New);
 
-system "bash ../add_date_omit_incompatible.sh";
+system "sh ../add_date_omit_incompatible.sh";
 
 sub generate_random_string
     {
