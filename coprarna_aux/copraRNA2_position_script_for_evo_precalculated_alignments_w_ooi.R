@@ -4,7 +4,7 @@
 
 # dependency: CopraRNA_available_organisms.txt
 
-# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi_fast3.r --args NC_000913
+# R --slave -f ../copraRNA2_position_script_for_evo_precalculated_alignments_w_ooi.R --args NC_000913
 
 args <- commandArgs(trailingOnly = TRUE) 
 ooi2 <- args[1] 
@@ -406,8 +406,8 @@ build_anno<-function(ooi="NC_000911"){
 		 
 		 
 		
-		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
-		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_anno.txt", sep=""), quote=F, row.names=F, col.names=F)
+		write.table(anno_mRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_mRNA_features.txt", sep=""), quote=F, row.names=F, col.names=F)
+		write.table(anno_sRNA, file=paste(wd,"/evo_alignments/",i,"_" ,tab[1,9],"/", i,"_" ,tab[1,9], "_sRNA_features.txt", sep=""), quote=F, row.names=F, col.names=F)
 		#########################
 		 align_anno_mRNA<-("JALVIEW_ANNOTATION")
 		 bar_mRNA<-paste(align_table_mRNA, collapse="|")

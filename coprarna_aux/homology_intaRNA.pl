@@ -243,7 +243,7 @@ if (scalar(@exception_lines) >= 1) {
 
 
 ## get cluster.tab with DomClust
-unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edit 2.0.4 changed this to -e
+unless (-e "cluster.tab") { # only do if cluster.tab has not been imported ## edit 2.0.4 changed this to -e
 
     ### get AA fasta for homolog clustering
 
@@ -255,18 +255,35 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
 
     # prep for DomClust
     system "formatdb -i all.fas" unless (-e "all.fas.blast"); ## edit 2.0.1
-    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> /dev/null" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage ## edit 2.0.1 // ## edit 2.0.5.1 // added 2> /dev/null to prevent output to the terminal
+    # blast sequences
+    my $blastallErrorFile = "blastall.error";
+    system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> $blastallErrorFile" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage ## edit 2.0.1 // ## edit 2.0.5.1 // added 2> /dev/null to prevent output to the terminal
+    # remove empty error file
+    system("rm -f $blastallErrorFile") if ( -z $blastallErrorFile );
     system $PATH_COPRA_SUBSCRIPTS . "blast2homfile.pl all.fas.blast > all.fas.hom"; ## edit 2.0.5.1 // removed -distconv this is now fixed within the script
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
-    system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab"; ## edit 2.0.5.1 // changed to conda domclust
+    my $domclustErrorFile = "domclust.error";
+    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
+    $domclustExitStatus /= 256; # get original exit value
+    # ensure domclust went fine
+    if ($domclustExitStatus != 0) {
+    	# restart domclust with --nobreak option
+	    my $domclustExitStatus = system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 --nobreak > cluster.tab 2> $domclustErrorFile"; ## edit 2.0.5.1 // changed to conda domclust
+	    $domclustExitStatus /= 256; # get original exit value
+	    # check if second run was successful
+	    if ($domclustExitStatus != 0) {
+	    	die("\nERROR: 'domclust' returned with non-zero exit status $domclustExitStatus.\n\n");
+	    }
+    }
+    # remove empty error file
+    system("rm -f $domclustErrorFile") if ( -z $domclustErrorFile );
 
     # edit 2.0.2
     system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
     if (-s "N_chars_in_CDS.txt") {
         print ERRORLOG "'N' characters found in nucleotide CDS. Please remove organism(s) with locus tags:\n";
-        system "cat err.log N_chars_in_CDS.txt > err.log.tmp";
-        system "mv err.log.tmp err.log";
+        system "cat err.log N_chars_in_CDS.txt >> err.log";
     }
 
 }

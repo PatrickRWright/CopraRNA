@@ -32,13 +32,13 @@ print WRITEINTERNAL "Rank,CopraRNA p-value,CopraRNA fdr,Locus Tag,Gene Name,Ener
 
 for (my $i=1;$i<scalar(@CopraRNA_out_lines);$i++) {
     my @split = split(/,/,$CopraRNA_out_lines[$i]);
-    if($split[2]) { ## edit 1.1.0 // check if organism of interest has an entry
+    if($split[2] != "") { ## edit 1.1.0 // check if organism of interest has an entry (not empty)
         
         # print Rank and CopraRNA p-value and fdr
         print WRITEINTERNAL "$printedcounter,";
-        printf WRITEINTERNAL ("%.4g", $split[1]); ## edit 1.1.0
+        printf WRITEINTERNAL ("%.4g", ( $split[1] == "NA" ? 1 : $split[1] ) ); ## edit 1.1.0
         print WRITEINTERNAL ",";                  ## edit 1.1.0
-        printf WRITEINTERNAL ("%.4g", $split[0]); ## edit 1.1.0
+        printf WRITEINTERNAL ("%.4g", ( $split[0] == "NA" ? 1 : $split[0] )); ## edit 1.1.0
         print WRITEINTERNAL ",";
         $printedcounter++;
 

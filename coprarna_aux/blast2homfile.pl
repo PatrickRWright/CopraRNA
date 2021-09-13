@@ -1,9 +1,13 @@
 #!/usr/bin/env perl
 
-$EVAL_CUT = 0.001;
-$infile = $ARGV[0];
-$distconv = 1; ## edit 2.0.5.1 // this is no longer a parameter // needed to be done like this to change shebang
+# this file was taken from the domclust package and adapted 
 
+$infile = $ARGV[0];
+
+$distconv = 1; ## edit 2.0.5.1 // this is no longer a parameter // needed to be done like this to change shebang
+$skip_sort = 0; ## added to make checks explicit instead of checking against undef values
+
+$EVAL_CUT = 0.01;
 $BITUNIT = 1/3;    ## the default scoring system is in 1/3 bit units
 
 if (! $skip_sort) {
@@ -17,7 +21,7 @@ if (! $skip_sort) {
 	"sort -T . -k 1,2 -k 11,11g | "; ## edit 2.0.6 // added -T to prevent tmp space limitation
 }
 
-open(IN, $infile) || die;
+open(IN, $infile) || die ("ERROR blast2homfile.pl : cannot open input file $infile");
 
 while (<IN>) {
 	next if (/^#/);
@@ -29,10 +33,6 @@ while (<IN>) {
 	}
 	$prev_qid = $qid; $prev_sid = $sid;
 
-	if ( $evalcorr) {
-		# corrected E-value
-		$eval *= len
-	}
 	$score /= $BITUNIT;
 	$dist = 100 - $ident;
 
