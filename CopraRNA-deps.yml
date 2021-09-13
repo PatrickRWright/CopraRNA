@@ -3,9 +3,9 @@ channels:
   - bioconda
   - conda-forge
   - r
-  - defaults
-  - conda
-  - anaconda
+#  - defaults
+#  - conda
+#  - anaconda
 dependencies:
   - biopython
   - bzip2
