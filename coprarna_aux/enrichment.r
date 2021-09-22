@@ -45,10 +45,6 @@ if(length(args)>0){
 num<-as.numeric(num)
 
 
-# preset path to required files, path can also be specified as argument
-copref_path<-paste(path,"coprarana-aux/CopraRNA_available_organisms.txt",sep="")  ########### fix path
-
-
 enrich_list<-vector("list",length(all_orgs))
 names(enrich_list)<-all_orgs
 

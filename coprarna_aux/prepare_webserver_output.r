@@ -7,14 +7,14 @@
 
 suppressPackageStartupMessages(require(seqinr))
 
-# get absolute path
-initial.options <- commandArgs(trailingOnly = FALSE)
-path<-initial.options [4]
-path<-sub("copraRNA2_find_conserved_sites.r","",path)
-#print(path)
+# # get absolute path
+# initial.options <- commandArgs(trailingOnly = FALSE)
+# path<-initial.options [4]
+# path<-sub("copraRNA2_find_conserved_sites.r","",path)
+# #print(path)
 
-# preset path to required files, path can also be specified as argument
-copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
+# # preset path to required files, path can also be specified as argument
+# copref_path<-paste(path,"CopraRNA_available_organisms.txt",sep="")
 
 # read the organism of interest (ooi) from the ncRNA fasta file. The sRNA of the ooi is considered to be the first sequence.
 ooi<-gsub("ncRNA_","",names(read.fasta("ncrna.fa"))[1])
