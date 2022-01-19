@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-my $COPRARNA_VERSION="3.0.0";
+my $COPRARNA_VERSION="2.1.3";
 
  # License: MIT
 
