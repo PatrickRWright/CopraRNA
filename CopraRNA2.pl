@@ -6,7 +6,7 @@ use warnings;
 use Getopt::Long;
 use Cwd 'abs_path'; ## edit 2.0.5.1
 
-CopraRNAversion="2.1.3";
+my $COPRARNA_VERSION="3.0.0";
 
  # License: MIT
 
@@ -213,7 +213,7 @@ GetOptions ( ## edit 2.0.4
 
 if ($help) { ## edit 2.0.4 // added  help and getopt
 
-print "\nCopraRNA $CopraRNAversion\n\n",
+print "\nCopraRNA $COPRARNA_VERSION\n\n",
 
 "CopraRNA is a tool for sRNA target prediction. It computes whole genome target predictions\n",
 "by combination of distinct whole genome IntaRNA predictions. As input CopraRNA requires\n",
@@ -362,7 +362,7 @@ open WRITETOOPTIONS, ">", "CopraRNA_option_file.txt";
     print WRITETOOPTIONS "noclean:" . $noclean . "\n";
     print WRITETOOPTIONS "cons:" . $cons . "\n"; ## edit 2.0.6
     print WRITETOOPTIONS "ooifilt:" . $ooi_filt . "\n"; ## 
-    print WRITETOOPTIONS "version:CopraRNA $CopraRNAversion\n";  ## edit 2.0.4.2
+    print WRITETOOPTIONS "version:CopraRNA $COPRARNA_VERSION\n";  ## edit 2.0.4.2
 close WRITETOOPTIONS;
 # end write options
 
