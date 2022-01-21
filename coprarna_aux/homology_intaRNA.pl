@@ -308,6 +308,18 @@ print "get cluster.tab with Diamond\n" if ($verbose);
     foreach my $gbFile (@gbFiles) {
         system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $gbFile >> all.fas"; 
     }
+    
+    system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
+    # remove duplicated CDS to the first (hopefully longest)
+    if (-s "duplicated_CDS.txt") {
+      # grep all duplicated CDS entries from FASTA file
+      system "for P in `cat duplicated_CDS.txt`; do grep -A1 -m1 \"\$P\" all.fas; done > duplicated_CDS.first.fa";
+      # compile a pattern to match all duplicated gene ids
+      # remove all duplicated entries from all.fas
+      system "PAT=\$(cat duplicated_CDS.txt | tr '\\n' '|'); cat all.fas | tr \"\\n\" \"#\" | sed \"s/#>/\\n>/g\" | grep -v -P  \"\${PAT%|}\" | tr '#' '\\n'  > all.fas.no-duplicates";
+      # join both files into a new all.fas
+      system "cat all.fas.no-duplicates duplicated_CDS.first.fa > all.fas";
+    }
 
     # prep for DomClust
     print "diamond clustering for all.fas\n" if ($verbose);
@@ -337,12 +349,6 @@ print "get cluster.tab with Diamond\n" if ($verbose);
 	    }
     }
 
-    }
-    system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
-    if (-s "duplicated_CDS.txt") {
-        print ERRORLOG "duplicated CDS for some genes. Please check locus tags:\n";
-		my $fileContent = do{local(@ARGV,$/)="duplicated_CDS.txt";<>};
-		print ERRORLOG $fileContent . "\n";
     }
 }
 
