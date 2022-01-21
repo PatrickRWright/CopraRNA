@@ -20,11 +20,14 @@ open (New, '>kegg2refseqnew.csv');
 my %rdmStringHash = ();
 my %printedHash = ();
 
+# only support of NC_ and NZ Ids
+# https://www.ncbi.nlm.nih.gov/books/NBK21091/table/ch18.T.refseq_accession_numbers_and_mole/?report=objectonly
+
 foreach my $line (@genomeInfo) {
     my $printLineHP = "";
     my $printLineNew = "";
     my $switch = 1;
-    if ($line =~ m/NC_\d{6}|NZ_.+/) { ## edit 2.0.2
+    if ($line =~ m/N[CZ]_.+/) { 
         my $rdmString = &generate_random_string(4);
         
         # make sure no duplicate letter codes are present
@@ -43,15 +46,15 @@ foreach my $line (@genomeInfo) {
         # specify ID cell
         my $ID_cell = $splitLine[8]; ## edit 2.0.5.1
         my @split_ID_cell = split(/;/, $ID_cell);       
- 
+ 	
         foreach my $entry (@split_ID_cell) {
-            if ($entry =~ m/(NC_\d{6}|NZ_.+)/) { ## edit 2.0.2
+            if ($entry =~ m/(N[CZ]_.+)/) {  
                 my $RID = $1;
                 chomp $RID;
                 # remove .1 at the end of new ids
                 $RID =~ s/\.\d+//g; ## edit 2.0.2
                 # remove all after '/'
-                $RID =~ s/\/.+//g; ## edit 2.0.5.1
+                $RID =~ s/\/.*//g; ## edit 2.0.5.1
                 $printLineHP = $printLineHP . $RID . " ";
                 $printLineNew = $printLineNew . $RID . " ";
             }
