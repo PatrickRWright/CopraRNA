@@ -253,6 +253,18 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
         system $PATH_COPRA_SUBSCRIPTS . "get_CDS_from_gbk.pl $_ >> all.fas"; ## edit 2.0.5.1 // removed unless 
     }
 
+    system "grep '>' all.fas | uniq -d > duplicated_CDS.txt";
+    # remove duplicated CDS to the first (hopefully longest)
+    if (-s "duplicated_CDS.txt") {
+      # grep all duplicated CDS entries from FASTA file
+      system "for P in `cat duplicated_CDS.txt`; do grep -A1 -m1 \"\$P\" all.fas; done > duplicated_CDS.first.fa";
+      # compile a pattern to match all duplicated gene ids
+      # remove all duplicated entries from all.fas
+      system "PAT=\$(cat duplicated_CDS.txt | tr '\\n' '|'); cat all.fas | tr \"\\n\" \"#\" | sed \"s/#>/\\n>/g\" | grep -v -P  \"\${PAT%|}\" | tr '#' '\\n'  > all.fas.no-duplicates";
+      # join both files into a new all.fas
+      system "cat all.fas.no-duplicates duplicated_CDS.first.fa > all.fas";
+    }
+
     # prep for DomClust
     system "formatdb -i all.fas" unless (-e "all.fas.blast"); ## edit 2.0.1
     system "blastall -a $cores -p blastp -d all.fas -e 0.001 -i all.fas -Y 1e9 -v 30000 -b 30000 -m 8 -o all.fas.blast 2> /dev/null" unless (-e "all.fas.blast"); # change the -a parameter to qdjust core usage ## edit 2.0.1 // ## edit 2.0.5.1 // added 2> /dev/null to prevent output to the terminal
@@ -260,14 +272,6 @@ unless (-e "cluster.tab") { # only do if cluter.tab has not been imported ## edi
     system $PATH_COPRA_SUBSCRIPTS . "fasta2genefile.pl all.fas";
     # DomClust
     system "domclust all.fas.hom all.fas.gene -HO -S -c60 -p0.5 -V0.6 -C80 -o5 > cluster.tab"; ## edit 2.0.5.1 // changed to conda domclust
-
-    # edit 2.0.2
-    system "grep '>' all.fas | uniq -d > N_chars_in_CDS.txt";
-    if (-s "N_chars_in_CDS.txt") {
-        print ERRORLOG "'N' characters found in nucleotide CDS. Please remove organism(s) with locus tags:\n";
-        system "cat err.log N_chars_in_CDS.txt > err.log.tmp";
-        system "mv err.log.tmp err.log";
-    }
 
 }
 
