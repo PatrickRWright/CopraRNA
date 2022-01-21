@@ -56,7 +56,46 @@ It is also possible to run CopraRNA [via a provided Docker container](#biocontai
 <a name="deps" />
 ## Dependencies
 
-The specified versions are tested and functional.
+The following setup was successfully used to build and run CopraRNA via conda:
+```yaml
+name: CopraRNA-2.1.3
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+  - conda
+
+dependencies:
+    - blast-legacy 
+    - bzip2
+    - clustalo
+    - coreutils 
+    - domclust
+    - embassy-phylip
+    - emboss 
+    - gawk
+    - grep
+    - intarna >2.2
+    - mafft 
+    - perl <6
+    - perl-bioperl 
+    - perl-bio-eutilities
+    - perl-getopt-long
+    - perl-list-moreutils 
+    - perl-parallel-forkmanager
+    - phantomjs
+    - python
+    - r-base <4
+    - r-pheatmap
+    - r-robustrankaggreg
+    - r-seqinr
+    - sed
+    - suds-jurko
+```
+
+The following package versions were tested and functional during development of CopraRNA2.
 
 - bzip2 1.0.6 (for the core genome archive)                            // conda install bzip2
 - gawk 4.1.3                                                           // conda install gawk
